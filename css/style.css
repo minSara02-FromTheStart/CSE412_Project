@@ -1,0 +1,127 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* body style */
+body{
+    margin: 0;
+    font-family: Poppins, sans-serif;
+}
+
+/* navbar */
+nav{
+    background-color: #de9dbe;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 20px 60px;
+
+    position: fixed;
+
+    width: 100%;
+
+    top: 0;
+
+    left: 0;
+
+    z-index: 1000;
+}
+/* logo */
+.logo{
+    font-style: italic;
+    font-size: 20px;
+    font-weight: bold;
+    color:  #8a0055;
+}
+/* menu */
+nav ul{
+    display: flex;
+    list-style: none;
+    gap: 30px;
+}
+
+nav ul li a{
+    text-decoration: none;
+    color: black;
+    font-weight: 500;
+}
+.hero{
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 100vh;
+
+    line-height: 30px;
+
+    color: #fefbfb;
+
+    font-size: 55px;
+
+    font-weight: bold;
+
+    line-height: 55px;
+
+    color: #fffcfc;
+
+    background-image: url("../images/bg.jpg");
+
+    background-size: cover;
+
+    background-repeat: no-repeat;
+
+    background-position: center;
+}
+
+/* shop now button */
+.shop-btn{
+
+    display: inline-block;
+
+    margin-top: 20px;
+
+    padding: 15px 35px;
+
+    background-color: #8a0055;
+
+    color: white;
+
+    border-radius: 30px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    text-decoration: none;
+
+    transition: 0.3s;
+}
+.shop-btn:hover{
+
+    background-color: #b0006d;
+}
+.hero-content{
+    text-align: center;
+}
+.dryfruits-section{
+
+    height: 100vh;
+
+    background-image: url("../images/about.jpg");
+
+    background-size: 55% 75%;
+
+    background-position: center;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
