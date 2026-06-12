@@ -125,3 +125,84 @@ nav ul li a{
 
     align-items: center;
 }
+.shop-btn:hover{
+
+    background-color: #b0006d;
+}
+.hero-content{
+    text-align: center;
+}
+.dryfruits-section{
+
+    height: 100vh;
+
+    background-image: url("../images/about.jpg");
+
+    background-size: 55% 75%;
+
+    background-position: center;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+/* dark transparent layer */
+.overlay{
+
+    background-color: rgba(160, 149, 149, 0.5);
+
+    padding: 50px;
+
+    border-radius: 20px;
+
+    text-align: center;
+
+    width: 700px;
+}
+
+/* heading */
+.overlay h2{
+
+    color: rgb(9, 0, 0);
+
+    font-size: 50px;
+
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* paragraph */
+.overlay p{
+
+    color: rgb(12, 0, 0);
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    line-height: 38px;
+
+    font-weight: 500;
+}
+.explore-btn{
+
+    margin-top: 30px;
+
+    padding: 15px 35px;
+
+    background-color: #8a0055;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 30px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
