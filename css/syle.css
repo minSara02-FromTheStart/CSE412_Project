@@ -74,10 +74,7 @@ body {
   gap: 15px;
 }
 
-/* Language Switcher */
-.lang-switcher {
-  position: relative;
-}
+
 
 .lang-btn {
   background: rgba(255,255,255,0.15);
