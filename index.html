@@ -1,99 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NutriNest - Pure & Natural</title>
-  <link rel="stylesheet" href="css/syle.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NurtiNest Website</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">NurtiNest</div>
 
-  <header class="navbar">
-    <div class="logo">
-      <span class="menu-icon">☰</span>
-      <div>
-        <h1>NutriNest</h1>
-        <p class="tagline">PURE & NATURAL</p>
-      </div>
-    </div>
-
-    <nav class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="products.html">Products</a>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
     </nav>
+    <section class="hero" id="home">
 
-    <div class="nav-right">
-      <details class="lang-switcher">
-        <summary class="lang-btn">🌐 EN ▾</summary>
-        <div class="lang-menu">
-          <a href="#">English</a>
-          <a href="#">বাংলা</a>
-        </div>
-      </details>
-
-      <a href="cart.html" class="icon-btn">
-        🛒
-        <span class="badge">3</span>
-      </a>
-
-      <details class="notif-switcher">
-        <summary class="icon-btn">
-          🔔
-          <span class="dot"></span>
-        </summary>
-        <div class="notif-menu">
-          <p>You have 3 new notifications</p>
-        </div>
-      </details>
-
-      <a href="login.html" class="login-btn">👤 Login</a>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="overlay"></div>
     <div class="hero-content">
-      <span class="badge-tag">🌿 100% Natural & Organic Nutrition</span>
-      <h2>Fuel Your Body with Nature's Finest Gifts</h2>
-      <p>Premium dry fruits, fruit powders & superfoods delivered to your door.</p>
 
-      <form class="search-box" action="products.html" method="get">
-        <input type="text" name="search" placeholder="Search almonds, dates, mango powder...">
-        <button type="submit">Search</button>
-      </form>
+        <div class="quote-wrapper">
+            <ul class="quote-list">
 
-      <p class="scroll-text">Scroll to explore ⌄</p>
+
+    <li class="quote">
+        <span>Experience nutrition the way</span>
+        <span>nature intended.</span>
+    </li>
+
+    <li class="quote">
+        <span>Pure ingredients, straight from trusted farms</span>
+        <span>to your table.</span>
+    </li>
+
+    <li class="quote">
+        <span>Every bite is a step toward</span>
+        <span>better health</span>
+    </li>
+            </ul>
+        </div>
+
+        <a href="#products" class="shop-btn">
+            Shop Now
+        </a>
+
     </div>
-  </section>
 
-  <!-- Extra content so you can test scrolling -->
-  <section class="page-content">
-    <h2>Why Choose NutriNest?</h2>
-    <p>We source the finest organic dry fruits, spices, and superfoods directly from trusted farms. Scroll up and notice the search bar stays visible at the top.</p>
-    <div class="product-grid">
-      <div class="product-card">
-        <h3>Cinnamon Sticks</h3>
-        <p>Aromatic, premium grade</p>
-        <strong>$4.99</strong>
-      </div>
-      <div class="product-card">
-        <h3>Saffron</h3>
-        <p>Pure, hand-picked threads</p>
-        <strong>$24.99</strong>
-      </div>
-      <div class="product-card">
-        <h3>Cardamom Pods</h3>
-        <p>Fresh, fragrant green pods</p>
-        <strong>$7.49</strong>
-      </div>
-      <div class="product-card">
-        <h3>Pistachios</h3>
-        <p>Roasted & lightly salted</p>
-        <strong>$9.99</strong>
-      </div>
+</section>
+<section class="dryfruits-section" id = "about">
+    <div class="overlay">
+        
+        <h2>About Dry Fruits</h2>
+
+        <p>
+            Dry fruits are rich in vitamins, minerals, and natural nutrients.
+            They help improve health, provide energy, and support a healthy lifestyle.
+            Our premium dry fruits are fresh, organic, and carefully selected
+            for the best quality and taste.
+        </p>
+        <button class="explore-btn">Explore More</button>
     </div>
-  </section>
-
-</body>
-</html>
+    </section>
