@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - NutriNest</title>
+  <link rel="stylesheet" href="css/syle.css">
+</head>
+<body>
+
+  <header class="navbar navbar-static">
+    <div class="logo">
+      <span class="menu-icon">☰</span>
+      <div>
+        <h1>NutriNest</h1>
+        <p class="tagline">PURE & NATURAL</p>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="products.html">Products</a>
+    </nav>
+
+    <div class="nav-right">
+      <details class="lang-switcher">
+        <summary class="lang-btn">🌐 EN ▾</summary>
+        <div class="lang-menu">
+          <a href="#">English</a>
+          <a href="#">বাংলা</a>
+        </div>
+      </details>
+
+      <a href="cart.html" class="icon-btn">
+        🛒
+        <span class="badge">3</span>
+      </a>
+
+      <details class="notif-switcher">
+        <summary class="icon-btn">
+          🔔
+          <span class="dot"></span>
+        </summary>
+        <div class="notif-menu">
+          <p>You have 3 new notifications</p>
+        </div>
+      </details>
+
+      <a href="login.html" class="login-btn">👤 Login</a>
+    </div>
+  </header>
+
+  <main class="page-content auth-page">
+    <h2>Login to Your Account</h2>
+
+    <form class="auth-form" action="index.html" method="get">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="••••••••" required>
+
+      <button type="submit" class="login-btn full-width">Login</button>
+    </form>
+
+    <p class="auth-switch">Don't have an account? <a href="#">Sign up</a></p>
+  </main>
+
+</body>
+</html>

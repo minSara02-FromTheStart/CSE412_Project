@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - NutriNest</title>
+  <link rel="stylesheet" href="css/syle.css">
+</head>
+<body>
+
+  <header class="navbar navbar-static">
+    <div class="logo">
+      <span class="menu-icon">☰</span>
+      <div>
+        <h1>NutriNest</h1>
+        <p class="tagline">PURE & NATURAL</p>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="products.html">Products</a>
+    </nav>
+
+    <div class="nav-right">
+      <details class="lang-switcher">
+        <summary class="lang-btn">🌐 EN ▾</summary>
+        <div class="lang-menu">
+          <a href="#">English</a>
+          <a href="#">বাংলা</a>
+        </div>
+      </details>
+
+      <a href="cart.html" class="icon-btn">
+        🛒
+        <span class="badge">3</span>
+      </a>
+
+      <details class="notif-switcher">
+        <summary class="icon-btn">
+          🔔
+          <span class="dot"></span>
+        </summary>
+        <div class="notif-menu">
+          <p>You have 3 new notifications</p>
+        </div>
+      </details>
+
+      <a href="login.html" class="login-btn">👤 Login</a>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <h2>Our Products</h2>
+
+    <form class="search-box search-box-light" action="products.html" method="get">
+      <input type="text" name="search" placeholder="Search almonds, dates, mango powder...">
+      <button type="submit">Search</button>
+    </form>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <h3>Almonds</h3>
+        <p>Premium quality, 500g pack</p>
+        <strong>$8.99</strong>
+      </div>
+      <div class="product-card">
+        <h3>Mango Powder</h3>
+        <p>100% natural, 250g pack</p>
+        <strong>$5.49</strong>
+      </div>
+      <div class="product-card">
+        <h3>Dried Dates</h3>
+        <p>Soft & sweet, 1kg pack</p>
+        <strong>$12.00</strong>
+      </div>
+      <div class="product-card">
+        <h3>Cashew Nuts</h3>
+        <p>Roasted, 500g pack</p>
+        <strong>$10.99</strong>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>
