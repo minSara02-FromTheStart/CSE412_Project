@@ -8,6 +8,42 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <span>🌿</span>
+            <span>NutriNest</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="#home" class="sidebar-link">🏠 Home</a>
+        <a href="#about" class="sidebar-link">🌿 About</a>
+
+        <div class="sidebar-dropdown">
+            <div class="sidebar-link dropdown-toggle" id="productToggle">
+                🛍️ Products <span class="arrow">▸</span>
+            </div>
+            <div class="sidebar-submenu" id="productSubmenu">
+                <a href="#" class="sidebar-sublink">⭐ Popular Products</a>
+                <a href="#" class="sidebar-sublink">🎓 Student Pack</a>
+                <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
+                <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
+                <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
+            </div>
+        </div>
+
+        <a href="#" class="sidebar-link">🏷️ Coupons</a>
+        <a href="#" class="sidebar-link">🔥 Offers</a>
+        <a href="#" class="sidebar-link">❤️ Favourites</a>
+        <a href="#" class="sidebar-link">⚡ Flash Sales</a>
+        <a href="#" class="sidebar-link">🆕 New Arrivals</a>
+    </nav>
+</div>
    <header class="navbar">
     <div class="logo">
       <span class="menu-icon">☰</span>
@@ -17,11 +53,7 @@
       </div>
     </div>
 
-    <nav class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="products.html">Products</a>
-    </nav>
+
 
     <div class="nav-right">
         <a href="login.html" class="login-btn">👤 Login</a>
@@ -29,29 +61,24 @@
   </header>
     <section class="hero" id="home">
 
+      
     <div class="hero-content">
+<div class="natural-box">
+    🌿 100% Natural & Organic Nutrition
+</div>
 
-        <div class="quote-wrapper">
-            <ul class="quote-list">
+<div class="quote-wrapper">
+    <h2 class="quote">Experience nutrition the way nature intended</h2>
+    <h2 class="quote">Fuel your body, fuel your mind</h2>
+    <h2 class="quote">Every bite is a step toward better health</h2>
+</div>
 
+<p class="hero-sub">Premium dry fruits, fruit powders & superfoods delivered to your door.</p>
 
-    <li class="quote">
-        <span>Experience nutrition the way nature intended</span>
-    </li>
-
-    <li class="quote">
-        <span>Fuel your body, fuel your mind</span>
-    </li>
-
-    <li class="quote">
-        <span>Every bite is a step toward better health</span>
-    </li>
-            </ul>
-        </div>
-        <form class="search-box" action="products.html" method="get">
-        <input type="text" name="search" placeholder="Search almonds, dates, mango powder...">
-        <button type="submit">Search</button>
-      </form>
+<form class="search-box" action="products.html" method="get">
+    <input type="text" name="search" placeholder="Search almonds, dates, mango powder...">
+    <button type="submit">Search</button>
+</form>
 
     </div>
    
@@ -60,41 +87,160 @@
 <section class="dryfruits-section" id = "about">
     <div class="overlay">
         
-        <h2>About Dry Fruits</h2>
+        <h2>About Us</h2>
 
         <p>
-            Dry fruits are rich in vitamins, minerals, and natural nutrients.
-            They help improve health, provide energy, and support a healthy lifestyle.
-            Our premium dry fruits are fresh, organic, and carefully selected
-            for the best quality and taste.
+            NutriNest is a healthy food platform dedicated to delivering high-quality, natural,
+            and value-added agricultural products including jackfruit powder, banana powder,
+            dried fruits, and healthy snacks.
         </p>
         <button class="explore-btn">Explore More</button>
     </div>
-    </section>
-
-    <section class="page-content">
-    <h2>Why Choose NutriNest?</h2>
-    <p>We source the finest organic dry fruits, spices, and superfoods directly from trusted farms.</p>
-    <div class="product-grid">
-      <div class="product-card">
-        <h3>Cinnamon Sticks</h3>
-        <p>Aromatic, premium grade</p>
-        <strong>$4.99</strong>
-      </div>
-      <div class="product-card">
-        <h3>Saffron</h3>
-        <p>Pure, hand-picked threads</p>
-        <strong>$24.99</strong>
-      </div>
-      <div class="product-card">
-        <h3>Cardamom Pods</h3>
-        <p>Fresh, fragrant green pods</p>
-        <strong>$7.49</strong>
-      </div>
-      <div class="product-card">
-        <h3>Pistachios</h3>
-        <p>Roasted & lightly salted</p>
-        <strong>$9.99</strong>
-      </div>
+</section>
+    <section class="why-choose">
+    <div class="why-header">
+        <p class="why-eyebrow">Why Choose Us</p>
+        <h2>The NutriNest Difference</h2>
+        <p class="why-desc">Everything we do is built around making healthy eating simple, affordable, and trustworthy.</p>
     </div>
-  </section>
+
+    <div class="why-grid">
+        <div class="why-card">
+            <div class="why-icon">🛍️</div>
+            <h3>500+ Premium Products</h3>
+            <p>From rare superfoods to everyday dry fruits — our catalog covers every health need, all in one place.</p>
+        </div>
+
+        <div class="why-card">
+            <div class="why-icon">🔒</div>
+            <h3>Pay After Receiving</h3>
+            <p>Order with full confidence. We only ask for payment once your package is safely in your hands.</p>
+        </div>
+
+        <div class="why-card">
+            <div class="why-icon">🚚</div>
+            <h3>Delivery Within 7 Days</h3>
+            <p>Fast, reliable delivery straight to your door — so your nutrition never has to wait.</p>
+        </div>
+
+        <div class="why-card">
+            <div class="why-icon">💰</div>
+            <h3>Deals That Save More</h3>
+            <p>Exclusive member offers, seasonal discounts, and bundle packs designed to make healthy living affordable.</p>
+        </div>
+    </div>
+</section>
+    <section id="products" class="products">
+
+    <h1>Our Products</h1>
+
+    <div class="product-container">
+
+        <div class="card">
+
+            <img src="https://i1-c.pinimg.com/1200x/6f/55/82/6f558209bca8c009629e9ebb40fa8633.jpg">
+
+            <h2>Almonds</h2>
+            <h3>৳1200 / KG</h3>
+
+            <p>Fresh and healthy premium almonds.</p>
+            <button class="cart-btn" onclick="addToCart('Almonds', 1200)">
+        Add to Cart
+    </button>
+
+        </div>
+
+        <div class="card">
+
+            <img src="https://i1-c.pinimg.com/1200x/1e/e9/29/1ee9291e3ad643e80e08b03112e2d3c9.jpg">
+
+            <h2>Cashew</h2>
+            <h3>৳1500 / KG</h3>
+
+            <p>Organic and crunchy cashew nuts.</p>
+            <button class="cart-btn" onclick="addToCart('Cashew', 1500)">
+        Add to Cart
+    </button>
+
+        </div>
+
+        <div class="card">
+
+            <img src="https://i1-c.pinimg.com/736x/14/92/75/149275669c5e1822264c94ec1920d694.jpg">
+
+            <h2>Pistachio</h2>
+            <h3>৳1800 / KG</h3>
+            <p>High quality pistachios full of nutrition.</p>
+            <button class="cart-btn" onclick="addToCart('Pistachio', 1800)">
+        Add to Cart
+    </button>
+
+        </div>
+        <div class = "card">
+            <img src = "https://i.pinimg.com/736x/a9/a6/e1/a9a6e1d15fe059fe44d216ae97c383ec.jpg">
+            <h2>Dates</h2>
+            <h3>৳1000 / KG</h3>
+
+            <p>Sweet and delicious dates packed with nutrients.</p>
+            <button class="cart-btn" onclick="addToCart('Dates', 1000)">
+        Add to Cart
+    </button>
+
+        </div>
+
+        <div class = "card">
+            <img src = "https://i.pinimg.com/736x/66/7d/d2/667dd27b774d8f7b6a6757a89cf83530.jpg">
+            <h2>Walnuts</h2>
+            <h3>৳2200 / KG</h3>
+
+            <p>Sweet and delicious walnuts packed with nutrients.</p>
+            <button class="cart-btn" onclick="addToCart('Walnuts', 2200)">
+        Add to Cart
+    </button>
+        </div>
+        <div class = "card">
+            <img src = "https://i.pinimg.com/736x/e6/67/5e/e6675e4c102e8b997f453732135011be.jpg">
+            <h2> Dry Mangoes</h2>
+            <h3>৳1200 / KG</h3>
+
+            <p>flavorful dry mangoes, perfect for snacking.</p>
+            <button class="cart-btn" onclick="addToCart('Dry Mangoes', 1200)">
+        Add to Cart
+       </button>
+        </div>
+        <div class = "card">
+            <img src = "https://i.pinimg.com/736x/cd/0d/27/cd0d27f24c8d4ca872a337d998b1b904.jpg">
+            <h2>Dry Apricots</h2>
+            <h3>৳1400 / KG</h3>
+
+            <p>Sweet and tangy dry apricots, packed with nutrients.</p>
+            <button class="cart-btn" onclick="addToCart('Dry Apricots', 1400)">
+        Add to Cart
+       </button>
+        </div>
+        <div class = "card">
+            <img src = "https://i.pinimg.com/736x/0c/44/4b/0c444b2fa3841e5d125085bac2db7891.jpg">
+            <h2>Dry kiwi</h2>
+            <h3>৳1400 / KG</h3>
+
+            <p>Sweet and tangy dry kiwi, packed with nutrients.</p>
+            <button class="cart-btn" onclick="addToCart('Dry kiwi', 1400)">
+        Add to Cart
+       </button>
+        </div>
+        <div class = "card">
+            <img src = "https://i1-c.pinimg.com/1200x/c5/9f/30/c59f301e2423b6ba3d917a9707ff413c.jpg">
+            <h2>Raisins</h2>
+            <h3>৳800 / KG</h3>
+
+            <p>Juicy and flavorful raisins, perfect for snacking.</p>
+            <button class="cart-btn" onclick="addToCart('Raisins', 800)">
+        Add to Cart
+       </button>
+        </div>
+
+</div>
+</section>
+<script src="js/script.js"></script>
+</body>
+</html>
