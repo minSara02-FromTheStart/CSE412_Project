@@ -718,6 +718,71 @@ nav ul li a{
   color: #ff7a00;
   text-decoration: none;
 }
+/* Signup modal styles */
+.modal-overlay[hidden] { display: none; }
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+}
+
+.signup-modal {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e8e0d4;
+    width: 100%;
+    max-width: 440px;
+    padding: 24px 28px;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+}
+
+.signup-options h3 {
+    margin-bottom: 14px;
+    font-size: 20px;
+    color: #2c2318;
+}
+
+.roles {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.role-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    background: #faf8f4;
+    cursor: pointer;
+    font-weight: 700;
+    color: #2c2318;
+}
+
+.role-btn:hover {
+    background: #f0eede;
+}
+
+.signup-form h3 { margin-bottom: 4px; }
+
+.signup-form .login-sub { margin-bottom: 18px; }
+ 
 .dryfruits-section {
     height: 100vh;
 
