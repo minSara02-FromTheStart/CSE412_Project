@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - NutriNest</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-error {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .auth-success {
+      background: #dcfce7;
+      color: #16a34a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .login-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
 
@@ -74,28 +98,29 @@
             <h3>Login to your account</h3>
             <p class="login-sub">Enter your credentials to continue</p>
 
-            <form action="#" method="get" id="loginForm">
-                <div class="input-group">
-                    <label for="email">Email address</label>
-                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
-                </div>
+            <div class="auth-error" id="loginError"></div>
+            <div class="auth-success" id="loginSuccess"></div>
 
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
-                </div>
+            <div class="input-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" placeholder="you@example.com" required>
+            </div>
 
-                <div class="login-options">
-                    <label class="remember-me">
-                        <input type="checkbox"> Remember me
-                    </label>
-                    <a href="#" class="forgot-link">Forgot password?</a>
-                </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
 
-                                <button type="submit" class="login-submit">Login</button>
-            </form>
+            <div class="login-options">
+                <label class="remember-me">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot password?</a>
+            </div>
 
-                        <p class="auth-switch">Don't have an account? <a href="#" id="openSignup">Sign up</a></p>
+            <button class="login-submit" id="loginBtn">Login</button>
+
+            <p class="auth-switch">Don't have an account? <a href="#" id="openSignup">Sign up</a></p>
         </div>
     </div>
 
@@ -118,31 +143,230 @@
         <div class="signup-form" id="signupForm" hidden>
             <h3 id="signupTitle">Sign up</h3>
             <p class="login-sub">Create your account</p>
-            <form action="#" method="post" id="signupFormElement">
-                <div class="input-group">
-                    <label for="fullName">Full name</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Your name" required>
-                </div>
-                <div class="input-group">
-                    <label for="signupPhone">Phone</label>
-                    <input type="tel" id="signupPhone" name="phone" placeholder="01XXXXXXXXX" required>
-                </div>
-                <div class="input-group">
-                    <label for="signupEmail">Email address</label>
-                    <input type="email" id="signupEmail" name="email" placeholder="you@example.com" required>
-                </div>
-                <div class="input-group">
-                    <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" name="password" placeholder="••••••••" required>
-                </div>
-                <input type="hidden" name="role" id="signupRole" value="">
-                <button type="submit" class="login-submit">Sign up</button>
-            </form>
+
+            <div class="auth-error" id="signupError"></div>
+            <div class="auth-success" id="signupSuccess"></div>
+
+            <div class="input-group">
+                <label for="fullName">Full name</label>
+                <input type="text" id="fullName" placeholder="Your name" required>
+            </div>
+            <div class="input-group">
+                <label for="signupPhone">Phone</label>
+                <input type="tel" id="signupPhone" placeholder="01XXXXXXXXX" required>
+            </div>
+            <div class="input-group">
+                <label for="signupEmail">Email address</label>
+                <input type="email" id="signupEmail" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group">
+                <label for="signupPassword">Password</label>
+                <input type="password" id="signupPassword" placeholder="Min. 6 characters" required>
+            </div>
+
+            <button class="login-submit" id="signupBtn">Sign up</button>
             <p class="auth-switch">Or choose a different role: <a href="#" id="changeRole">Change</a></p>
         </div>
     </div>
 </div>
 
 <script src="js/script.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
+    authDomain: "nutrinest-408d4.firebaseapp.com",
+    projectId: "nutrinest-408d4",
+    storageBucket: "nutrinest-408d4.firebasestorage.app",
+    messagingSenderId: "44196278510",
+    appId: "1:44196278510:web:11acb64840e2d536c843ff"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function showSuccess(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function clearMessages(...ids) {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = ''; el.style.display = 'none'; }
+    });
+  }
+
+  function friendlyError(code) {
+    switch(code) {
+      case 'auth/user-not-found': return '❌ No account found with this email.';
+      case 'auth/wrong-password': return '❌ Wrong password. Please try again.';
+      case 'auth/email-already-in-use': return '❌ This email is already registered. Please login.';
+      case 'auth/weak-password': return '❌ Password must be at least 6 characters.';
+      case 'auth/invalid-email': return '❌ Please enter a valid email address.';
+      case 'auth/too-many-requests': return '❌ Too many attempts. Try again later.';
+      default: return '❌ Something went wrong. Please try again.';
+    }
+  }
+
+  // -------- LOGIN --------
+  document.getElementById('loginBtn').addEventListener('click', async () => {
+    clearMessages('loginError', 'loginSuccess');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      showError('loginError', '❌ Please fill in all fields.');
+      return;
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const role = userDoc.exists() ? userDoc.data().role : 'Customer';
+
+      showSuccess('loginSuccess', '✅ Welcome back! Redirecting...');
+
+      setTimeout(() => {
+        if (role === 'Admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      }, 1200);
+
+    } catch (error) {
+      showError('loginError', friendlyError(error.code));
+      btn.disabled = false;
+      btn.textContent = 'Login';
+    }
+  });
+
+  // -------- FORGOT PASSWORD --------
+  document.getElementById('forgotPasswordLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      showError('loginError', '❌ Type your email first, then click Forgot password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showSuccess('loginSuccess', '✅ Reset email sent! Check your inbox.');
+    } catch (error) {
+      showError('loginError', friendlyError(error.code));
+    }
+  });
+
+  // -------- SIGNUP MODAL --------
+  let selectedRole = '';
+
+  document.getElementById('openSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('signupOverlay').removeAttribute('hidden');
+  });
+
+  document.getElementById('signupClose').addEventListener('click', () => {
+    document.getElementById('signupOverlay').setAttribute('hidden', '');
+    clearMessages('signupError', 'signupSuccess');
+    document.getElementById('signupOptions').style.display = 'block';
+    document.getElementById('signupForm').setAttribute('hidden', '');
+    selectedRole = '';
+  });
+
+  document.querySelectorAll('.role-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedRole = btn.dataset.role;
+      document.getElementById('signupTitle').textContent = `Sign up as ${selectedRole}`;
+      document.getElementById('signupOptions').style.display = 'none';
+      document.getElementById('signupForm').removeAttribute('hidden');
+    });
+  });
+
+  document.getElementById('changeRole').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('signupForm').setAttribute('hidden', '');
+    document.getElementById('signupOptions').style.display = 'block';
+    clearMessages('signupError', 'signupSuccess');
+    selectedRole = '';
+  });
+
+  // -------- SIGNUP SUBMIT --------
+  document.getElementById('signupBtn').addEventListener('click', async () => {
+    clearMessages('signupError', 'signupSuccess');
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('signupPhone').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+
+    if (!fullName || !phone || !email || !password) {
+      showError('signupError', '❌ Please fill in all fields.');
+      return;
+    }
+
+    const btn = document.getElementById('signupBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(doc(db, 'users', user.uid), {
+        fullName: fullName,
+        phone: phone,
+        email: email,
+        role: selectedRole,
+        createdAt: new Date().toISOString()
+      });
+
+      showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
+
+      setTimeout(() => {
+        document.getElementById('signupOverlay').setAttribute('hidden', '');
+        if (selectedRole === 'Admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+      }, 1500);
+
+    } catch (error) {
+      showError('signupError', friendlyError(error.code));
+      btn.disabled = false;
+      btn.textContent = 'Sign up';
+    }
+  });
+
+</script>
+
 </body>
 </html>

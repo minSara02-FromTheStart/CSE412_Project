@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Logging out...</title>
+</head>
+<body>
+
+  <p style="text-align:center; margin-top:100px; font-size:20px;">
+    🌿 Logging you out...
+  </p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
+      authDomain: "nutrinest-408d4.firebaseapp.com",
+      projectId: "nutrinest-408d4",
+      storageBucket: "nutrinest-408d4.firebasestorage.app",
+      messagingSenderId: "44196278510",
+      appId: "1:44196278510:web:11acb64840e2d536c843ff"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Automatically logs out and sends to login page
+    signOut(auth).then(() => {
+      window.location.href = 'login.html';
+    });
+  </script>
+
+</body>
+</html>

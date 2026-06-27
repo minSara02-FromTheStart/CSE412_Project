@@ -62,7 +62,8 @@
     </nav>
 
     <div class="nav-right">
-        <a href="login.html" class="login-btn">👤 Login</a>
+        <a href="login.html" class="login-btn" id="loginNavBtn">👤 Login</a>
+        <a href="logout.html" class="login-btn" id="logoutNavBtn" style="display:none;">🚪 Logout</a>
     </div>
   </header>
     <section class="hero" id="home">
@@ -276,5 +277,33 @@
 
 <script src="js/cart.js"></script>
 <script src="js/script.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
+    authDomain: "nutrinest-408d4.firebaseapp.com",
+    projectId: "nutrinest-408d4",
+    storageBucket: "nutrinest-408d4.firebasestorage.app",
+    messagingSenderId: "44196278510",
+    appId: "1:44196278510:web:11acb64840e2d536c843ff"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // You ARE logged in → show Logout, hide Login
+      document.getElementById('loginNavBtn').style.display = 'none';
+      document.getElementById('logoutNavBtn').style.display = 'inline-block';
+    } else {
+      // You are NOT logged in → show Login, hide Logout
+      document.getElementById('loginNavBtn').style.display = 'inline-block';
+      document.getElementById('logoutNavBtn').style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
