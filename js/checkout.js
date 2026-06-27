@@ -1,82 +1,46 @@
-const checkoutForm = document.getElementById("checkoutForm");
-
-const summaryItems = document.getElementById("summary-items");
-const subtotalText = document.getElementById("subtotal");
-const deliveryText = document.getElementById("delivery");
-const grandTotalText = document.getElementById("grandTotal");
-const checkoutMessage = document.getElementById("checkoutMessage");
-
-const deliveryOptions = document.querySelectorAll("input[name='delivery']");
+const checkoutForm =
+document.getElementById("checkoutForm");
 
 
-// LOAD CART
-const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
-
-let subtotal = Number(localStorage.getItem("cartTotal")) || 0;
+const summaryItems =
+document.getElementById("summary-items");
 
 
-
-function formatPrice(amount) {
-    return "৳" + Number(amount).toLocaleString();
-}
+const subtotalText =
+document.getElementById("subtotal");
 
 
+const deliveryText =
+document.getElementById("delivery");
 
 
-
-function renderSummary() {
-
-
-    summaryItems.innerHTML = "";
+const grandTotalText =
+document.getElementById("grandTotal");
 
 
-    if (cartItems.length === 0) {
+const checkoutMessage =
+document.getElementById("checkoutMessage");
 
 
-        summaryItems.innerHTML =
-        `
-        <p class="empty-summary">
-            No items found in your cart.
-        </p>
-        `;
-
-
-    } else {
-
-
-        cartItems.forEach(item => {
-
-
-            const quantity = item.quantity || 1;
-
-            const itemTotal =
-            Number(item.price) * quantity;
+const deliveryOptions =
+document.querySelectorAll("input[name='delivery']");
 
 
 
-            summaryItems.innerHTML +=
-            `
-            <div class="summary-item">
-
-                <span>
-                    ${item.product} × ${quantity}
-                </span>
+const cartItems =
+JSON.parse(localStorage.getItem("cart")) || [];
 
 
-                <strong>
-                    ${formatPrice(itemTotal)}
-                </strong>
-
-            </div>
-            `;
+let subtotal =
+Number(localStorage.getItem("cartTotal")) || 0;
 
 
-        });
-
-    }
 
 
-    updateTotal();
+
+function formatPrice(amount){
+
+return "৳" + Number(amount).toLocaleString();
 
 }
 
@@ -84,41 +48,70 @@ function renderSummary() {
 
 
 
+function renderSummary(){
 
 
-function updateTotal() {
-
-
-    const selectedDelivery =
-    document.querySelector(
-        "input[name='delivery']:checked"
-    );
-
-
-    const deliveryCharge =
-    Number(selectedDelivery.value);
+summaryItems.innerHTML="";
 
 
 
-    const total =
-    subtotal + deliveryCharge;
+if(cartItems.length===0){
+
+
+summaryItems.innerHTML=
+`
+<p class="empty-summary">
+No items found in your cart.
+</p>
+`;
+
+}
+
+else{
+
+
+cartItems.forEach(item=>{
+
+
+let quantity=item.quantity || 1;
+
+
+let itemTotal =
+Number(item.price)*quantity;
 
 
 
-    subtotalText.textContent =
-    formatPrice(subtotal);
+summaryItems.innerHTML +=
+
+`
+
+<div class="summary-item">
+
+<span>
+${item.product} × ${quantity}
+</span>
+
+
+<strong>
+${formatPrice(itemTotal)}
+</strong>
+
+
+</div>
+
+`;
 
 
 
-    deliveryText.textContent =
-    deliveryCharge === 0
-    ? "Free"
-    : formatPrice(deliveryCharge);
+});
+
+
+}
 
 
 
-    grandTotalText.textContent =
-    formatPrice(total);
+updateTotal();
+
 
 }
 
@@ -128,13 +121,55 @@ function updateTotal() {
 
 
 
-deliveryOptions.forEach(option => {
+function updateTotal(){
 
 
-    option.addEventListener(
-        "change",
-        updateTotal
-    );
+let selected =
+document.querySelector(
+"input[name='delivery']:checked"
+);
+
+
+let delivery =
+Number(selected.value);
+
+
+
+let total =
+subtotal + delivery;
+
+
+
+subtotalText.textContent =
+formatPrice(subtotal);
+
+
+deliveryText.textContent =
+delivery===0
+?"Free"
+:formatPrice(delivery);
+
+
+
+grandTotalText.textContent =
+formatPrice(total);
+
+
+}
+
+
+
+
+
+
+
+deliveryOptions.forEach(option=>{
+
+
+option.addEventListener(
+"change",
+updateTotal
+);
 
 
 });
@@ -146,19 +181,53 @@ deliveryOptions.forEach(option => {
 
 
 
-function showError(input,message) {
+
+function showError(input,message){
 
 
-    const group =
-    input.closest(".input-group");
+let group =
+input.closest(".input-group");
 
 
-    group.classList.add("error");
+
+group.classList.add("error");
 
 
-    group.querySelector(
-        ".error-message"
-    ).textContent = message;
+
+group.querySelector(
+".error-message"
+).textContent=message;
+
+
+}
+
+
+
+
+
+
+function clearError(input){
+
+
+let group =
+input.closest(".input-group");
+
+
+group.classList.remove("error");
+
+
+
+let msg =
+group.querySelector(".error-message");
+
+
+
+if(msg){
+
+msg.textContent="";
+
+}
+
 
 }
 
@@ -168,23 +237,24 @@ function showError(input,message) {
 
 
 
-function clearError(input) {
+function focusError(input){
 
 
-    const group =
-    input.closest(".input-group");
+input.scrollIntoView({
+
+behavior:"smooth",
+
+block:"center"
+
+});
 
 
-    group.classList.remove("error");
+setTimeout(()=>{
 
+input.focus();
 
-    const msg =
-    group.querySelector(".error-message");
+},500);
 
-
-    if(msg){
-        msg.textContent="";
-    }
 
 }
 
@@ -197,10 +267,9 @@ function clearError(input) {
 
 function isValidEmail(email){
 
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 }
-
 
 
 
@@ -209,9 +278,10 @@ function isValidEmail(email){
 
 function isValidPhone(phone){
 
-    return /^01[3-9]\d{8}$/.test(phone);
+return /^01[3-9]\d{8}$/.test(phone);
 
 }
+
 
 
 
@@ -223,35 +293,38 @@ function isValidPhone(phone){
 
 checkoutForm.addEventListener(
 "submit",
-function(event){
+function(e){
 
 
-event.preventDefault();
+e.preventDefault();
 
 
 
-const fullName =
+let fullName =
 document.getElementById("fullName");
 
 
-const phone =
+let phone =
 document.getElementById("phone");
 
 
-const email =
+let email =
 document.getElementById("email");
 
 
-const address =
+let address =
 document.getElementById("address");
 
 
 
-let valid = true;
+
+let valid=true;
+
+let firstError=null;
 
 
 
-checkoutMessage.textContent = "";
+checkoutMessage.textContent="";
 
 
 
@@ -268,7 +341,8 @@ address
 
 
 
-if(fullName.value.trim().length < 3){
+
+if(fullName.value.trim().length<3){
 
 showError(
 fullName,
@@ -276,6 +350,8 @@ fullName,
 );
 
 valid=false;
+
+firstError ??= fullName;
 
 }
 
@@ -288,10 +364,14 @@ if(!isValidPhone(phone.value.trim())){
 
 showError(
 phone,
-"Please enter a valid Bangladeshi phone number."
+"Enter a valid Bangladeshi number."
 );
 
+
 valid=false;
+
+
+firstError ??= phone;
 
 }
 
@@ -305,10 +385,15 @@ if(!isValidEmail(email.value.trim())){
 
 showError(
 email,
-"Please enter a valid email address."
+"Enter a valid email."
 );
 
+
 valid=false;
+
+
+firstError ??= email;
+
 
 }
 
@@ -317,17 +402,24 @@ valid=false;
 
 
 
-if(address.value.trim().length < 10){
+if(address.value.trim().length<10){
 
 
 showError(
 address,
-"Please enter your complete delivery address."
+"Enter complete address."
 );
+
 
 valid=false;
 
+
+firstError ??= address;
+
+
 }
+
+
 
 
 
@@ -335,7 +427,13 @@ valid=false;
 
 
 if(!valid){
+
+
+focusError(firstError);
+
 return;
+
+
 }
 
 
@@ -343,12 +441,12 @@ return;
 
 
 
+
 checkoutMessage.textContent =
-"Your order has been confirmed successfully. We will contact you shortly.";
+"Your order has been confirmed successfully!";
 
 
 
-// CLEAR CART AFTER ORDER
 
 localStorage.removeItem("cart");
 
@@ -358,16 +456,16 @@ localStorage.removeItem("cartTotal");
 
 setTimeout(()=>{
 
-    window.location.href="index.html";
+
+window.location.href="index.html";
+
 
 },2000);
 
 
 
+
 });
-
-
-
 
 
 
