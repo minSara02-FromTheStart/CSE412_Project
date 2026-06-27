@@ -6,6 +6,7 @@
     <title>NurtiNest Website</title>
 
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/cart.css">
 </head>
 <body>
 
@@ -30,7 +31,7 @@
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
                 <a href="#" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="#" class="sidebar-sublink">🎓 Student Pack</a>
+                <a href="#" class="sidebar-sublink">🤱🎓 Mom & Baby Pack</a>
                 <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
                 <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
                 <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
@@ -53,15 +54,17 @@
       </div>
     </div>
 
-
+    <nav class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#products">Products</a>
+    </nav>
 
     <div class="nav-right">
         <a href="login.html" class="login-btn">👤 Login</a>
     </div>
   </header>
     <section class="hero" id="home">
-
-      
     <div class="hero-content">
 <div class="natural-box">
     🌿 100% Natural & Organic Nutrition
@@ -81,8 +84,6 @@
 </form>
 
     </div>
-   
-
 </section>
 <section class="dryfruits-section" id = "about">
     <div class="overlay">
@@ -238,9 +239,37 @@
         Add to Cart
        </button>
         </div>
-
 </div>
 </section>
+<!-- CART SIDEBAR -->
+<div class="cart-sidebar" id="cart-sidebar">
+
+    <div class="cart-header">
+        <h2>Your Cart</h2>
+
+        <button id="close-cart">✖</button>
+    </div>
+
+    <div id="cart-items"></div>
+
+    <div class="cart-footer">
+
+        <h3 id="cart-total">Total: ৳0</h3>
+
+        <button id="checkout-btn">
+            Confirm Order
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- OPEN CART BUTTON -->
+<button id="open-cart-btn">
+    🛒 Cart
+</button>
+<script src="js/cart.js"></script>
 <script src="js/script.js"></script>
 </body>
 </html>
