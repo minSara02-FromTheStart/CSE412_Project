@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/checkout.css">
 </head>
 <body>
 
@@ -251,24 +252,28 @@
     </div>
 
     <div id="cart-items"></div>
-
+    <div id="cart-overlay"></div>
     <div class="cart-footer">
 
-        <h3 id="cart-total">Total: ৳0</h3>
+        <h3 id="cart-total">
+            Total: ৳0
+        </h3>
 
-        <button id="checkout-btn">
-            Confirm Order
+        <button id="checkout-btn" disabled>
+             Confirm Order
         </button>
+        <p id="cart-warning" class="cart-warning"></p>
 
     </div>
 
 </div>
 
 
-<!-- OPEN CART BUTTON -->
 <button id="open-cart-btn">
     🛒 Cart
 </button>
+
+
 <script src="js/cart.js"></script>
 <script src="js/script.js"></script>
 </body>
