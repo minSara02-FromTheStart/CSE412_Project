@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products - NutriNest</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="cart.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cart.css">
 </head>
 <body>
 
@@ -41,7 +41,7 @@
       </nav>
   </div>
 
-  <header class="navbar navbar-static">
+  <header class="navbar">
     <div class="logo">
       <span class="menu-icon">☰</span>
       <div>
@@ -55,12 +55,28 @@
       <a href="about.html">About</a>
       <a href="products.html">Products</a>
     </nav>
+    <form class="nav-search-box" action="products.html" method="get">
+
+<input 
+type="text" 
+name="search"
+placeholder="Search products..."
+>
+
+<button type="submit">
+Search
+</button>
+
+</form>
 
     <div class="nav-right">
-      <a href="login.html" class="login-btn">👤 Login</a>
-    </div>
+  <a href="login.html" class="login-btn" id="loginNavBtn">
+    Buy Now
+  </a>
+</div>
   </header>
 
+  
   <main class="page-content">
     <section id="products" class="products">
       <h1>Our Products</h1>
@@ -163,5 +179,6 @@
 
   <script src="js/cart.js"></script>
   <script src="js/script.js"></script>
+  <script type="module" src="js/userStatus.js"></script>
 </body>
 </html>

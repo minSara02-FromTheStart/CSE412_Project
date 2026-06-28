@@ -73,7 +73,7 @@
         </div>
     </div>
     <div class="nav-right">
-        <a href="login.html" class="login-btn">👤 Login</a>
+        <a href="login.html" class="login-btn">Buy Now</a>
     </div>
 </header>
 
@@ -255,12 +255,12 @@
       showSuccess('loginSuccess', '✅ Welcome back! Redirecting...');
 
       setTimeout(() => {
-        if (role === 'Admin') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'index.html';
-        }
-      }, 1200);
+  if (role === 'Admin') {
+    window.location.href = 'admin.html';
+  } else {
+    window.location.href = 'products.html';
+  }
+}, 1200);
 
     } catch (error) {
       showError('loginError', friendlyError(error.code));
@@ -355,7 +355,7 @@
         if (selectedRole === 'Admin') {
           window.location.href = 'admin.html';
         } else {
-          window.location.href = 'index.html';
+          window.location.href = 'products.html';
         }
       }, 1500);
 
