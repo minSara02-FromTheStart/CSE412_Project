@@ -62,9 +62,10 @@
     </nav>
 
     <div class="nav-right">
-        <a href="login.html" class="login-btn" id="loginNavBtn">👤 Login</a>
-        <a href="logout.html" class="login-btn" id="logoutNavBtn" style="display:none;">🚪 Logout</a>
-    </div>
+    <a href="login.html" class="login-btn" id="loginNavBtn">
+        Buy Now
+    </a>
+</div>
   </header>
     <section class="hero" id="home">
     <div class="hero-content">
@@ -137,111 +138,10 @@
 
     <h1>Our Products</h1>
 
-    <div class="product-container">
+    <div id="product-container" class="product-container">
+        <!-- প্রোডাক্ট এখানে JavaScript দিয়ে আসবে -->
+    </div>
 
-        <div class="card">
-
-            <img src="https://i1-c.pinimg.com/1200x/6f/55/82/6f558209bca8c009629e9ebb40fa8633.jpg">
-
-            <h2>Almonds</h2>
-            <h3>৳1200 / KG</h3>
-
-            <p>Fresh and healthy premium almonds.</p>
-            <button class="cart-btn" onclick="addToCart('Almonds', 1200)">
-        Add to Cart
-    </button>
-
-        </div>
-
-        <div class="card">
-
-            <img src="https://i1-c.pinimg.com/1200x/1e/e9/29/1ee9291e3ad643e80e08b03112e2d3c9.jpg">
-
-            <h2>Cashew</h2>
-            <h3>৳1500 / KG</h3>
-
-            <p>Organic and crunchy cashew nuts.</p>
-            <button class="cart-btn" onclick="addToCart('Cashew', 1500)">
-        Add to Cart
-    </button>
-
-        </div>
-
-        <div class="card">
-
-            <img src="https://i1-c.pinimg.com/736x/14/92/75/149275669c5e1822264c94ec1920d694.jpg">
-
-            <h2>Pistachio</h2>
-            <h3>৳1800 / KG</h3>
-            <p>High quality pistachios full of nutrition.</p>
-            <button class="cart-btn" onclick="addToCart('Pistachio', 1800)">
-        Add to Cart
-    </button>
-
-        </div>
-        <div class = "card">
-            <img src = "https://i.pinimg.com/736x/a9/a6/e1/a9a6e1d15fe059fe44d216ae97c383ec.jpg">
-            <h2>Dates</h2>
-            <h3>৳1000 / KG</h3>
-
-            <p>Sweet and delicious dates packed with nutrients.</p>
-            <button class="cart-btn" onclick="addToCart('Dates', 1000)">
-        Add to Cart
-    </button>
-
-        </div>
-
-        <div class = "card">
-            <img src = "https://i.pinimg.com/736x/66/7d/d2/667dd27b774d8f7b6a6757a89cf83530.jpg">
-            <h2>Walnuts</h2>
-            <h3>৳2200 / KG</h3>
-
-            <p>Sweet and delicious walnuts packed with nutrients.</p>
-            <button class="cart-btn" onclick="addToCart('Walnuts', 2200)">
-        Add to Cart
-    </button>
-        </div>
-        <div class = "card">
-            <img src = "https://i.pinimg.com/736x/e6/67/5e/e6675e4c102e8b997f453732135011be.jpg">
-            <h2> Dry Mangoes</h2>
-            <h3>৳1200 / KG</h3>
-
-            <p>flavorful dry mangoes, perfect for snacking.</p>
-            <button class="cart-btn" onclick="addToCart('Dry Mangoes', 1200)">
-        Add to Cart
-       </button>
-        </div>
-        <div class = "card">
-            <img src = "https://i.pinimg.com/736x/cd/0d/27/cd0d27f24c8d4ca872a337d998b1b904.jpg">
-            <h2>Dry Apricots</h2>
-            <h3>৳1400 / KG</h3>
-
-            <p>Sweet and tangy dry apricots, packed with nutrients.</p>
-            <button class="cart-btn" onclick="addToCart('Dry Apricots', 1400)">
-        Add to Cart
-       </button>
-        </div>
-        <div class = "card">
-            <img src = "https://i.pinimg.com/736x/0c/44/4b/0c444b2fa3841e5d125085bac2db7891.jpg">
-            <h2>Dry kiwi</h2>
-            <h3>৳1400 / KG</h3>
-
-            <p>Sweet and tangy dry kiwi, packed with nutrients.</p>
-            <button class="cart-btn" onclick="addToCart('Dry kiwi', 1400)">
-        Add to Cart
-       </button>
-        </div>
-        <div class = "card">
-            <img src = "https://i1-c.pinimg.com/1200x/c5/9f/30/c59f301e2423b6ba3d917a9707ff413c.jpg">
-            <h2>Raisins</h2>
-            <h3>৳800 / KG</h3>
-
-            <p>Juicy and flavorful raisins, perfect for snacking.</p>
-            <button class="cart-btn" onclick="addToCart('Raisins', 800)">
-        Add to Cart
-       </button>
-        </div>
-</div>
 </section>
 <!-- CART SIDEBAR -->
 <div class="cart-sidebar" id="cart-sidebar">
@@ -274,6 +174,44 @@
     🛒 Cart
 </button>
 
+<script>
+const API_URL = 'http://localhost:3001/api';
+
+async function fetchProducts() {
+  try {
+    const response = await fetch(`${API_URL}/products`);
+    const products = await response.json();
+    displayProducts(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    document.getElementById('product-container').innerHTML = 
+      '<p class="error">Failed to load products. Please make sure the server is running.</p>';
+  }
+}
+
+function displayProducts(products) {
+  const container = document.getElementById('product-container');
+  
+  if (products.length === 0) {
+    container.innerHTML = '<p>No products available.</p>';
+    return;
+  }
+
+  container.innerHTML = products.map(product => `
+    <div class="card">
+      <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}">
+      <h2>${product.name}</h2>
+      <h3>৳${product.price} / ${product.unit || 'KG'}</h3>
+      <p>${product.description || ''}</p>
+      <button class="cart-btn" onclick="addToCart('${product.name}', ${product.price})">
+        Add to Cart
+      </button>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', fetchProducts);
+</script>
 
 <script src="js/cart.js"></script>
 <script src="js/script.js"></script>
