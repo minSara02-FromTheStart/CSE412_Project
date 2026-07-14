@@ -254,12 +254,14 @@
       showSuccess('loginSuccess', '✅ Welcome back! Redirecting...');
 
       setTimeout(() => {
-  if (role === 'Admin') {
-    window.location.href = 'admin.html';
-  } else {
-    window.location.href = 'products.html';
-  }
-}, 1200);
+        if (role === 'Admin') {
+          window.location.href = 'admin.html';
+        } else if (role === 'Deliveryman') {
+          window.location.href = 'rider-dashboard.html';
+        } else {
+          window.location.href = 'products.html';
+        }
+      }, 1200);
 
     } catch (error) {
       showError('loginError', friendlyError(error.code));
@@ -339,13 +341,26 @@
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
+      const userDocData = {
         fullName: fullName,
         phone: phone,
         email: email,
         role: selectedRole,
         createdAt: new Date().toISOString()
-      });
+      };
+
+      if (selectedRole === 'Deliveryman') {
+        userDocData.runs = 0;
+        userDocData.earnings = 0;
+        userDocData.rating = 0;
+        userDocData.completedDeliveries = 0;
+        userDocData.riderId = `RD-${Math.floor(1000 + Math.random() * 9000)}`;
+        userDocData.status = 'Online';
+        userDocData.currentDelivery = null;
+        userDocData.upcomingOrders = [];
+      }
+
+      await setDoc(doc(db, 'users', user.uid), userDocData);
 
       showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
 
@@ -353,6 +368,8 @@
         document.getElementById('signupOverlay').setAttribute('hidden', '');
         if (selectedRole === 'Admin') {
           window.location.href = 'admin.html';
+        } else if (selectedRole === 'Deliveryman') {
+          window.location.href = 'rider-dashboard.html';
         } else {
           window.location.href = 'products.html';
         }
