@@ -65,78 +65,14 @@ transform:rotate(360deg);
 <body>
 
 
-<div class="logout-box">
-
-<h2>🌿 NutriNest</h2>
-
-<div class="spinner"></div>
-
-<p>Logging you out...</p>
-
-
-</div>
-
-
-
-<script type="module">
-
-
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-
-import { 
-getAuth,
-signOut 
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-
-
-const firebaseConfig = {
-
-apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
-
-authDomain: "nutrinest-408d4.firebaseapp.com",
-
-projectId: "nutrinest-408d4",
-
-storageBucket: "nutrinest-408d4.firebasestorage.app",
-
-messagingSenderId: "44196278510",
-
-appId: "1:44196278510:web:11acb64840e2d536c843ff"
-
-};
-
-
-
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-
-
-signOut(auth)
-.then(()=>{
-
-    setTimeout(()=>{
-
-        window.location.href="login.html";
-
-    },1000);
-
-
-})
-.catch((error)=>{
-
-console.log(error);
-
-});
-
-
-</script>
-
+  <script type="module">
+    import { auth } from "./js/firebase-config.js";
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
+    // Automatically logs out and sends to login page
+    signOut(auth).then(() => {
+      window.location.href = 'login.html';
+    });
+  </script>
 
 </body>
 

@@ -173,33 +173,18 @@
 <script src="js/script.js"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { auth, db } from "./js/firebase-config.js";
   import {
-    getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
     onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore,
     doc,
     setDoc,
     getDoc
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
-    authDomain: "nutrinest-408d4.firebaseapp.com",
-    projectId: "nutrinest-408d4",
-    storageBucket: "nutrinest-408d4.firebasestorage.app",
-    messagingSenderId: "44196278510",
-    appId: "1:44196278510:web:11acb64840e2d536c843ff"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
 
   function showError(id, msg) {
     const el = document.getElementById(id);

@@ -215,6 +215,19 @@ document.addEventListener('DOMContentLoaded', fetchProducts);
 
 <script src="js/cart.js"></script>
 <script src="js/script.js"></script>
-<script type="module" src="js/userStatus.js"></script>
+<script type="module">
+  import { auth } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('loginNavBtn').style.display = 'none';
+      document.getElementById('logoutNavBtn').style.display = 'inline-block';
+    } else {
+      document.getElementById('loginNavBtn').style.display = 'inline-block';
+      document.getElementById('logoutNavBtn').style.display = 'none';
+    }
+  });
+</script>
 </body>
 </html>
