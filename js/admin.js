@@ -58,11 +58,14 @@ function pill(status) {
         Delivered:   'pill-delivered',
         Pending:     'pill-pending',
         Processing:  'pill-processing',
+        'Out for Delivery': 'pill-processing',
         Customer:    'pill-customer',
         Admin:       'pill-admin',
         Deliveryman: 'pill-deliveryman',
         website:     'pill-website',
         added:       'pill-added',
+        approved:    'pill-delivered',
+        pending:     'pill-pending',
     };
     const label = status === 'website' ? 'Website' : status === 'added' ? 'Admin added' : status;
     return `<span class="pill ${map[status] || 'pill-customer'}">${label}</span>`;
@@ -95,6 +98,7 @@ window.renderAll = function () {
     renderProducts(products);
     renderOrders(orders);
     renderCustomers(users);
+    renderRiders(users);
 };
 
 /* =============================================================
@@ -142,6 +146,97 @@ function renderDashboard(orders, users, products) {
                 <span class="top-prod-price">${fmtCurrency(p.price)}/kg</span>
             </div>`).join('')
         : `<p class="empty-cell">No products yet.</p>`;
+
+    renderCharts(orders, products);
+}
+
+/* =============================================================
+   DASHBOARD CHARTS  (sales over time + stock levels)
+   ============================================================= */
+let salesChartInstance = null;
+let stockChartInstance = null;
+
+function orderDateKey(o) {
+    const ts = o.createdAt;
+    const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts || Date.now());
+    if (isNaN(d)) return null;
+    return d.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
+function renderCharts(orders, products) {
+    if (typeof Chart === 'undefined') return; // Chart.js failed to load (offline)
+
+    /* ── Sales over the last 14 days ── */
+    const days = [];
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        days.push(d.toISOString().slice(0, 10));
+    }
+    const revenueByDay = Object.fromEntries(days.map(d => [d, 0]));
+    orders.forEach(o => {
+        const key = orderDateKey(o);
+        if (key && key in revenueByDay) {
+            revenueByDay[key] += Number(o.grandTotal || o.total || 0);
+        }
+    });
+    const salesLabels = days.map(d => d.slice(5)); // MM-DD
+    const salesData = days.map(d => revenueByDay[d]);
+
+    const salesCanvas = document.getElementById('salesChart');
+    if (salesCanvas) {
+        if (salesChartInstance) salesChartInstance.destroy();
+        salesChartInstance = new Chart(salesCanvas, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Revenue (৳)',
+                    data: salesData,
+                    borderColor: '#006b3c',
+                    backgroundColor: 'rgba(0,107,60,0.12)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    /* ── Stock levels per product ── */
+    const stockCanvas = document.getElementById('stockChart');
+    if (stockCanvas) {
+        const stocked = [...products].sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0));
+        const labels = stocked.map(p => p.name);
+        const data = stocked.map(p => Number(p.stock) || 0);
+        const colors = data.map(v => v <= 10 ? '#dc2626' : v <= 25 ? '#d97706' : '#006b3c');
+
+        if (stockChartInstance) stockChartInstance.destroy();
+        stockChartInstance = new Chart(stockCanvas, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Stock (KG)',
+                    data,
+                    backgroundColor: colors
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                indexAxis: labels.length > 6 ? 'y' : 'x',
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
 }
 
 /* =============================================================
@@ -173,6 +268,7 @@ function renderProducts(products, search = '', category = '', source = '') {
                 <div class="product-card-info">
                     <h4>${sanitize(p.name)}</h4>
                     <p class="price">${fmtCurrency(p.price)} / kg</p>
+                    <p class="stock ${(Number(p.stock)||0) <= 10 ? 'stock-low' : ''}">Stock: ${Number(p.stock)||0} kg</p>
                     <span class="cat-tag">${sanitize(p.category||'General')}</span>
                     <span class="src-tag ${srcClass}">${srcLabel}</span>
                 </div>
@@ -216,6 +312,10 @@ function renderOrders(orders, search = '', status = '') {
             const itemStr = Array.isArray(o.items)
                 ? o.items.map(it => `${it.name} ×${it.qty}`).join('<br>')
                 : sanitize(o.product || '—');
+            const canAssign = o.status === 'Processing' || o.status === 'Out for Delivery';
+            const riderLabel = o.riderId
+                ? `<br><span class="src-tag src-added" style="margin-top:4px;display:inline-block;">🏍️ ${sanitize(o.riderName||'')}</span>`
+                : '';
             return `<tr>
                 <td>#${String(i+1).padStart(4,'0')}</td>
                 <td>${sanitize(o.fullName || o.customerName || '—')}</td>
@@ -224,7 +324,7 @@ function renderOrders(orders, search = '', status = '') {
                 <td>${fmtCurrency(o.grandTotal || o.total || 0)}</td>
                 <td>${sanitize(o.deliveryType || o.delivery || '—')}</td>
                 <td>${fmtDate(o.createdAt)}</td>
-                <td>${pill(o.status || 'Pending')}</td>
+                <td>${pill(o.status || 'Pending')}${riderLabel}</td>
                 <td>
                     <button class="action-btn"
                         onclick="openOrderModal('${o.id}','${o.status||'Pending'}',
@@ -232,6 +332,7 @@ function renderOrders(orders, search = '', status = '') {
                             '${Array.isArray(o.items)?o.items.map(it=>it.name).join(', '):(o.product||'')}')">
                         Update
                     </button>
+                    ${canAssign ? `<button class="action-btn" onclick="openAssignRiderModal('${o.id}')">${o.riderId ? '🔁 Reassign' : '🏍️ Assign Rider'}</button>` : ''}
                 </td>
             </tr>`;
           }).join('')
@@ -288,6 +389,150 @@ function applyCustomerFilters() {
 }
 
 /* =============================================================
+   RIDERS PAGE  (pending applications + active riders)
+   ============================================================= */
+function renderRiders(users) {
+    const riders  = users.filter(u => u.role === 'Deliveryman');
+    const pending = riders.filter(u => u.riderStatus !== 'approved');
+    const active  = riders.filter(u => u.riderStatus === 'approved');
+
+    const badge = document.getElementById('riderPendingBadge');
+    if (badge) {
+        if (pending.length > 0) {
+            badge.textContent = pending.length;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    const pendingBody = document.getElementById('rider-pending-body');
+    pendingBody.innerHTML = pending.length
+        ? pending.map(u => `<tr>
+            <td>${sanitize(u.fullName||'—')}</td>
+            <td>${sanitize(u.phone||'—')}</td>
+            <td>${sanitize(u.email||'—')}</td>
+            <td>${fmtDate(u.createdAt)}</td>
+            <td>
+                <button class="action-btn" onclick="approveRider('${u.id}')">✅ Approve</button>
+                <button class="action-btn danger" onclick="rejectRider('${u.id}')">✖ Reject</button>
+            </td>
+        </tr>`).join('')
+        : `<tr><td colspan="5" class="empty-cell">No pending applications.</td></tr>`;
+
+    const activeBody = document.getElementById('rider-active-body');
+    activeBody.innerHTML = active.length
+        ? active.map(u => `<tr>
+            <td>${sanitize(u.fullName||'—')}</td>
+            <td>${sanitize(u.phone||'—')}</td>
+            <td>${sanitize(u.email||'—')}</td>
+            <td>${pill('approved')}</td>
+            <td>
+                <button class="action-btn danger" onclick="deleteCustomer('${u.id}')">Remove</button>
+            </td>
+        </tr>`).join('')
+        : `<tr><td colspan="5" class="empty-cell">No approved riders yet.</td></tr>`;
+}
+
+window.approveRider = async function(id) {
+    try {
+        const { db, doc, updateDoc } = window._fb;
+        await updateDoc(doc(db, 'users', id), { riderStatus: 'approved' });
+        const idx = window.adminData.users.findIndex(u => u.id === id);
+        if (idx > -1) window.adminData.users[idx].riderStatus = 'approved';
+        renderRiders(window.adminData.users);
+        renderCustomers(window.adminData.users);
+        showToast('✅ Rider approved! They can now log in.');
+    } catch(err) {
+        console.error(err);
+        showToast('❌ Approval failed.');
+    }
+};
+
+window.rejectRider = async function(id) {
+    if (!confirm('Reject this rider application? The account will be removed.')) return;
+    try {
+        const { db, doc, deleteDoc } = window._fb;
+        await deleteDoc(doc(db, 'users', id));
+        window.adminData.users = window.adminData.users.filter(u => u.id !== id);
+        renderRiders(window.adminData.users);
+        renderCustomers(window.adminData.users);
+        showToast('🗑 Application rejected.');
+    } catch(err) {
+        console.error(err);
+        showToast('❌ Reject failed.');
+    }
+};
+
+/* =============================================================
+   ASSIGN RIDER MODAL
+   ============================================================= */
+const assignRiderModal = document.getElementById('assignRiderModal');
+
+window.openAssignRiderModal = function(orderId) {
+    const order = window.adminData.orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const availableRiders = window.adminData.users.filter(u => u.role === 'Deliveryman' && u.riderStatus === 'approved');
+    const select = document.getElementById('assignRiderSelect');
+
+    if (availableRiders.length === 0) {
+        select.innerHTML = `<option value="">-- No approved riders available --</option>`;
+    } else {
+        select.innerHTML = availableRiders.map(r =>
+            `<option value="${r.id}" data-name="${sanitize(r.fullName||'')}" data-phone="${sanitize(r.phone||'')}" ${order.riderId === r.id ? 'selected' : ''}>
+                ${sanitize(r.fullName||'Rider')} (${sanitize(r.phone||'—')})
+            </option>`
+        ).join('');
+    }
+
+    document.getElementById('assignOrderId').value = orderId;
+    document.getElementById('assignRiderInfo').textContent =
+        `${order.fullName || order.customerName || 'Customer'} — ${order.address || ''}`;
+    document.getElementById('assignRiderError').textContent = '';
+    assignRiderModal.classList.add('open');
+};
+
+document.getElementById('closeAssignRiderModal').addEventListener('click',  () => assignRiderModal.classList.remove('open'));
+document.getElementById('cancelAssignRiderModal').addEventListener('click', () => assignRiderModal.classList.remove('open'));
+
+document.getElementById('saveAssignRider').addEventListener('click', async () => {
+    const orderId = document.getElementById('assignOrderId').value;
+    const select   = document.getElementById('assignRiderSelect');
+    const errEl    = document.getElementById('assignRiderError');
+    const chosen   = select.options[select.selectedIndex];
+
+    if (!select.value) { errEl.textContent = '⚠️ Please choose a rider.'; return; }
+    errEl.textContent = '';
+
+    const riderId    = select.value;
+    const riderName  = chosen.dataset.name || '';
+    const riderPhone = chosen.dataset.phone || '';
+
+    try {
+        const { db, doc, updateDoc } = window._fb;
+        await updateDoc(doc(db, 'orders', orderId), {
+            riderId, riderName, riderPhone,
+            status: 'Out for Delivery'
+        });
+        const idx = window.adminData.orders.findIndex(o => o.id === orderId);
+        if (idx > -1) {
+            window.adminData.orders[idx].riderId    = riderId;
+            window.adminData.orders[idx].riderName  = riderName;
+            window.adminData.orders[idx].riderPhone = riderPhone;
+            window.adminData.orders[idx].status     = 'Out for Delivery';
+        }
+        renderOrders(window.adminData.orders);
+        renderDashboard(window.adminData.orders, window.adminData.users, window.adminData.products);
+        assignRiderModal.classList.remove('open');
+        showToast(`✅ Order assigned to ${riderName}.`);
+    } catch(err) {
+        console.error(err);
+        errEl.textContent = '❌ Assignment failed: ' + (err.message || 'unknown error');
+    }
+});
+
+/* =============================================================
    ADD / EDIT PRODUCT MODAL
    ============================================================= */
 const productModal  = document.getElementById('productModal');
@@ -300,6 +545,7 @@ function closeProductModal() {
     document.getElementById('editProductId').value  = '';
     document.getElementById('productName').value    = '';
     document.getElementById('productPrice').value   = '';
+    document.getElementById('productStock').value   = '';
     document.getElementById('productImage').value   = '';
     document.getElementById('productDesc').value    = '';
     document.getElementById('productError').textContent = '';
@@ -317,6 +563,7 @@ window.openEditProduct = function(id) {
     document.getElementById('editProductId').value      = id;
     document.getElementById('productName').value        = p.name;
     document.getElementById('productPrice').value       = p.price;
+    document.getElementById('productStock').value       = p.stock != null ? p.stock : '';
     document.getElementById('productImage').value       = p.image || '';
     document.getElementById('productDesc').value        = p.desc  || '';
     document.getElementById('productCategory').value   = p.category || 'Nuts';
@@ -328,6 +575,7 @@ window.openEditProduct = function(id) {
 saveProductBtn.addEventListener('click', async () => {
     const name     = document.getElementById('productName').value.trim();
     const price    = Number(document.getElementById('productPrice').value);
+    const stock    = Number(document.getElementById('productStock').value);
     const image    = document.getElementById('productImage').value.trim();
     const desc     = document.getElementById('productDesc').value.trim();
     const category = document.getElementById('productCategory').value;
@@ -336,9 +584,12 @@ saveProductBtn.addEventListener('click', async () => {
 
     if (!name)  { errEl.textContent = '⚠️ Product name is required.'; return; }
     if (!price || price <= 0) { errEl.textContent = '⚠️ Enter a valid price.'; return; }
+    if (document.getElementById('productStock').value === '' || isNaN(stock) || stock < 0) {
+        errEl.textContent = '⚠️ Enter a valid stock quantity.'; return;
+    }
     errEl.textContent = '';
 
-    const data = { name, price, image, desc, category };
+    const data = { name, price, stock, image, desc, category };
     saveProductBtn.disabled = true;
     saveProductBtn.textContent = 'Saving...';
 
@@ -465,7 +716,7 @@ document.getElementById('saveDelivery').addEventListener('click', () => {
 /* =============================================================
    CLOSE MODALS ON BACKGROUND CLICK
    ============================================================= */
-[productModal, orderModal].forEach(overlay => {
+[productModal, orderModal, assignRiderModal].forEach(overlay => {
     overlay.addEventListener('click', e => {
         if (e.target === overlay) overlay.classList.remove('open');
     });

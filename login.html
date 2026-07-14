@@ -134,10 +134,13 @@
         <div class="signup-options" id="signupOptions">
             <h3>Sign up as</h3>
             <div class="roles">
-                <button class="role-btn" data-role="Admin">Admin</button>
                 <button class="role-btn" data-role="Customer">Customer</button>
-                <button class="role-btn" data-role="Deliveryman">Deliveryman</button>
+                <button class="role-btn" data-role="Deliveryman">Rider</button>
             </div>
+            <p class="login-sub" id="riderNotice" style="display:none;margin-top:10px;">
+                Rider accounts are reviewed by our team before you can start taking deliveries.
+                You'll be able to log in once an admin approves your application.
+            </p>
         </div>
 
         <div class="signup-form" id="signupForm" hidden>
@@ -250,15 +253,25 @@
       const user = userCredential.user;
 
       const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const role = userDoc.exists() ? userDoc.data().role : 'Customer';
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      const role = userData.role || 'Customer';
+
+      if (role === 'Deliveryman' && userData.riderStatus !== 'approved') {
+        showError('loginError', '⏳ Your rider application is still under review. We\'ll let you know once an admin approves it.');
+        btn.disabled = false;
+        btn.textContent = 'Login';
+        return;
+      }
 
       showSuccess('loginSuccess', '✅ Welcome back! Redirecting...');
 
       setTimeout(() => {
   if (role === 'Admin') {
     window.location.href = 'admin.html';
+  } else if (role === 'Deliveryman') {
+    window.location.href = 'rider-dashboard.html';
   } else {
-    window.location.href = 'products.html';
+    window.location.href = 'customer-dashboard.html';
   }
 }, 1200);
 
@@ -304,9 +317,11 @@
   document.querySelectorAll('.role-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedRole = btn.dataset.role;
-      document.getElementById('signupTitle').textContent = `Sign up as ${selectedRole}`;
+      const label = selectedRole === 'Deliveryman' ? 'Rider' : selectedRole;
+      document.getElementById('signupTitle').textContent = `Sign up as ${label}`;
       document.getElementById('signupOptions').style.display = 'none';
       document.getElementById('signupForm').removeAttribute('hidden');
+      document.getElementById('riderNotice').style.display = selectedRole === 'Deliveryman' ? 'block' : 'none';
     });
   });
 
@@ -340,24 +355,33 @@
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
+      const userRecord = {
         fullName: fullName,
         phone: phone,
         email: email,
         role: selectedRole,
         createdAt: new Date().toISOString()
-      });
+      };
 
-      showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
+      if (selectedRole === 'Deliveryman') {
+        userRecord.riderStatus = 'pending';
+      }
 
-      setTimeout(() => {
-        document.getElementById('signupOverlay').setAttribute('hidden', '');
-        if (selectedRole === 'Admin') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'products.html';
-        }
-      }, 1500);
+      await setDoc(doc(db, 'users', user.uid), userRecord);
+
+      if (selectedRole === 'Deliveryman') {
+        showSuccess('signupSuccess', `✅ Application submitted! We'll email you once an admin approves your rider account.`);
+        setTimeout(() => {
+          document.getElementById('signupOverlay').setAttribute('hidden', '');
+          window.location.href = 'index.html';
+        }, 2200);
+      } else {
+        showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
+        setTimeout(() => {
+          document.getElementById('signupOverlay').setAttribute('hidden', '');
+          window.location.href = 'customer-dashboard.html';
+        }, 1500);
+      }
 
     } catch (error) {
       showError('signupError', friendlyError(error.code));
