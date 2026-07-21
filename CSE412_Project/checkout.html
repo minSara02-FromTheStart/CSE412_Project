@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriNest | Checkout</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/checkout.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="logo">
+        <span class="menu-icon">☰</span>
+        <div>
+            <h1>NutriNest</h1>
+            <p class="tagline">PURE & NATURAL</p>
+        </div>
+    </div>
+
+    <nav class="nav-links">
+        <a href="index.html#home">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#products">Products</a>
+    </nav>
+
+    <div class="nav-right">
+        <a href="login.html" class="login-btn">👤 Login</a>
+    </div>
+</header>
+
+<main class="checkout-container">
+
+    <section class="checkout-card">
+        <h2>Delivery Information</h2>
+
+        <form id="checkoutForm" novalidate>
+            <div class="input-group">
+                <label for="fullName">Full Name</label>
+                <input id="fullName" type="text" placeholder="Enter your full name">
+                <small class="error-message"></small>
+            </div>
+
+            <div class="input-group">
+                <label for="phone">Phone Number</label>
+                <input id="phone" type="tel" placeholder="01XXXXXXXXX">
+                <small class="error-message"></small>
+            </div>
+
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input id="email" type="email" placeholder="example@gmail.com">
+                <small class="error-message"></small>
+            </div>
+
+            <div class="input-group">
+                <label for="address">Delivery Address</label>
+                <textarea id="address" placeholder="House, Road, Area, District"></textarea>
+                <small class="error-message"></small>
+            </div>
+
+            <div class="input-group">
+                <label for="notes">Delivery Notes Optional</label>
+                <textarea id="notes" placeholder="Any special instructions..."></textarea>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- COUPON SECTION - ADD THIS -->
+            <!-- ========================================= -->
+            <h2>Apply Coupon</h2>
+            <div class="input-group">
+                <div class="coupon-input-group">
+                    <input id="couponCode" type="text" placeholder="Enter coupon code (e.g. FIRST10)">
+                    <button id="applyCouponBtn" class="apply-coupon-btn" type="button">Apply</button>
+                </div>
+                <small id="couponMessage" class="coupon-message"></small>
+            </div>
+            <!-- ========================================= -->
+
+            <h2>Delivery Option</h2>
+
+            <div class="option-box">
+                <label class="checkout-option">
+                    <input type="radio" name="delivery" value="120" checked>
+                    <span>
+                        <strong>Instant Delivery</strong>
+                        <small>Priority delivery</small>
+                    </span>
+                    <b>৳120</b>
+                </label>
+
+                <label class="checkout-option">
+                    <input type="radio" name="delivery" value="60">
+                    <span>
+                        <strong>Standard Delivery</strong>
+                        <small>Delivery within 3-7 days</small>
+                    </span>
+                    <b>৳60</b>
+                </label>
+
+                <label class="checkout-option">
+                    <input type="radio" name="delivery" value="0">
+                    <span>
+                        <strong>Pickup</strong>
+                        <small>Collect from pickup point</small>
+                    </span>
+                    <b>Free</b>
+                </label>
+            </div>
+
+            <h2>Payment Method</h2>
+
+            <div class="payment-box">
+                <label class="payment-option">
+                    <input type="radio" name="payment" checked>
+                    <span>
+                        <strong>Cash On Delivery</strong>
+                        <small>Pay after receiving your order</small>
+                    </span>
+                </label>
+
+                <label class="payment-option upcoming">
+                    <input type="radio" name="payment" disabled>
+                    <span>
+                        <strong>bKash</strong>
+                        <small>Upcoming</small>
+                    </span>
+                </label>
+
+                <label class="payment-option upcoming">
+                    <input type="radio" name="payment" disabled>
+                    <span>
+                        <strong>Nagad</strong>
+                        <small>Upcoming</small>
+                    </span>
+                </label>
+
+                <label class="payment-option upcoming">
+                    <input type="radio" name="payment" disabled>
+                    <span>
+                        <strong>Rocket</strong>
+                        <small>Upcoming</small>
+                    </span>
+                </label>
+            </div>
+
+            <button type="submit" class="place-order">Confirm Order</button>
+            <p id="checkoutMessage" class="checkout-message"></p>
+        </form>
+    </section>
+
+    <aside class="summary-card">
+        <h2>Order Summary</h2>
+
+        <div id="summary-items"></div>
+
+        <hr>
+
+        <div class="price-row">
+            <span>Subtotal</span>
+            <span id="subtotal">৳0</span>
+        </div>
+
+        <!-- DISCOUNT ROW - ADD THIS -->
+        <div class="price-row discount" id="discountRow" style="display: none;">
+            <span>Discount</span>
+            <span id="discountAmount">-৳0</span>
+        </div>
+
+        <div class="price-row">
+            <span>Delivery</span>
+            <span id="delivery">৳120</span>
+        </div>
+
+        <div class="total">
+            <h3>Total</h3>
+            <h3 id="grandTotal">৳120</h3>
+        </div>
+
+        <div class="checkout-info">
+            <p>🔒 Secure checkout</p>
+            <p>🚚 Delivery within 7 days</p>
+            <p>🌿 100% natural products</p>
+        </div>
+    </aside>
+
+</main>
+
+<footer class="checkout-footer">
+    <p>© 2026 NutriNest • Healthy Food Delivered With Care</p>
+</footer>
+
+<script src="js/checkout.js"></script>
+</body>
+</html>

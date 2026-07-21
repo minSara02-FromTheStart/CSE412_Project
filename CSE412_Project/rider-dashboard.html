@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rider Dashboard - NutriNest</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/rider-dashboard.css">
+</head>
+<body>
+  <main class="dashboard-main-shell">
+    <header class="rider-header">
+      <div class="rider-header-left">
+        <div class="rider-brand-row">
+          <span class="rider-brand-name">NutriNest</span>
+          <span class="role-pill">RIDER</span>
+        </div>
+        <div class="rider-status-row">
+          <span class="status-dot online" id="riderStatusDot"></span>
+          <span id="riderStatusText">Online</span>
+        </div>
+      </div>
+      <a class="rider-logout-btn" href="logout.html">Logout</a>
+    </header>
+
+    <section class="rider-top-card">
+      <div class="rider-profile-card">
+        <div class="profile-avatar" id="riderAvatar">RN</div>
+        <div class="profile-meta">
+          <h1 id="riderName">Rider name</h1>
+          <p class="profile-subtext" id="riderId">Rider ID: RD-0000</p>
+        </div>
+      </div>
+      <div class="rider-quick-stats">
+        <div class="stat-card">
+          <span>Today's runs</span>
+          <strong id="runsCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Earnings</span>
+          <strong id="earningsAmount">৳0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Rating</span>
+          <strong id="ratingValue">0.0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="current-delivery-card">
+      <div class="delivery-card-header">
+        <div>
+          <p class="delivery-label">Current delivery</p>
+          <h2>Order <span id="orderId">#NN1042</span></h2>
+        </div>
+        <span class="delivery-pill" id="deliveryStatus">Picked up</span>
+      </div>
+      <div class="delivery-address-block">
+        <p class="delivery-address-label">Deliver to</p>
+        <p class="delivery-address" id="deliveryAddress">House 12, Road 4, Banani, Dhaka</p>
+      </div>
+      <div class="delivery-details-row">
+        <p><strong>Payment:</strong> <span id="deliveryDistance">Cash On Delivery</span></p>
+        <p><strong>Order total:</strong> <span id="deliveryEta">৳0</span></p>
+      </div>
+      <div class="delivery-action-buttons">
+        <button class="btn btn-primary" id="navigateBtn">Navigate</button>
+        <button class="btn btn-outline" id="callBtn">Call</button>
+      </div>
+      <button class="btn btn-full" id="markDeliveredBtn">Mark as delivered</button>
+    </section>
+
+    <section class="up-next-section">
+      <div class="up-next-header">
+        <h2>Up next</h2>
+        <p id="upNextCount">2 orders waiting</p>
+      </div>
+      <div class="up-next-list" id="upNextList"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/rider-dashboard.js"></script>
+</body>
+</html>
