@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const ProductBuilder = require('../models/ProductBuilder');
 
-// GET all products
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find();
@@ -12,7 +12,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET single product by ID
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -23,10 +22,17 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST new product
 router.post('/', async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const product = new ProductBuilder()
+      .setName(req.body.name)
+      .setPrice(req.body.price)
+      .setDescription(req.body.description)
+      .setCategory(req.body.category)
+      .setStock(req.body.stock)
+      .setImage(req.body.image)
+      .build();
+
     await product.save();
     res.status(201).json(product);
   } catch (err) {
@@ -34,7 +40,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update product
 router.put('/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -45,7 +50,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE product
 router.delete('/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndDelete(req.params.id);
