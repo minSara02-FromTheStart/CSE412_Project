@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - NutriNest</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div class="admin-wrap">
+
+    <!-- ───────── SIDEBAR ───────── -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <div class="sb-brand">
+            <span>🌿</span>
+            <div>
+                <h2>NutriNest</h2>
+                <p>Admin Panel</p>
+            </div>
+        </div>
+        <nav class="sb-nav">
+            <span class="sb-section">Overview</span>
+            <a class="sb-link active" data-page="dashboard"><span class="sb-icon">📊</span> Dashboard</a>
+
+            <span class="sb-section">Catalogue</span>
+            <a class="sb-link" data-page="products"><span class="sb-icon">📦</span> Products</a>
+
+            <span class="sb-section">Commerce</span>
+            <a class="sb-link" data-page="orders"><span class="sb-icon">🛍️</span> Orders</a>
+            <a class="sb-link" data-page="customers"><span class="sb-icon">👥</span> Customers</a>
+            <a class="sb-link" data-page="riders"><span class="sb-icon">🏍️</span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
+
+            <span class="sb-section">System</span>
+            <a class="sb-link" data-page="settings"><span class="sb-icon">⚙️</span> Settings</a>
+            <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon">🚪</span> Logout</a>
+        </nav>
+    </aside>
+
+    <!-- ───────── MAIN ───────── -->
+    <div class="admin-main">
+
+        <header class="admin-topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+                <h1 id="topbarTitle">Dashboard</h1>
+            </div>
+            <div class="topbar-right">
+                <span class="admin-badge">Admin</span>
+                <div class="admin-avatar" id="adminAvatar">AD</div>
+            </div>
+        </header>
+
+        <div class="admin-content">
+
+            <!-- ── DASHBOARD ── -->
+            <section class="page active" id="page-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon si-green">💰</div>
+                        <p class="stat-label">Total Revenue</p>
+                        <h3 class="stat-value" id="stat-revenue">৳0</h3>
+                        <p class="stat-trend up" id="stat-revenue-trend">Updated live</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon si-amber">🛍️</div>
+                        <p class="stat-label">Total Orders</p>
+                        <h3 class="stat-value" id="stat-orders">0</h3>
+                        <p class="stat-trend up" id="stat-orders-trend"></p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon si-blue">👥</div>
+                        <p class="stat-label">Customers</p>
+                        <h3 class="stat-value" id="stat-customers">0</h3>
+                        <p class="stat-trend up" id="stat-customers-trend">Registered users</p>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon si-red">⏳</div>
+                        <p class="stat-label">Pending Orders</p>
+                        <h3 class="stat-value" id="stat-pending">0</h3>
+                        <p class="stat-trend down" id="stat-pending-trend">Needs attention</p>
+                    </div>
+                </div>
+
+                <div class="dash-row">
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h3>Recent Orders</h3>
+                            <button class="link-btn" data-page="orders">View all →</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr>
+                                </thead>
+                                <tbody id="recent-orders-body">
+                                    <tr><td colspan="4" class="empty-cell">No orders yet.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head"><h3>All Products</h3></div>
+                        <div class="top-products" id="top-products">
+                            <p class="empty-cell">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-row">
+                    <div class="panel">
+                        <div class="panel-head"><h3>Sales (last 14 days)</h3></div>
+                        <div style="padding:16px; height:280px;">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head"><h3>Stock Levels</h3></div>
+                        <div style="padding:16px; height:280px;">
+                            <canvas id="stockChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── PRODUCTS ── -->
+            <section class="page" id="page-products">
+                <div class="page-header">
+                    <h2>Products <span class="product-count" id="productCount"></span></h2>
+                    <button class="primary-btn" id="openAddProduct">+ Add Product</button>
+                </div>
+                <div class="panel">
+                    <div class="filter-bar">
+                        <input type="text" id="productSearch" placeholder="Search products..." class="filter-input">
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">All categories</option>
+                            <option value="Nuts">Nuts</option>
+                            <option value="Dry Fruits">Dry Fruits</option>
+                            <option value="Superfoods">Superfoods</option>
+                        </select>
+                        <select id="sourceFilter" class="filter-select">
+                            <option value="">All sources</option>
+                            <option value="website">Website (hardcoded)</option>
+                            <option value="added">Admin added</option>
+                        </select>
+                    </div>
+                    <div class="product-grid" id="productGrid">
+                        <p class="empty-cell" style="padding:20px">Loading products...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── ORDERS ── -->
+            <section class="page" id="page-orders">
+                <div class="page-header"><h2>Orders</h2></div>
+                <div class="panel">
+                    <div class="filter-bar">
+                        <input type="text" id="orderSearch" placeholder="Search by customer..." class="filter-input">
+                        <select id="orderStatusFilter" class="filter-select">
+                            <option value="">All status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th><th>Customer</th><th>Phone</th>
+                                    <th>Items</th><th>Total</th><th>Delivery</th>
+                                    <th>Date</th><th>Status</th><th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-body">
+                                <tr><td colspan="9" class="empty-cell">No orders yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── CUSTOMERS ── -->
+            <section class="page" id="page-customers">
+                <div class="page-header"><h2>Customers</h2></div>
+                <div class="panel">
+                    <div class="filter-bar">
+                        <input type="text" id="customerSearch" placeholder="Search by name or email..." class="filter-input">
+                        <select id="roleFilter" class="filter-select">
+                            <option value="">All roles</option>
+                            <option value="Customer">Customer</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Deliveryman">Deliveryman</option>
+                        </select>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Joined</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="customers-body">
+                                <tr><td colspan="6" class="empty-cell">No customers yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── RIDERS ── -->
+            <section class="page" id="page-riders">
+                <div class="page-header"><h2>Riders</h2></div>
+
+                <div class="panel">
+                    <div class="panel-head"><h3>Pending Applications</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Name</th><th>Phone</th><th>Email</th><th>Applied</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="rider-pending-body">
+                                <tr><td colspan="5" class="empty-cell">No pending applications.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-top:20px;">
+                    <div class="panel-head"><h3>Active Riders</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="rider-active-body">
+                                <tr><td colspan="5" class="empty-cell">No approved riders yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── SETTINGS ── -->
+            <section class="page" id="page-settings">
+                <div class="page-header"><h2>Settings</h2></div>
+                <div class="settings-grid">
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Store Information</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>Store name</label>
+                                <input type="text" id="storeName" value="NutriNest">
+                            </div>
+                            <div class="field-group">
+                                <label>Tagline</label>
+                                <input type="text" id="storeTagline" value="PURE & NATURAL">
+                            </div>
+                            <div class="field-group">
+                                <label>Contact email</label>
+                                <input type="email" id="storeEmail" value="hello@nutrinest.com">
+                            </div>
+                            <div class="field-group">
+                                <label>Contact phone</label>
+                                <input type="tel" id="storePhone" value="01XXXXXXXXX">
+                            </div>
+                            <button class="primary-btn" id="saveStoreInfo">Save changes</button>
+                            <p class="settings-msg" id="storeMsg"></p>
+                        </div>
+                    </div>
+
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Delivery Fees</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>Instant delivery (৳)</label>
+                                <input type="number" id="feeInstant" value="120">
+                            </div>
+                            <div class="field-group">
+                                <label>Standard delivery (৳)</label>
+                                <input type="number" id="feeStandard" value="60">
+                            </div>
+                            <div class="field-group">
+                                <label>Pickup</label>
+                                <input type="text" value="Free" disabled>
+                            </div>
+                            <button class="primary-btn" id="saveDelivery">Save fees</button>
+                            <p class="settings-msg" id="deliveryMsg"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /admin-content -->
+    </div><!-- /admin-main -->
+</div><!-- /admin-wrap -->
+
+<!-- ───────── ADD / EDIT PRODUCT MODAL ───────── -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3 id="modalTitle">Add New Product</h3>
+            <button class="modal-close" id="closeProductModal">✕</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editProductId">
+            <div class="field-group">
+                <label>Product name *</label>
+                <input type="text" id="productName" placeholder="e.g. Premium Almonds">
+            </div>
+            <div class="form-row">
+                <div class="field-group">
+                    <label>Price (৳ / KG) *</label>
+                    <input type="number" id="productPrice" placeholder="1200">
+                </div>
+                <div class="field-group">
+                    <label>Stock (KG in hand) *</label>
+                    <input type="number" id="productStock" placeholder="50">
+                </div>
+                <div class="field-group">
+                    <label>Category</label>
+                    <select id="productCategory">
+                        <option value="Nuts">Nuts</option>
+                        <option value="Dry Fruits">Dry Fruits</option>
+                        <option value="Superfoods">Superfoods</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-group">
+                <label>Image URL</label>
+                <input type="url" id="productImage" placeholder="https://...">
+            </div>
+            <div class="field-group">
+                <label>Description</label>
+                <textarea id="productDesc" rows="2" placeholder="Short product description..."></textarea>
+            </div>
+            <p class="modal-error" id="productError"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="secondary-btn" id="cancelProductModal">Cancel</button>
+            <button class="primary-btn" id="saveProduct">Add Product</button>
+        </div>
+    </div>
+</div>
+
+<!-- ───────── ORDER STATUS MODAL ───────── -->
+<div class="modal-overlay" id="orderModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-head">
+            <h3>Update Order Status</h3>
+            <button class="modal-close" id="closeOrderModal">✕</button>
+        </div>
+        <div class="modal-body">
+            <p id="orderModalInfo" class="order-modal-info"></p>
+            <div class="field-group">
+                <label>New status</label>
+                <select id="newOrderStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                </select>
+            </div>
+            <input type="hidden" id="editOrderId">
+        </div>
+        <div class="modal-footer">
+            <button class="secondary-btn" id="cancelOrderModal">Cancel</button>
+            <button class="primary-btn" id="saveOrderStatus">Update</button>
+        </div>
+    </div>
+</div>
+
+<!-- ───────── ASSIGN RIDER MODAL ───────── -->
+<div class="modal-overlay" id="assignRiderModal">
+    <div class="modal-box modal-sm">
+        <div class="modal-head">
+            <h3>Assign Rider</h3>
+            <button class="modal-close" id="closeAssignRiderModal">✕</button>
+        </div>
+        <div class="modal-body">
+            <p id="assignRiderInfo" class="order-modal-info"></p>
+            <div class="field-group">
+                <label>Select rider</label>
+                <select id="assignRiderSelect">
+                    <option value="">-- No riders available --</option>
+                </select>
+            </div>
+            <p class="modal-error" id="assignRiderError"></p>
+            <input type="hidden" id="assignOrderId">
+        </div>
+        <div class="modal-footer">
+            <button class="secondary-btn" id="cancelAssignRiderModal">Cancel</button>
+            <button class="primary-btn" id="saveAssignRider">Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- ───────── TOAST ───────── -->
+<div class="toast" id="toast"></div>
+
+<!-- Chart.js powers the sales & stock charts on the dashboard -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<!-- admin.js must load BEFORE the Firebase module so window.renderAll is defined -->
+<script src="js/admin.js"></script>
+
+<script type="module">
+    import { auth, db } from "./js/firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+        doc, getDoc, setDoc,
+        collection, getDocs, addDoc, updateDoc, deleteDoc,
+        query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    /* ── The 9 hardcoded products that live in index.html / products.html ──
+       We seed them into Firestore the first time (source:"website").
+       They get a stable id based on their name so we never duplicate them. */
+    const WEBSITE_PRODUCTS = [
+        { name:'Almonds',     price:1200, stock:50, category:'Nuts',       desc:'Fresh and healthy premium almonds.',             image:'https://i1-c.pinimg.com/1200x/6f/55/82/6f558209bca8c009629e9ebb40fa8633.jpg' },
+        { name:'Cashew',      price:1500, stock:50, category:'Nuts',       desc:'Organic and crunchy cashew nuts.',               image:'https://i1-c.pinimg.com/1200x/1e/e9/29/1ee9291e3ad643e80e08b03112e2d3c9.jpg' },
+        { name:'Pistachio',   price:1800, stock:50, category:'Nuts',       desc:'High quality pistachios full of nutrition.',     image:'https://i1-c.pinimg.com/736x/14/92/75/149275669c5e1822264c94ec1920d694.jpg' },
+        { name:'Dates',       price:1000, stock:50, category:'Dry Fruits', desc:'Sweet and delicious dates packed with nutrients.',image:'https://i.pinimg.com/736x/a9/a6/e1/a9a6e1d15fe059fe44d216ae97c383ec.jpg' },
+        { name:'Walnuts',     price:2200, stock:50, category:'Nuts',       desc:'Sweet and delicious walnuts packed with nutrients.',image:'https://i.pinimg.com/736x/66/7d/d2/667dd27b774d8f7b6a6757a89cf83530.jpg' },
+        { name:'Dry Mangoes', price:1200, stock:50, category:'Dry Fruits', desc:'Flavorful dry mangoes, perfect for snacking.',   image:'https://i.pinimg.com/736x/e6/67/5e/e6675e4c102e8b997f453732135011be.jpg' },
+        { name:'Dry Apricots',price:1400, stock:50, category:'Dry Fruits', desc:'Sweet and tangy dry apricots, packed with nutrients.',image:'https://i.pinimg.com/736x/cd/0d/27/cd0d27f24c8d4ca872a337d998b1b904.jpg' },
+        { name:'Dry Kiwi',    price:1400, stock:50, category:'Dry Fruits', desc:'Sweet and tangy dry kiwi, packed with nutrients.',image:'https://i.pinimg.com/736x/0c/44/4b/0c444b2fa3841e5d125085bac2db7891.jpg' },
+        { name:'Raisins',     price:800,  stock:50, category:'Dry Fruits', desc:'Juicy and flavorful raisins, perfect for snacking.',image:'https://i1-c.pinimg.com/1200x/c5/9f/30/c59f301e2423b6ba3d917a9707ff413c.jpg' },
+    ];
+
+    /* ── AUTH GUARD ── */
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'login.html'; return; }
+
+        const userSnap = await getDoc(doc(db, 'users', user.uid));
+        if (!userSnap.exists() || userSnap.data().role !== 'Admin') {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const name = userSnap.data().fullName || 'AD';
+        document.getElementById('adminAvatar').textContent =
+            name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+        await seedWebsiteProducts(db);
+        await loadAll(db);
+    });
+
+    /* ── SEED: write the 9 hardcoded products into Firestore only if missing ── */
+    async function seedWebsiteProducts(db) {
+        const promises = WEBSITE_PRODUCTS.map(async (p) => {
+            /* Use a deterministic doc id so we never double-seed */
+            const stableId = 'website_' + p.name.toLowerCase().replace(/\s+/g,'_');
+            const ref = doc(db, 'products', stableId);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+                await setDoc(ref, {
+                    ...p,
+                    source: 'website',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+        await Promise.all(promises);
+    }
+
+    /* ── LOAD ALL DATA FROM FIRESTORE ── */
+    async function loadAll(db) {
+        let ordersSnap, usersSnap, productsSnap;
+        try {
+            [ordersSnap, usersSnap, productsSnap] = await Promise.all([
+                getDocs(query(collection(db, 'orders'), orderBy('createdAt','desc'))).catch(() => ({ docs:[] })),
+                getDocs(collection(db, 'users')),
+                getDocs(collection(db, 'products'))
+            ]);
+        } catch(e) {
+            console.warn('Load error:', e);
+            ordersSnap   = { docs:[] };
+            usersSnap    = { docs:[] };
+            productsSnap = { docs:[] };
+        }
+
+        const orders   = ordersSnap.docs.map(d   => ({ id: d.id, ...d.data() }));
+        const users    = usersSnap.docs.map(d    => ({ id: d.id, ...d.data() }));
+        const products = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        window.adminData = { orders, users, products, db };
+        window.renderAll();
+    }
+
+    /* ── EXPOSE Firebase helpers to admin.js (called from event handlers) ── */
+    window._fb = {
+        db,
+        doc, getDoc, setDoc,
+        collection, getDocs, addDoc, updateDoc, deleteDoc,
+        query, orderBy,
+
+        async reloadProducts() {
+            const snap = await getDocs(collection(db, 'products'));
+            window.adminData.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        },
+        async reloadOrders() {
+            const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt','desc'))).catch(()=>({docs:[]}));
+            window.adminData.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        }
+    };
+</script>
+
+</body>
+</html>

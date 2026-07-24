@@ -137,6 +137,10 @@
                 <button class="role-btn" data-role="Customer">Customer</button>
                 <button class="role-btn" data-role="Rider">Rider</button>
             </div>
+            <p class="login-sub" id="riderNotice" style="display:none;margin-top:10px;">
+                Rider accounts are reviewed by our team before you can start taking deliveries.
+                You'll be able to log in once an admin approves your application.
+            </p>
         </div>
 
         <div class="signup-form" id="signupForm" hidden>
@@ -249,19 +253,27 @@
       const user = userCredential.user;
 
       const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const role = userDoc.exists() ? userDoc.data().role : 'Customer';
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      const role = userData.role || 'Customer';
+
+      if (role === 'Deliveryman' && userData.riderStatus !== 'approved') {
+        showError('loginError', '⏳ Your rider application is still under review. We\'ll let you know once an admin approves it.');
+        btn.disabled = false;
+        btn.textContent = 'Login';
+        return;
+      }
 
       showSuccess('loginSuccess', '✅ Welcome back! Redirecting...');
 
       setTimeout(() => {
-        if (role === 'Admin') {
-          window.location.href = 'admin.html';
-        } else if (role === 'Rider' || role === 'Deliveryman') {
-          window.location.href = 'rider-dashboard.html';
-        } else {
-          window.location.href = 'products.html';
-        }
-      }, 1200);
+  if (role === 'Admin') {
+    window.location.href = 'admin.html';
+  } else if (role === 'Rider' || role === 'Deliveryman') {
+    window.location.href = 'rider-dashboard.html';
+  } else {
+    window.location.href = 'customer-dashboard.html';
+  }
+}, 1200);
 
     } catch (error) {
       showError('loginError', friendlyError(error.code));
@@ -312,9 +324,11 @@
   document.querySelectorAll('.role-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedRole = btn.dataset.role;
-      document.getElementById('signupTitle').textContent = `Sign up as ${selectedRole}`;
+      const label = selectedRole === 'Deliveryman' ? 'Rider' : selectedRole;
+      document.getElementById('signupTitle').textContent = `Sign up as ${label}`;
       document.getElementById('signupOptions').style.display = 'none';
       document.getElementById('signupForm').removeAttribute('hidden');
+      document.getElementById('riderNotice').style.display = selectedRole === 'Deliveryman' ? 'block' : 'none';
     });
   });
 
@@ -358,7 +372,7 @@
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      const userDocData = {
+      const userRecord = {
         fullName: fullName,
         phone: phone,
         email: email,

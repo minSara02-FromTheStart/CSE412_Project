@@ -36,29 +36,34 @@ const heroSection = document.querySelector('.hero');
 const navbar = document.querySelector('.navbar');
 const navRight = document.querySelector('.nav-right');
 
-const navSearch = document.createElement('form');
-navSearch.action = 'products.html';
-navSearch.method = 'get';
-navSearch.innerHTML = `
-    <input type="text" name="search" placeholder="Search products...">
-    <button type="submit">Search</button>
-`;
-navSearch.classList.add('nav-search-box');
-navSearch.style.display = 'none';
+// Only build a scroll-triggered nav search box on pages that actually
+// have a hero section (index.html). Other pages (like products.html)
+// already have their own static nav-search-box, so we skip this there
+// to avoid creating a duplicate hidden one.
+if (heroSection && navbar && navRight) {
+    const navSearch = document.createElement('form');
+    navSearch.action = 'products.html';
+    navSearch.method = 'get';
+    navSearch.innerHTML = `
+        <input type="text" name="search" placeholder="Search products...">
+        <button type="submit">Search</button>
+    `;
+    navSearch.classList.add('nav-search-box');
+    navSearch.style.display = 'none';
 
-// insert BEFORE nav-right, so order is: logo | search | login
-navbar.insertBefore(navSearch, navRight);
+    // insert BEFORE nav-right, so order is: logo | search | login
+    navbar.insertBefore(navSearch, navRight);
 
-window.addEventListener('scroll', () => {
-    if (!heroSection) return;
-    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+    window.addEventListener('scroll', () => {
+        const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
 
-    if (window.scrollY > heroBottom - 80) {
-        navSearch.style.display = 'flex';
-    } else {
-        navSearch.style.display = 'none';
-    }
-});
+        if (window.scrollY > heroBottom - 80) {
+            navSearch.style.display = 'flex';
+        } else {
+            navSearch.style.display = 'none';
+        }
+    });
+}
 
 // Signup modal and client-side auth using localStorage
 document.addEventListener('DOMContentLoaded', () => {

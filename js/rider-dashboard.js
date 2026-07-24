@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore, doc, getDoc, updateDoc,
+  collection, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
@@ -24,8 +27,8 @@ const ratingValueEl = document.getElementById('ratingValue');
 const orderIdEl = document.getElementById('orderId');
 const deliveryStatusEl = document.getElementById('deliveryStatus');
 const deliveryAddressEl = document.getElementById('deliveryAddress');
-const deliveryDistanceEl = document.getElementById('deliveryDistance');
-const deliveryEtaEl = document.getElementById('deliveryEta');
+const deliveryDistanceEl = document.getElementById('deliveryDistance'); // repurposed: Payment method
+const deliveryEtaEl = document.getElementById('deliveryEta');           // repurposed: Order total
 const markDeliveredBtn = document.getElementById('markDeliveredBtn');
 const navigateBtn = document.getElementById('navigateBtn');
 const callBtn = document.getElementById('callBtn');
@@ -34,71 +37,68 @@ const riderStatusTextEl = document.getElementById('riderStatusText');
 const upNextListEl = document.getElementById('upNextList');
 const upNextCountEl = document.getElementById('upNextCount');
 
-let currentDelivery = null;
-let upcomingOrders = [];
-let riderData = {};
+let riderUid = null;
+let activeOrders = [];   // all non-delivered orders assigned to this rider, oldest first
+let deliveredCount = 0;
+let earningsTotal = 0;
 
 function getInitials(name) {
-  return name
+  return (name || 'Rider')
     .split(' ')
     .map(part => part[0]?.toUpperCase())
     .slice(0, 2)
     .join('');
 }
 
-function setDeliveryData(delivery) {
-  if (!delivery) {
-    currentDelivery = {
-      orderId: 'No active order',
-      address: 'No delivery assigned yet',
-      distance: '—',
-      eta: '—',
-      phone: '',
-      status: 'Waiting for assignment'
-    };
-    return;
-  }
-
-  currentDelivery = {
-    orderId: delivery.orderId || 'No active order',
-    address: delivery.address || 'No delivery assigned yet',
-    distance: delivery.distance || '—',
-    eta: delivery.eta || '—',
-    phone: delivery.phone || '',
-    status: delivery.status || 'Waiting for assignment'
-  };
+function fmtCurrency(n) {
+  const num = Number(n);
+  return isNaN(num) ? '৳0' : '৳' + num.toLocaleString();
 }
 
-function setUpcomingOrders(orders) {
-  upcomingOrders = Array.isArray(orders) ? orders : [];
+function orderItemsSummary(order) {
+  return Array.isArray(order.items)
+    ? order.items.map(it => `${it.name} ×${it.qty}`).join(', ')
+    : (order.product || '—');
 }
 
 function renderRiderInfo(userData) {
   const name = userData.fullName || 'Rider';
   riderNameEl.textContent = name;
   riderAvatarEl.textContent = getInitials(name);
-  riderIdEl.textContent = `Rider ID: ${userData.riderId || 'RD-0192'}`;
+  riderIdEl.textContent = `Rider ID: ${userData.riderId || ('RD-' + riderUid.slice(0, 4).toUpperCase())}`;
 }
 
 function renderCurrentDelivery() {
-  orderIdEl.textContent = currentDelivery.orderId;
-  deliveryStatusEl.textContent = currentDelivery.status;
-  deliveryAddressEl.textContent = currentDelivery.address;
-  deliveryDistanceEl.textContent = currentDelivery.distance;
-  deliveryEtaEl.textContent = currentDelivery.eta;
-  callBtn.disabled = !currentDelivery.phone;
-  navigateBtn.disabled = currentDelivery.address === 'No delivery assigned yet' || currentDelivery.address === '—';
-  if (currentDelivery.orderId === 'No active order') {
+  const current = activeOrders[0];
+
+  if (!current) {
+    orderIdEl.textContent = 'No active order';
+    deliveryStatusEl.textContent = 'Waiting for assignment';
+    deliveryAddressEl.textContent = 'No delivery assigned yet';
+    deliveryDistanceEl.textContent = '—';
+    deliveryEtaEl.textContent = '—';
+    callBtn.disabled = true;
+    navigateBtn.disabled = true;
     markDeliveredBtn.textContent = 'No active delivery';
     markDeliveredBtn.disabled = true;
-  } else {
-    markDeliveredBtn.textContent = currentDelivery.status === 'Delivered' ? 'Delivered' : 'Mark as delivered';
-    markDeliveredBtn.disabled = currentDelivery.status === 'Delivered';
+    return;
   }
+
+  orderIdEl.textContent = '#' + current.id.slice(-6).toUpperCase();
+  deliveryStatusEl.textContent = current.status || 'Out for Delivery';
+  deliveryAddressEl.textContent = current.address || '—';
+  deliveryDistanceEl.textContent = current.paymentMethod || 'Cash On Delivery';
+  deliveryEtaEl.textContent = fmtCurrency(current.grandTotal || current.total || 0);
+  callBtn.disabled = !current.phone;
+  navigateBtn.disabled = !current.address;
+  markDeliveredBtn.textContent = 'Mark as delivered';
+  markDeliveredBtn.disabled = false;
 }
 
 function renderUpNext() {
-  if (upcomingOrders.length === 0) {
+  const upcoming = activeOrders.slice(1);
+
+  if (upcoming.length === 0) {
     upNextListEl.innerHTML = `
       <div class="up-next-item">
         <h3>No orders in queue</h3>
@@ -109,86 +109,84 @@ function renderUpNext() {
     return;
   }
 
-  upNextListEl.innerHTML = upcomingOrders.map(order => `
+  upNextListEl.innerHTML = upcoming.map(order => `
     <div class="up-next-item">
-      <h3>Order ${order.orderId || order.id}</h3>
-      <p>${order.address || order.location} · ${order.distance || '—'}</p>
-      <span class="up-next-status">${order.status || 'Waiting'}</span>
+      <h3>Order #${order.id.slice(-6).toUpperCase()}</h3>
+      <p>${order.address || '—'} · ${orderItemsSummary(order)}</p>
+      <span class="up-next-status">${order.status || 'Out for Delivery'}</span>
     </div>
   `).join('');
-  upNextCountEl.textContent = `${upcomingOrders.length} orders waiting`;
+  upNextCountEl.textContent = `${upcoming.length} order${upcoming.length === 1 ? '' : 's'} waiting`;
 }
 
 function updateStats() {
-  runsCountEl.textContent = riderData.runs != null ? riderData.runs : 0;
-  earningsAmountEl.textContent = `৳${riderData.earnings != null ? riderData.earnings : 0}`;
-  ratingValueEl.textContent = riderData.rating != null ? Number(riderData.rating).toFixed(1) : '0.0';
+  runsCountEl.textContent = deliveredCount;
+  earningsAmountEl.textContent = fmtCurrency(earningsTotal);
+  ratingValueEl.textContent = '5.0';
 }
 
-function renderRiderStatus(status) {
-  const normalized = (status || 'Online').toString().trim();
-  riderStatusTextEl.textContent = normalized;
+function renderRiderStatus() {
+  const online = activeOrders.length > 0 ? 'Busy' : 'Online';
+  riderStatusTextEl.textContent = online;
   riderStatusDotEl.classList.remove('online', 'offline', 'busy');
-
-  const lower = normalized.toLowerCase();
-  if (lower.includes('online') || lower.includes('available')) {
-    riderStatusDotEl.classList.add('online');
-  } else if (lower.includes('deliver') || lower.includes('on the way') || lower.includes('assigned') || lower.includes('busy')) {
-    riderStatusDotEl.classList.add('busy');
-  } else {
-    riderStatusDotEl.classList.add('offline');
-  }
+  riderStatusDotEl.classList.add(online === 'Busy' ? 'busy' : 'online');
 }
 
-async function saveRiderState() {
-  const user = auth.currentUser;
-  if (!user) return;
-  const userRef = doc(db, 'users', user.uid);
+async function loadAssignedOrders() {
+  // All orders assigned to this rider, delivered or not
+  const q = query(collection(db, 'orders'), where('riderId', '==', riderUid));
+  const snap = await getDocs(q).catch(() => ({ docs: [] }));
+  const orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-  const savedDelivery = currentDelivery.orderId === 'No active order' ? null : currentDelivery;
-  await updateDoc(userRef, {
-    currentDelivery: savedDelivery,
-    upcomingOrders: upcomingOrders,
-    runs: riderData.runs || 0,
-    earnings: riderData.earnings || 0,
-    rating: riderData.rating || 0,
-    completedDeliveries: riderData.completedDeliveries || 0
+  // Sort oldest-assigned-first for the queue
+  orders.sort((a, b) => {
+    const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
+    const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
+    return ta - tb;
   });
+
+  activeOrders = orders.filter(o => o.status !== 'Delivered');
+  const delivered = orders.filter(o => o.status === 'Delivered');
+  deliveredCount = delivered.length;
+  earningsTotal = delivered.reduce((sum, o) => sum + (Number(o.deliveryFee) || 0), 0);
 }
 
-function openMaps() {
-  const query = encodeURIComponent(currentDelivery.address);
-  window.open(`https://www.google.com/maps/search/${query}`, '_blank');
-}
-
-function makeCall() {
-  window.location.href = `tel:${currentDelivery.phone.replace(/\s+/g, '')}`;
-}
-
-async function markDelivered() {
-  if (currentDelivery.orderId === 'No active order' || currentDelivery.status === 'Delivered') return;
-  currentDelivery.status = 'Delivered';
-  riderData.completedDeliveries = (riderData.completedDeliveries || 0) + 1;
-  renderCurrentDelivery();
-
-  if (upcomingOrders.length) {
-    const nextOrder = upcomingOrders.shift();
-    setDeliveryData({
-      orderId: nextOrder.orderId || nextOrder.id,
-      address: nextOrder.address || nextOrder.location,
-      distance: nextOrder.distance || '—',
-      eta: nextOrder.eta || '10 min',
-      phone: nextOrder.phone || currentDelivery.phone,
-      status: 'On the way'
-    });
-  } else {
-    setDeliveryData(null);
-  }
-
+async function refreshDashboard() {
+  await loadAssignedOrders();
   renderCurrentDelivery();
   renderUpNext();
   updateStats();
-  await saveRiderState();
+  renderRiderStatus();
+}
+
+function openMaps() {
+  const current = activeOrders[0];
+  if (!current || !current.address) return;
+  const mapQuery = encodeURIComponent(current.address);
+  window.open(`https://www.google.com/maps/search/${mapQuery}`, '_blank');
+}
+
+function makeCall() {
+  const current = activeOrders[0];
+  if (!current || !current.phone) return;
+  window.location.href = `tel:${current.phone.replace(/\s+/g, '')}`;
+}
+
+async function markDelivered() {
+  const current = activeOrders[0];
+  if (!current) return;
+
+  markDeliveredBtn.disabled = true;
+  markDeliveredBtn.textContent = 'Updating...';
+
+  try {
+    await updateDoc(doc(db, 'orders', current.id), { status: 'Delivered' });
+    await refreshDashboard();
+  } catch (err) {
+    console.error('Failed to mark delivered:', err);
+    markDeliveredBtn.disabled = false;
+    markDeliveredBtn.textContent = 'Mark as delivered';
+  }
 }
 
 navigateBtn.addEventListener('click', openMaps);
@@ -204,17 +202,12 @@ onAuthStateChanged(auth, async user => {
   const userDoc = await getDoc(doc(db, 'users', user.uid));
   const userData = userDoc.exists() ? userDoc.data() : {};
 
-  if (userData.role !== 'Deliveryman') {
+  if (userData.role !== 'Deliveryman' || userData.riderStatus !== 'approved') {
     window.location.href = 'login.html';
     return;
   }
 
-  riderData = userData;
+  riderUid = user.uid;
   renderRiderInfo(userData);
-  renderRiderStatus(userData.status || 'Online');
-  setDeliveryData(userData.currentDelivery);
-  setUpcomingOrders(userData.upcomingOrders);
-  renderCurrentDelivery();
-  renderUpNext();
-  updateStats();
+  await refreshDashboard();
 });
