@@ -5,7 +5,11 @@ import {
   addDoc,
   serverTimestamp,
   doc,
-  getDoc
+  getDoc,
+  getDocs,
+  query,
+  where,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const CURRENCY = "\u09F3";
@@ -156,6 +160,35 @@ function getSelectedDeliveryLabel() {
     : "Standard Delivery";
 }
 
+async function decrementStock(orderItems) {
+  for (const item of orderItems) {
+    try {
+      const productsQuery = query(collection(db, "products"), where("name", "==", item.name));
+      const snap = await getDocs(productsQuery);
+
+      if (snap.empty) {
+        console.warn(`No product found matching "${item.name}", stock not updated.`);
+        continue;
+      }
+
+      const productRef = snap.docs[0].ref;
+
+      // Transaction avoids two simultaneous orders both reading the same
+      // "old" stock number and overwriting each other's update.
+      await runTransaction(db, async (transaction) => {
+        const productSnap = await transaction.get(productRef);
+        if (!productSnap.exists()) return;
+
+        const currentStock = Number(productSnap.data().stock) || 0;
+        const newStock = Math.max(0, currentStock - item.qty);
+        transaction.update(productRef, { stock: newStock });
+      });
+    } catch (err) {
+      console.error(`Failed to update stock for "${item.name}":`, err);
+    }
+  }
+}
+
 async function saveOrderToFirestore(formValues) {
   if (!currentUser) {
     throw new Error("Customer must be signed in before placing an order.");
@@ -194,6 +227,7 @@ async function saveOrderToFirestore(formValues) {
   };
 
   const docRef = await addDoc(collection(db, "orders"), orderData);
+  await decrementStock(orderItems);
   return { id: docRef.id, pointsEarned };
 }
 

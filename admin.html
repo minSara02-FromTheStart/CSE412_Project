@@ -412,7 +412,7 @@
     import {
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, serverTimestamp
+        query, orderBy, serverTimestamp, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     /* ── The 9 hardcoded products that live in index.html / products.html ──
@@ -445,7 +445,7 @@
             name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
 
         await seedWebsiteProducts(db);
-        await loadAll(db);
+        initLiveData(db);
     });
 
     /* ── SEED: write the 9 hardcoded products into Firestore only if missing ── */
@@ -466,28 +466,39 @@
         await Promise.all(promises);
     }
 
-    /* ── LOAD ALL DATA FROM FIRESTORE ── */
-    async function loadAll(db) {
-        let ordersSnap, usersSnap, productsSnap;
-        try {
-            [ordersSnap, usersSnap, productsSnap] = await Promise.all([
-                getDocs(query(collection(db, 'orders'), orderBy('createdAt','desc'))).catch(() => ({ docs:[] })),
-                getDocs(collection(db, 'users')),
-                getDocs(collection(db, 'products'))
-            ]);
-        } catch(e) {
-            console.warn('Load error:', e);
-            ordersSnap   = { docs:[] };
-            usersSnap    = { docs:[] };
-            productsSnap = { docs:[] };
-        }
+    /* ── LIVE DATA FROM FIRESTORE ──
+       Orders and products use onSnapshot so the admin panel updates itself
+       in real time (e.g. the moment a rider marks an order Delivered, or a
+       customer's checkout reduces stock) — no manual refresh needed.
+       Users is loaded once since it doesn't need to be live. Each source
+       has its own try/catch so one failing collection can't blank the rest. */
+    function initLiveData(db) {
+        window.adminData = { orders: [], users: [], products: [], db };
 
-        const orders   = ordersSnap.docs.map(d   => ({ id: d.id, ...d.data() }));
-        const users    = usersSnap.docs.map(d    => ({ id: d.id, ...d.data() }));
-        const products = productsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onSnapshot(
+            query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
+            (snap) => {
+                window.adminData.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                window.renderAll();
+            },
+            (err) => console.warn('Orders listener error:', err)
+        );
 
-        window.adminData = { orders, users, products, db };
-        window.renderAll();
+        onSnapshot(
+            collection(db, 'products'),
+            (snap) => {
+                window.adminData.products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                window.renderAll();
+            },
+            (err) => console.warn('Products listener error:', err)
+        );
+
+        getDocs(collection(db, 'users'))
+            .then(snap => {
+                window.adminData.users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                window.renderAll();
+            })
+            .catch(err => console.warn('Users load error:', err));
     }
 
     /* ── EXPOSE Firebase helpers to admin.js (called from event handlers) ── */
