@@ -5,204 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Account - NutriNest</title>
 <link rel="stylesheet" href="css/style.css">
-
-<style>
-  :root{
-    --brand:#006b3c;
-    --brand-light:#e8f5ee;
-    --bg:#f7faf7;
-    --card:#ffffff;
-    --text:#1c2b23;
-    --muted:#65786e;
-    --border:#e4ece6;
-    --radius:16px;
-  }
-
-  *{box-sizing:border-box;}
-
-  body{
-    margin:0;
-    font-family:'Segoe UI', Arial, sans-serif;
-    background:var(--bg);
-    color:var(--text);
-  }
-
-  a{color:var(--brand);text-decoration:none;}
-
-  /* ---------- Layout ---------- */
-  .dash-main{
-    max-width:1200px;
-    margin:0 auto;
-    padding:110px 20px 60px;
-  }
-
-  .welcome-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:12px;
-    margin-bottom:22px;
-  }
-  .welcome-row h2{margin:0 0 4px;font-size:24px;}
-  .welcome-row p{margin:0;color:var(--muted);font-size:14px;}
-
-  .stats-row{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
-    gap:16px;
-    margin-bottom:24px;
-  }
-  .stat-box{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:18px 20px;
-  }
-  .stat-box p{margin:0 0 6px;color:var(--muted);font-size:13px;}
-  .stat-box h3{margin:0;font-size:22px;color:var(--brand);}
-
-  .grid-2{
-    display:grid;
-    grid-template-columns:2fr 1fr;
-    gap:20px;
-    align-items:start;
-  }
-  @media (max-width:880px){
-    .grid-2{grid-template-columns:1fr;}
-  }
-
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:22px;
-    margin-bottom:20px;
-  }
-  .card h3{margin:0 0 16px;font-size:17px;}
-
-  /* ---------- Loyalty ---------- */
-  .loyalty-card{
-    background:linear-gradient(135deg, var(--brand), #04502c);
-    color:#fff;
-    border:none;
-  }
-  .loyalty-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
-  .loyalty-points{font-size:34px;font-weight:800;}
-  .loyalty-points span{font-size:14px;font-weight:500;opacity:.85;display:block;}
-  .loyalty-tier{
-    background:rgba(255,255,255,.18);
-    padding:6px 14px;
-    border-radius:20px;
-    font-weight:700;
-    font-size:14px;
-  }
-  .tier-progress-track{
-    margin-top:16px;
-    height:8px;
-    border-radius:6px;
-    background:rgba(255,255,255,.25);
-    overflow:hidden;
-  }
-  .tier-progress-bar{
-    height:100%;
-    background:#fff;
-    width:0%;
-    transition:width .4s ease;
-  }
-  .tier-progress-text{margin:8px 0 0;font-size:13px;opacity:.9;}
-
-  /* ---------- Profile ---------- */
-  .profile-row{display:flex;gap:14px;align-items:center;margin-bottom:16px;}
-  .profile-avatar-lg{
-    width:56px;height:56px;border-radius:50%;
-    background:var(--brand-light);color:var(--brand);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:20px;
-  }
-  .profile-row h4{margin:0;font-size:16px;}
-  .profile-row p{margin:2px 0 0;color:var(--muted);font-size:13px;}
-  .profile-detail{
-    display:flex;justify-content:space-between;
-    padding:9px 0;
-    border-top:1px solid var(--border);
-    font-size:14px;
-  }
-  .profile-detail span:first-child{color:var(--muted);}
-
-  /* ---------- Orders ---------- */
-  .order-track-card{
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:16px 18px;
-    margin-bottom:14px;
-  }
-  .order-track-head{
-    display:flex;justify-content:space-between;align-items:flex-start;
-    margin-bottom:8px;flex-wrap:wrap;gap:8px;
-  }
-  .order-id-label{margin:0;font-weight:700;font-size:14px;}
-  .order-date{margin:2px 0 0;font-size:12px;color:var(--muted);}
-  .order-items{margin:0 0 12px;font-size:13px;color:var(--text);}
-
-  .order-track-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(140px,1fr));
-    gap:12px;
-    background:var(--bg);
-    border-radius:10px;
-    padding:12px 14px;
-  }
-  .track-label{margin:0;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
-  .track-value{margin:3px 0 0;font-size:13.5px;font-weight:600;}
-
-  .empty-state{text-align:center;padding:26px 10px;color:var(--muted);}
-  .btn-link{font-weight:700;}
-
-  /* ---------- Pills ---------- */
-  .pill{
-    padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;
-  }
-  .pill-pending{background:#fdf3e0;color:#a2670e;}
-  .pill-processing{background:#e6f0fd;color:#1a5fb4;}
-  .pill-outfordelivery{background:#fdeee0;color:#c05e17;}
-  .pill-delivered{background:#e2f6ea;color:#0f7a3d;}
-
-  /* ---------- Offers ---------- */
-  .offers-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
-    gap:14px;
-  }
-  .offer-card{
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:16px;
-    text-align:center;
-  }
-  .offer-card.locked{opacity:.55;}
-  .offer-icon{font-size:26px;margin-bottom:8px;}
-  .offer-card h4{margin:0 0 6px;font-size:14px;}
-  .offer-card p{margin:0 0 10px;font-size:12.5px;color:var(--muted);}
-  .offer-badge{
-    display:inline-block;
-    font-size:11px;font-weight:700;
-    padding:4px 10px;border-radius:20px;
-    background:#f1f1f1;color:var(--muted);
-  }
-  .offer-badge.unlocked{background:var(--brand-light);color:var(--brand);}
-
-  /* ---------- History table ---------- */
-  .table-wrap{overflow-x:auto;}
-  table.data-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-  table.data-table th{
-    text-align:left;padding:10px 12px;color:var(--muted);
-    font-size:12px;text-transform:uppercase;letter-spacing:.4px;
-    border-bottom:1px solid var(--border);
-  }
-  table.data-table td{padding:12px;border-bottom:1px solid var(--border);}
-  .empty-cell{text-align:center;color:var(--muted);padding:24px !important;}
-</style>
+<link rel="stylesheet" href="css/customer-dashboard.css">
 </head>
 <body>
 
@@ -276,7 +79,7 @@
     </div>
     <div class="stat-box">
       <p>Total Spent</p>
-      <h3 id="statSpent">à§³0</h3>
+      <h3 id="statSpent">৳0</h3>
     </div>
     <div class="stat-box">
       <p>Delivered Orders</p>
@@ -343,9 +146,9 @@
             <p>NutriNest Member</p>
           </div>
         </div>
-        <div class="profile-detail"><span>Email</span><span id="customerEmail">â€”</span></div>
-        <div class="profile-detail"><span>Phone</span><span id="customerPhone">â€”</span></div>
-        <div class="profile-detail"><span>Member since</span><span id="memberSince">â€”</span></div>
+        <div class="profile-detail"><span>Email</span><span id="customerEmail">—</span></div>
+        <div class="profile-detail"><span>Phone</span><span id="customerPhone">—</span></div>
+        <div class="profile-detail"><span>Member since</span><span id="memberSince">—</span></div>
       </div>
     </div>
 
@@ -357,5 +160,3 @@
 <script type="module" src="js/customer-dashboard.js"></script>
 </body>
 </html>
-
-
