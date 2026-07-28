@@ -6,6 +6,14 @@
 <title>My Account - NutriNest</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/customer-dashboard.css">
+<style>
+  .rate-stars { display:flex; gap:2px; cursor:pointer; }
+  .rate-stars .rate-star { font-size:18px; color:#ccc; transition:color .15s; }
+  .rate-stars .rate-star:hover,
+  .rate-stars .rate-star.hovered { color:#e0a800; }
+  .stars-display { color:#e0a800; font-size:15px; white-space:nowrap; }
+  .rating-muted { color:#999; font-size:13px; }
+</style>
 </head>
 <body>
 
@@ -110,10 +118,10 @@
         <div class="table-wrap">
           <table class="data-table">
             <thead>
-              <tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th></tr>
+              <tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Rider Rating</th></tr>
             </thead>
             <tbody id="historyBody">
-              <tr><td colspan="5" class="empty-cell">Loading...</td></tr>
+              <tr><td colspan="6" class="empty-cell">Loading...</td></tr>
             </tbody>
           </table>
         </div>

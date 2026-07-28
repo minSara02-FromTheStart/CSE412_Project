@@ -41,6 +41,7 @@ let riderUid = null;
 let activeOrders = [];   // all non-delivered orders assigned to this rider, oldest first
 let deliveredCount = 0;
 let earningsTotal = 0;
+let avgRating = null;    // average of customer-submitted riderRating values, null if none yet
 
 function getInitials(name) {
   return (name || 'Rider')
@@ -122,7 +123,7 @@ function renderUpNext() {
 function updateStats() {
   runsCountEl.textContent = deliveredCount;
   earningsAmountEl.textContent = fmtCurrency(earningsTotal);
-  ratingValueEl.textContent = '5.0';
+  ratingValueEl.textContent = avgRating !== null ? avgRating.toFixed(1) : 'New';
 }
 
 function renderRiderStatus() {
@@ -149,6 +150,11 @@ async function loadAssignedOrders() {
   const delivered = orders.filter(o => o.status === 'Delivered');
   deliveredCount = delivered.length;
   earningsTotal = delivered.reduce((sum, o) => sum + (Number(o.deliveryFee) || 0), 0);
+
+  const rated = delivered.filter(o => Number.isFinite(Number(o.riderRating)));
+  avgRating = rated.length
+    ? rated.reduce((sum, o) => sum + Number(o.riderRating), 0) / rated.length
+    : null;
 }
 
 async function refreshDashboard() {

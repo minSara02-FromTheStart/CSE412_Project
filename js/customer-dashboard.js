@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import {
   doc,
   getDoc,
+  updateDoc,
   collection,
   query,
   where,
@@ -285,9 +286,35 @@ function renderActiveOrders(orders) {
   }).join("");
 }
 
+let currentOrders = [];
+
+function ratingCellHTML(order) {
+  if (!order.riderId) {
+    return `<span class="rating-muted">—</span>`;
+  }
+
+  if (order.riderRating) {
+    const filled = "★".repeat(order.riderRating);
+    const empty = "☆".repeat(5 - order.riderRating);
+    return `<span class="stars-display">${filled}${empty}</span>`;
+  }
+
+  if (order.status !== "Delivered") {
+    return `<span class="rating-muted">Rate after delivery</span>`;
+  }
+
+  return `
+    <div class="rate-stars" data-order-id="${escapeHTML(order.id)}">
+      ${[1, 2, 3, 4, 5].map(n => `<span class="rate-star" data-value="${n}">☆</span>`).join("")}
+    </div>
+  `;
+}
+
 function renderHistory(orders) {
+  currentOrders = orders;
+
   if (orders.length === 0) {
-    historyBody.innerHTML = `<tr><td colspan="5" class="empty-cell">No orders yet. Your purchases will show up here.</td></tr>`;
+    historyBody.innerHTML = `<tr><td colspan="6" class="empty-cell">No orders yet. Your purchases will show up here.</td></tr>`;
     return;
   }
 
@@ -300,10 +327,54 @@ function renderHistory(orders) {
         <td>${orderItemsSummary(order)}</td>
         <td>${fmtCurrency(order.grandTotal || order.total)}</td>
         <td><span class="${statusPillClass(status)}">${escapeHTML(status)}</span></td>
+        <td>${ratingCellHTML(order)}</td>
       </tr>
     `;
   }).join("");
 }
+
+// Star hover preview + click-to-submit, delegated on the table body since
+// rows are re-rendered whenever orders reload.
+historyBody.addEventListener("mouseover", (e) => {
+  const star = e.target.closest(".rate-star");
+  if (!star) return;
+  const value = Number(star.dataset.value);
+  const siblings = star.parentElement.querySelectorAll(".rate-star");
+  siblings.forEach((s, i) => {
+    s.classList.toggle("hovered", i < value);
+    s.textContent = i < value ? "★" : "☆";
+  });
+});
+
+historyBody.addEventListener("mouseout", (e) => {
+  const wrap = e.target.closest(".rate-stars");
+  if (!wrap) return;
+  wrap.querySelectorAll(".rate-star").forEach(s => {
+    s.classList.remove("hovered");
+    s.textContent = "☆";
+  });
+});
+
+historyBody.addEventListener("click", async (e) => {
+  const star = e.target.closest(".rate-star");
+  if (!star) return;
+
+  const wrap = star.closest(".rate-stars");
+  const orderId = wrap.dataset.orderId;
+  const value = Number(star.dataset.value);
+
+  wrap.innerHTML = "Saving...";
+
+  try {
+    await updateDoc(doc(db, "orders", orderId), { riderRating: value });
+    const order = currentOrders.find(o => o.id === orderId);
+    if (order) order.riderRating = value;
+    renderHistory(currentOrders);
+  } catch (err) {
+    console.error("Failed to save rating:", err);
+    wrap.innerHTML = `<span class="rating-muted">Failed to save, try again</span>`;
+  }
+});
 
 function renderStats(orders) {
   const delivered = orders.filter(order => order.status === "Delivered").length;
@@ -366,5 +437,3 @@ onAuthStateChanged(auth, async (user) => {
 
   init(user, userData);
 });
-
-
