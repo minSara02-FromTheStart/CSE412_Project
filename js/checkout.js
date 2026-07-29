@@ -23,6 +23,25 @@ const checkoutMessage = document.getElementById("checkoutMessage");
 const deliveryOptions = document.querySelectorAll("input[name='delivery']");
 const submitBtn = checkoutForm ? checkoutForm.querySelector(".place-order") : null;
 
+// ===================== COUPON ELEMENTS =====================
+const couponInput = document.getElementById("couponInput");
+const applyCouponBtn = document.getElementById("applyCouponBtn");
+const couponMessage = document.getElementById("couponMessage");
+const discountRow = document.getElementById("discountRow");
+const discountAmountText = document.getElementById("discountAmount");
+const appliedCouponCodeText = document.getElementById("appliedCouponCode");
+
+// ===================== COUPON RULES =====================
+// Edit this object to add/change coupon offers — nothing else needs to change.
+const couponRules = {
+  FIRST10: { type: "percent", value: 10, minSpend: 0, label: "10% off your first purchase" },
+  SAVE15: { type: "percent", value: 15, minSpend: 2000, label: "15% off orders above \u09F32000" },
+  FLASH20: { type: "percent", value: 20, minSpend: 0, label: "20% off flash sale items" },
+  FREESHIP: { type: "freeShipping", minSpend: 1000, label: "Free delivery above \u09F31000" }
+};
+
+let appliedCoupon = null; // { code, ...rule }
+
 const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 let subtotal = Number(localStorage.getItem("cartTotal")) || 0;
 let currentUser = null;
@@ -97,13 +116,88 @@ function renderSummary() {
   updateSubmitState();
 }
 
+function calculateDiscount(deliveryFee) {
+  if (!appliedCoupon) return 0;
+
+  if (appliedCoupon.type === "percent") {
+    return Math.round(subtotal * (appliedCoupon.value / 100));
+  }
+
+  if (appliedCoupon.type === "freeShipping") {
+    return deliveryFee;
+  }
+
+  return 0;
+}
+
 function updateTotal() {
   const deliveryFee = selectedDeliveryFee();
-  const total = subtotal + deliveryFee;
+  const discount = calculateDiscount(deliveryFee);
+  const total = subtotal + deliveryFee - discount;
 
   if (subtotalText) subtotalText.textContent = formatPrice(subtotal);
   if (deliveryText) deliveryText.textContent = deliveryFee === 0 ? "Free" : formatPrice(deliveryFee);
-  if (grandTotalText) grandTotalText.textContent = formatPrice(total);
+  if (grandTotalText) grandTotalText.textContent = formatPrice(Math.max(0, total));
+
+  if (discountRow) {
+    if (appliedCoupon && discount > 0) {
+      discountRow.style.display = "flex";
+      if (appliedCouponCodeText) appliedCouponCodeText.textContent = `(${appliedCoupon.code})`;
+      if (discountAmountText) discountAmountText.textContent = "-" + formatPrice(discount);
+    } else {
+      discountRow.style.display = "none";
+    }
+  }
+}
+
+function setCouponMessage(message, type = "") {
+  if (!couponMessage) return;
+  couponMessage.textContent = message;
+  couponMessage.className = "coupon-message" + (type ? " " + type : "");
+}
+
+function applyCoupon() {
+  if (!couponInput) return;
+
+  const code = couponInput.value.trim().toUpperCase();
+
+  if (!code) {
+    setCouponMessage("Please enter a coupon code.", "error");
+    return;
+  }
+
+  const rule = couponRules[code];
+
+  if (!rule) {
+    appliedCoupon = null;
+    setCouponMessage("Invalid coupon code.", "error");
+    updateTotal();
+    return;
+  }
+
+  if (subtotal < rule.minSpend) {
+    appliedCoupon = null;
+    setCouponMessage(`This coupon needs a minimum order of ${formatPrice(rule.minSpend)}.`, "error");
+    updateTotal();
+    return;
+  }
+
+  appliedCoupon = { code, ...rule };
+  setCouponMessage(`Coupon applied: ${rule.label}`, "success");
+  updateTotal();
+}
+
+if (applyCouponBtn) {
+  applyCouponBtn.addEventListener("click", applyCoupon);
+}
+
+if (couponInput) {
+  couponInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyCoupon();
+    }
+  });
 }
 
 deliveryOptions.forEach(option => {
@@ -195,7 +289,8 @@ async function saveOrderToFirestore(formValues) {
   }
 
   const deliveryFee = selectedDeliveryFee();
-  const grandTotal = subtotal + deliveryFee;
+  const discount = calculateDiscount(deliveryFee);
+  const grandTotal = Math.max(0, subtotal + deliveryFee - discount);
   const pointsEarned = Math.floor(grandTotal / 100);
 
   const orderItems = cartItems.map(item => ({
@@ -216,6 +311,8 @@ async function saveOrderToFirestore(formValues) {
     subtotal,
     deliveryFee,
     deliveryType: getSelectedDeliveryLabel(),
+    couponCode: appliedCoupon ? appliedCoupon.code : "",
+    discountAmount: discount,
     grandTotal,
     pointsEarned,
     paymentMethod: "Cash On Delivery",
