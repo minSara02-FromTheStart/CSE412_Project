@@ -7,11 +7,29 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/cart.css">
+    <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/checkout.css">
+    <link rel="stylesheet" href="css/coupon.css">
 </head>
 <body>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===================== -->
+  <!-- COUPONS PANEL -->
+  <!-- ===================== -->
+  <div class="coupon-overlay" id="couponOverlay"></div>
+
+  <aside class="coupon-panel" id="couponPanel">
+      <div class="coupon-panel-header">
+          <h3>🏷️ Available Coupons</h3>
+          <button class="close-btn" id="closeCouponBtn">✕</button>
+      </div>
+
+      <div class="coupon-list" id="couponList">
+          <!-- Coupon cards are injected here by the script below -->
+      </div>
+  </aside>
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -31,15 +49,15 @@
                 🛍️ Products <span class="arrow">▸</span>
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
-                <a href="#" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="#" class="sidebar-sublink">🤱🎓 Mom & Baby Pack</a>
-                <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
-                <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
+                <a href="products.html?category=Popular" class="sidebar-sublink">⭐ Popular Products</a>
+                <a href="products.html?category=Mom" class="sidebar-sublink">🤱 Mom & Baby Pack</a>
+                <a href="products.html?category=Gym" class="sidebar-sublink">💪 Gym Pack</a>
+                <a href="products.html?category=Family" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
+                <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
             </div>
         </div>
 
-        <a href="#" class="sidebar-link">🏷️ Coupons</a>
+        <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
         <a href="#" class="sidebar-link">🔥 Offers</a>
         <a href="#" class="sidebar-link">❤️ Favourites</a>
         <a href="#" class="sidebar-link">⚡ Flash Sales</a>
@@ -98,7 +116,6 @@
             and value-added agricultural products including jackfruit powder, banana powder,
             dried fruits, and healthy snacks.
         </p>
-        <button class="explore-btn">Explore More</button>
     </div>
 </section>
     <section class="why-choose">
@@ -109,11 +126,6 @@
     </div>
 
     <div class="why-grid">
-        <div class="why-card">
-            <div class="why-icon">🛍️</div>
-            <h3>500+ Premium Products</h3>
-            <p>From rare superfoods to everyday dry fruits — our catalog covers every health need, all in one place.</p>
-        </div>
 
         <div class="why-card">
             <div class="why-icon">🔒</div>
@@ -139,11 +151,9 @@
     <h1>Our Products</h1>
 
     <div id="product-container" class="product-container">
-        <!-- প্রোডাক্ট এখানে JavaScript দিয়ে আসবে -->
     </div>
 
 </section>
-<!-- CART SIDEBAR -->
 <div class="cart-sidebar" id="cart-sidebar">
 
     <div class="cart-header">
@@ -173,61 +183,23 @@
 <button id="open-cart-btn">
     🛒 Cart
 </button>
+<section class="contact" id="contact">
 
-<script>
-const API_URL = 'http://localhost:3001/api';
+    <h3>Contact Us</h3>
 
-async function fetchProducts() {
-  try {
-    const response = await fetch(`${API_URL}/products`);
-    const products = await response.json();
-    displayProducts(products);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    document.getElementById('product-container').innerHTML = 
-      '<p class="error">Failed to load products. Please make sure the server is running.</p>';
-  }
-}
+    <p>Email: NurtiNest@gmail.com</p>
 
-function displayProducts(products) {
-  const container = document.getElementById('product-container');
-  
-  if (products.length === 0) {
-    container.innerHTML = '<p>No products available.</p>';
-    return;
-  }
+    <p>Phone: +880 1234-567890</p>
 
-  container.innerHTML = products.map(product => `
-    <div class="card">
-      <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}">
-      <h2>${product.name}</h2>
-      <h3>৳${product.price} / ${product.unit || 'KG'}</h3>
-      <p>${product.description || ''}</p>
-      <button class="cart-btn" onclick="addToCart('${product.name}', ${product.price})">
-        Add to Cart
-      </button>
-    </div>
-  `).join('');
-}
+    <p>Location: Dhaka, Bangladesh</p>
 
-document.addEventListener('DOMContentLoaded', fetchProducts);
-</script>
+</section>
 
 <script src="js/cart.js"></script>
+<script type="module" src="js/products-feed.js"></script>
 <script src="js/script.js"></script>
-<script type="module">
-  import { auth } from "./js/firebase-config.js";
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script type="module" src="js/userStatus.js"></script>
+<script src="js/coupon.js"></script>
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      document.getElementById('loginNavBtn').style.display = 'none';
-      document.getElementById('logoutNavBtn').style.display = 'inline-block';
-    } else {
-      document.getElementById('loginNavBtn').style.display = 'inline-block';
-      document.getElementById('logoutNavBtn').style.display = 'none';
-    }
-  });
-</script>
 </body>
 </html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Account - NutriNest</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/customer-dashboard.css">
+<style>
+  .rate-stars { display:flex; gap:2px; cursor:pointer; }
+  .rate-stars .rate-star { font-size:18px; color:#ccc; transition:color .15s; }
+  .rate-stars .rate-star:hover,
+  .rate-stars .rate-star.hovered { color:#e0a800; }
+  .stars-display { color:#e0a800; font-size:15px; white-space:nowrap; }
+  .rating-muted { color:#999; font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span>🌿</span>
+      <span>NutriNest</span>
+    </div>
+    <button class="sidebar-close" id="sidebarClose">✕</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="index.html#home" class="sidebar-link">🏠 Home</a>
+    <a href="index.html#about" class="sidebar-link">🌿 About</a>
+    <div class="sidebar-dropdown">
+      <div class="sidebar-link dropdown-toggle" id="productToggle">
+        🛍️ Products <span class="arrow">▸</span>
+      </div>
+      <div class="sidebar-submenu" id="productSubmenu">
+        <a href="products.html" class="sidebar-sublink">⭐ Popular Products</a>
+        <a href="#" class="sidebar-sublink">🎓 Student Pack</a>
+        <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
+        <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
+        <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
+      </div>
+    </div>
+    <a href="#" class="sidebar-link">🏷️ Coupons</a>
+    <a href="#" class="sidebar-link">🔥 Offers</a>
+    <a href="#" class="sidebar-link">❤️ Favourites</a>
+    <a href="#" class="sidebar-link">⚡ Flash Sales</a>
+    <a href="#" class="sidebar-link">🆕 New Arrivals</a>
+  </nav>
+</div>
+
+<header class="navbar">
+  <div class="logo">
+    <span class="menu-icon">☰</span>
+    <div>
+      <h1>NutriNest</h1>
+      <p class="tagline">PURE & NATURAL</p>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="index.html#home">Home</a>
+    <a href="index.html#about">About</a>
+    <a href="products.html">Products</a>
+  </nav>
+
+  <div class="nav-right">
+    <a href="logout.html" class="login-btn">Logout</a>
+  </div>
+</header>
+
+<main class="dash-main">
+
+  <div class="welcome-row">
+    <div>
+      <h2>Welcome back, <span id="customerName">Customer</span></h2>
+      <p>Here's what's happening with your account today.</p>
+    </div>
+    <a href="products.html" class="btn-link">Continue shopping</a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <p>Total Orders</p>
+      <h3 id="statOrders">0</h3>
+    </div>
+    <div class="stat-box">
+      <p>Total Spent</p>
+      <h3 id="statSpent">৳0</h3>
+    </div>
+    <div class="stat-box">
+      <p>Delivered Orders</p>
+      <h3 id="statDelivered">0</h3>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <div>
+      <!-- Active order tracking -->
+      <div class="card">
+        <h3>Order Tracking</h3>
+        <div id="activeOrdersList">
+          <div class="empty-state"><p>Loading your orders...</p></div>
+        </div>
+      </div>
+
+      <!-- Special offers -->
+      <div class="card">
+        <h3>Member Offers</h3>
+        <div class="offers-grid" id="offersGrid"></div>
+      </div>
+
+      <!-- Order history -->
+      <div class="card">
+        <h3>Order History</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th>Rider Rating</th></tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td colspan="6" class="empty-cell">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <!-- Loyalty points -->
+      <div class="card loyalty-card">
+        <h3 style="color:#fff;">Loyalty Points</h3>
+        <div class="loyalty-top">
+          <div class="loyalty-points">
+            <span>Points balance</span>
+            <span id="pointsValue" style="font-size:34px;font-weight:800;">0</span>
+          </div>
+          <div class="loyalty-tier" id="tierName">Bronze</div>
+        </div>
+        <div class="tier-progress-track">
+          <div class="tier-progress-bar" id="tierProgressBar"></div>
+        </div>
+        <p class="tier-progress-text" id="tierProgressText">Keep shopping to earn more points.</p>
+      </div>
+
+      <!-- Profile -->
+      <div class="card">
+        <div class="profile-row">
+          <div class="profile-avatar-lg" id="customerAvatarLg">NN</div>
+          <div>
+            <h4 id="customerNameSide">Customer</h4>
+            <p>NutriNest Member</p>
+          </div>
+        </div>
+        <div class="profile-detail"><span>Email</span><span id="customerEmail">—</span></div>
+        <div class="profile-detail"><span>Phone</span><span id="customerPhone">—</span></div>
+        <div class="profile-detail"><span>Member since</span><span id="memberSince">—</span></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="js/script.js"></script>
+<script type="module" src="js/customer-dashboard.js"></script>
+</body>
+</html>
