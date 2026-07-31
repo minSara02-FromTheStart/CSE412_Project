@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Favourites - NutriNest</title>
+  <meta name="description" content="View and manage the products you've saved to your NutriNest Favourites.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cart.css">
+  <link rel="stylesheet" href="css/search.css">
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+          <div class="sidebar-logo">
+              <span>🌿</span>
+              <span>NutriNest</span>
+          </div>
+          <button class="sidebar-close" id="sidebarClose">✕</button>
+      </div>
+      <nav class="sidebar-nav">
+          <a href="index.html" class="sidebar-link">🏠 Home</a>
+          <a href="index.html#about" class="sidebar-link">🌿 About</a>
+          <div class="sidebar-dropdown">
+              <div class="sidebar-link dropdown-toggle" id="productToggle">
+                  🛍️ Products <span class="arrow">▸</span>
+              </div>
+              <div class="sidebar-submenu" id="productSubmenu">
+                  <a href="products.html?category=Popular" class="sidebar-sublink">⭐ Popular Products</a>
+                  <a href="products.html?category=Mom" class="sidebar-sublink">🤱 Mom & Baby Pack</a>
+                  <a href="products.html?category=Gym" class="sidebar-sublink">💪 Gym Pack</a>
+                  <a href="products.html?category=Family" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
+                  <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
+              </div>
+          </div>
+          <a href="#" class="sidebar-link">🏷️ Coupons</a>
+          <a href="#" class="sidebar-link">🔥 Offers</a>
+          <a href="favourites.html" class="sidebar-link">❤️ Favourites</a>
+          <a href="#" class="sidebar-link">⚡ Flash Sales</a>
+          <a href="#" class="sidebar-link">🆕 New Arrivals</a>
+      </nav>
+  </div>
+
+  <header class="navbar">
+    <div class="logo">
+      <span class="menu-icon">☰</span>
+      <div>
+        <h1>NutriNest</h1>
+        <p class="tagline">PURE & NATURAL</p>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#about">About</a>
+      <a href="products.html">Products</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="login.html" class="login-btn" id="loginNavBtn">Buy Now</a>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <section id="favourites" class="products">
+      <div class="products-header">
+        <h1>Your Favourites</h1>
+        <a href="products.html" class="view-all-link">Browse Products <span class="arrow">→</span></a>
+      </div>
+
+      <div id="favourites-container" class="product-container"></div>
+      <div id="favourites-empty" class="favourites-empty" style="display:none;">
+        <p>You haven't saved any favourites yet.</p>
+        <a href="products.html" class="view-all-link">Start browsing <span class="arrow">→</span></a>
+      </div>
+    </section>
+  </main>
+
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2>Your Cart</h2>
+      <button id="close-cart">✖</button>
+    </div>
+    <div id="cart-items"></div>
+    <div class="cart-footer">
+      <h3 id="cart-total">Total: ৳0</h3>
+      <button id="checkout-btn">Confirm Order</button>
+    </div>
+  </div>
+
+  <button id="open-cart-btn">🛒 Cart</button>
+
+  <script src="js/cart.js"></script>
+  <script src="js/script.js"></script>
+  <script src="js/wishlist.js"></script>
+
+  <script>
+    function renderFavourites() {
+      const container = document.getElementById('favourites-container');
+      const emptyState = document.getElementById('favourites-empty');
+      const items = NutriNestWishlist.getWishlist();
+
+      if (!items.length) {
+        container.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      container.innerHTML = items.map(product => `
+        <div class="card">
+          <div class="card-media">
+            <button class="wishlist-btn active" type="button" data-id="${product.id}" aria-label="Remove from favourites" onclick="NutriNestWishlist.removeFromWishlist('${product.id}'); renderFavourites()">♥</button>
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+          </div>
+          <div class="card-body">
+            <h2>${product.name}</h2>
+            <p>${product.desc || ''}</p>
+            <div class="card-footer">
+              <div>
+                <h3>৳${product.price}</h3>
+                <span class="unit">/ ${product.unit || 'KG'}</span>
+              </div>
+              <button class="cart-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price})">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderFavourites);
+    document.addEventListener('wishlist:changed', renderFavourites);
+  </script>
+</body>
+</html>
