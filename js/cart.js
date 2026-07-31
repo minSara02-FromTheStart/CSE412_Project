@@ -100,11 +100,11 @@ function updateCheckoutButton() {
 // ADD TO CART
 // =====================
 
-function addToCart(product, price) {
+function addToCart(id, product, price) {
 
 
     const existing =
-    cart.find(item => item.product === product);
+    cart.find(item => item.id === id);
 
 
 
@@ -116,6 +116,8 @@ function addToCart(product, price) {
 
 
         cart.push({
+
+            id: id,
 
             product: product,
 
