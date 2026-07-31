@@ -36,12 +36,6 @@ function initFooter() {
   const yearEl = document.getElementById('footerYear');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Back to top — show after scrolling 400px
-  const btn = document.getElementById('backToTop');
-  window.addEventListener('scroll', () => {
-    if (!btn) return;
-    btn.classList.toggle('visible', window.scrollY > 400);
-  });
 }
 
 /* ── BACK TO TOP ──────────────────────────────────────────── */

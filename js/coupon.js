@@ -1,4 +1,3 @@
-
 // =====================
 // COUPON DATA — edit this list to add/change offers
 // =====================
