@@ -1,0 +1,203 @@
+/* ========================
+   PROMO PAGES (Offers / Flash Sales)
+   Shared styles — uses the same design tokens as style.css
+   ======================== */
+
+/* ---- Generic promo hero banner ---- */
+.promo-banner {
+    position: relative;
+    padding: 90px 40px 60px;
+    margin-top: 0;
+    text-align: center;
+    overflow: hidden;
+    color: var(--white);
+}
+
+.promo-banner.offers-banner {
+    background: linear-gradient(135deg, var(--primary) 0%, #16302a 100%);
+}
+
+.promo-banner.flash-banner {
+    background: linear-gradient(135deg, #7a2418 0%, #d9534f 100%);
+}
+
+.promo-banner::before {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.promo-banner::after {
+    content: "";
+    position: absolute;
+    bottom: -110px;
+    left: -80px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.promo-banner-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.promo-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+}
+
+.promo-banner h1 {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 14px;
+}
+
+.promo-banner p {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+/* ---- Countdown timer (Flash Sales) ---- */
+.countdown {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 74px;
+    padding: 12px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(4px);
+}
+
+.countdown-unit span.value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.countdown-unit span.label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
+    margin-top: 6px;
+}
+
+.countdown.ended .countdown-unit span.value {
+    opacity: 0.5;
+}
+
+/* ---- Section wrapper for the filtered product grid ---- */
+.promo-products {
+    padding: 60px 20px 80px;
+    background: var(--background);
+}
+
+.promo-products h2 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 40px;
+}
+
+/* Reuses .product-container / .card from style.css so cards render identically
+   to Home and Products pages. */
+
+/* ---- Empty state (no offer / no flash-sale products right now) ---- */
+.promo-empty {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 70px 20px;
+    text-align: center;
+    color: var(--text-light);
+}
+
+.promo-empty .promo-empty-icon {
+    font-size: 42px;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.promo-empty h3 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.promo-empty p {
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.promo-empty .explore-btn {
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Discount badge shown on cards that are part of the current promotion */
+.discount-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #d9534f;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 20px;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 640px) {
+    .promo-banner {
+        padding: 80px 20px 44px;
+    }
+    .promo-banner h1 {
+        font-size: 30px;
+    }
+    .countdown-unit {
+        min-width: 62px;
+        padding: 10px 8px;
+    }
+    .countdown-unit span.value {
+        font-size: 22px;
+    }
+}

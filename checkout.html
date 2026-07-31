@@ -88,14 +88,7 @@
                     <b>৳60</b>
                 </label>
 
-                <label class="checkout-option">
-                    <input type="radio" name="delivery" value="0">
-                    <span>
-                        <strong>Pickup </strong>
-                        <small>Collect from pickup point</small>
-                    </span>
-                    <b>Free</b>
-                </label>
+                
             </div>
 
             <h2>Payment Method</h2>
@@ -106,30 +99,6 @@
                     <span>
                         <strong>Cash On Delivery</strong>
                         <small>Pay after receiving your order</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>bKash</strong>
-                        <small>Upcoming</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>Nagad</strong>
-                        <small>Upcoming</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>Rocket</strong>
-                        <small>Upcoming</small>
                     </span>
                 </label>
             </div>
@@ -157,6 +126,7 @@
         <div class="coupon-apply-box">
             <input type="text" id="couponInput" placeholder="Enter coupon code">
             <button type="button" id="applyCouponBtn">Apply</button>
+            <button type="button" id="removeCouponBtn" style="display:none;">Remove Coupon</button>
         </div>
         <p id="couponMessage" class="coupon-message"></p>
 

@@ -64,8 +64,7 @@ async function loadCurrentRole() {
 }
 
 function sendToLogin() {
-  alert("Please log in as a customer to save favourites.");
-  window.location.href = "login.html";
+    window.location.href = "favourites.html";
 }
 
 async function requireCustomer(options = {}) {
