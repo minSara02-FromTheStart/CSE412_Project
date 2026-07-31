@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const productContainer = document.querySelector('.product-container');
     const isProductsPage = window.location.pathname.endsWith('products.html');
 
+    let allProducts = [];
+
     function getAllProducts() {
         if (!productContainer) return [];
         return Array.from(productContainer.querySelectorAll('.card')).map(card => {
@@ -30,11 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get('search') || '';
-    if (initialQuery) {
-        filterProducts(initialQuery);
+
+    function refreshProductsAndApplyInitialQuery() {
+        allProducts = getAllProducts();
+        if (initialQuery) {
+            filterProducts(initialQuery);
+        }
     }
 
-    const allProducts = getAllProducts();
+    // Cards may be static (already in the HTML) or loaded dynamically from
+    // Firestore by products-feed.js. If dynamic, wait for its "products:loaded"
+    // event before reading cards -- otherwise DOMContentLoaded fires before
+    // the async Firestore fetch finishes and we'd see zero products.
+    document.addEventListener('products:loaded', refreshProductsAndApplyInitialQuery);
+
+    // Fallback for pages with static cards and no products-feed.js at all.
+    refreshProductsAndApplyInitialQuery();
 
     document.querySelectorAll('form.search-box, form.nav-search-box').forEach(form => {
         const input = form.querySelector('input[name="search"]');
