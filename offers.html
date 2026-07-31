@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/cart.css">
   <link rel="stylesheet" href="css/search.css">
   <link rel="stylesheet" href="css/promo.css">
+  <link rel="stylesheet" href="css/coupon.css">
 </head>
 <body>
 
@@ -88,6 +89,15 @@
 
   </main>
 
+  <div class="coupon-overlay" id="couponOverlay"></div>
+  <div class="coupon-panel" id="couponPanel">
+    <div class="coupon-panel-header">
+      <h2>Available Coupons</h2>
+      <button class="coupon-close-btn" id="closeCouponBtn">✕</button>
+    </div>
+    <div id="couponList" class="coupon-list"></div>
+  </div>
+
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
       <h2>Your Cart</h2>
@@ -107,6 +117,7 @@
   <script src="js/cart.js"></script>
   <script type="module" src="js/wishlist.js"></script>
   <script src="js/quickview.js"></script>
+  <script src="js/coupon.js"></script>
   <script type="module" src="js/offers-feed.js"></script>
   <script src="js/script.js"></script>
   <script type="module" src="js/userStatus.js"></script>
