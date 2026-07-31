@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cart.css">
   <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/coupon.css">
 </head>
 <body>
 
@@ -36,10 +37,10 @@
                   <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
               </div>
           </div>
-          <a href="#" class="sidebar-link">🏷️ Coupons</a>
-          <a href="#" class="sidebar-link">🔥 Offers</a>
+          <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
+          <a href="offers.html" class="sidebar-link">🔥 Offers</a>
           <a href="favourites.html" class="sidebar-link">❤️ Favourites</a>
-          <a href="#" class="sidebar-link">⚡ Flash Sales</a>
+          <a href="flashsale.html" class="sidebar-link">⚡ Flash Sales</a>
           <a href="#" class="sidebar-link">🆕 New Arrivals</a>
       </nav>
   </div>
@@ -79,6 +80,15 @@
     </section>
   </main>
 
+  <div class="coupon-overlay" id="couponOverlay"></div>
+  <div class="coupon-panel" id="couponPanel">
+    <div class="coupon-panel-header">
+      <h2>Available Coupons</h2>
+      <button class="coupon-close-btn" id="closeCouponBtn">✕</button>
+    </div>
+    <div id="couponList" class="coupon-list"></div>
+  </div>
+
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
       <h2>Your Cart</h2>
@@ -98,6 +108,7 @@
   <script src="js/quickview.js"></script>
   <script type="module" src="js/wishlist.js"></script>
   <script type="module" src="js/userStatus.js"></script>
+  <script src="js/coupon.js"></script>
 
   <script>
     function escapeHTML(value) {
