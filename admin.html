@@ -247,7 +247,12 @@
 
             <!-- ── SETTINGS ── -->
             <section class="page" id="page-settings">
-                <div class="page-header"><h2>Settings</h2></div>
+                <div class="page-header">
+                    <h2>Settings</h2>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="primary-btn" type="button" id="sendOfferAlertBtn" onclick="triggerFlashSaleAlert()">Send flash sale alert</button>
+                    </div>
+                </div>
                 <div class="settings-grid">
                     <div class="panel settings-panel">
                         <div class="panel-head"><h3>Store Information</h3></div>
@@ -409,7 +414,18 @@
 <!-- Chart.js powers the sales & stock charts on the dashboard -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
+<!-- EmailJS for sending emails -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser/dist/email.min.js"></script>
+<script>
+window.addEventListener("load", function () {
+    emailjs.init({
+        publicKey: "StGrNaDDao53u1aoA"
+    });
+});
+</script>
+
 <!-- admin.js must load BEFORE the Firebase module so window.renderAll is defined -->
+<script src="js/newsletterService.js"></script>
 <script src="js/admin.js"></script>
 
 <script type="module">
@@ -420,13 +436,8 @@
         collection, getDocs, addDoc, updateDoc, deleteDoc,
         query, orderBy, serverTimestamp, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import {
-        getStorage, ref as storageRef, uploadBytes, getDownloadURL
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    
 
-    /* Uses the same default Firebase app that firebase-config.js already
-       initialised for auth/db, so no second config object is needed here. */
-    const storage = getStorage();
 
     /* ── The 9 hardcoded products that live in index.html / products.html ──
        We seed them into Firestore the first time (source:"website").
@@ -520,7 +531,6 @@
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
         query, orderBy,
-        storage, storageRef, uploadBytes, getDownloadURL,
 
         async reloadProducts() {
             const snap = await getDocs(collection(db, 'products'));

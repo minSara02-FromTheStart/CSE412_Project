@@ -68,9 +68,9 @@ transform:rotate(360deg);
   <script type="module">
     import { auth } from "./js/firebase-config.js";
     import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
-    // Automatically logs out and sends to login page
-    signOut(auth).then(() => {
-      window.location.href = 'login.html';
+    // Automatically logs out and sends back to the home page.
+    signOut(auth).finally(() => {
+      window.location.href = 'index.html';
     });
   </script>
 

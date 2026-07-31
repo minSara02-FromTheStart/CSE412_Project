@@ -55,18 +55,15 @@ function handleNewsletter(e) {
   btn.textContent = 'Subscribing...';
   btn.disabled = true;
 
-  // Simulate API — replace with Firebase later
+  const service = window.newsletterService || null;
+  const subscribers = service ? service.saveSubscriberEmail(email) : [];
+
   setTimeout(() => {
     btn.textContent = '✅ Subscribed!';
     btn.style.background = '#27ae60';
     input.value = '';
 
-    // Save to localStorage for now
-    const subs = JSON.parse(localStorage.getItem('nn_subscribers') || '[]');
-    if (!subs.includes(email)) {
-      subs.push(email);
-      localStorage.setItem('nn_subscribers', JSON.stringify(subs));
-    }
+    console.info(`Newsletter subscriber saved. Total subscribers: ${subscribers.length}`);
 
     setTimeout(() => {
       btn.textContent = 'Subscribe';
@@ -74,6 +71,15 @@ function handleNewsletter(e) {
       btn.disabled = false;
     }, 3000);
   }, 1000);
+}
+
+/* ── SALE ALERTS ─────────────────────────────────────────── */
+function triggerOfferAlert(title, description) {
+  const service = window.newsletterService;
+  if (!service) return;
+
+  const result = service.sendOfferAlertToSubscribers(title, description);
+  console.info(`Offer email alert sent to ${result.subscribers.length} subscriber(s)`);
 }
 
 /* ── FIREBASE INTEGRATION (when ready) ───────────────────── */

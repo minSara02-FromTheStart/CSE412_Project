@@ -74,7 +74,7 @@ function renderProducts(products) {
       <div class="card" data-category="${product.category || ''}">
         <div class="card-media">
           ${badgeHtml}
-          <button class="wishlist-btn" type="button" data-id="${product.id}" aria-label="Add to wishlist" onclick="NutriNestWishlist.toggleWishlist(window.__nutriProductsById['${product.id}']); this.classList.toggle('active')">♥</button>
+          <button class="wishlist-btn" type="button" data-id="${product.id}" aria-label="Add to favourites" onclick="NutriNestWishlist.toggleWishlist(window.__nutriProductsById['${product.id}'], this)">♥</button>
           <img src="${imgSrc}" alt="${product.name}" loading="lazy">
           <div class="quick-actions">
             <button class="quick-view-btn" type="button" onclick="openQuickView(window.__nutriProductsById['${product.id}'])">Quick View</button>
@@ -83,7 +83,7 @@ function renderProducts(products) {
         <div class="card-body">
           <h2>${product.name}</h2>
           ${ratingHtml}
-          <p>${desc}</p>
+          <!-- Description removed -->
           <div class="card-footer">
             <div>
               <h3>৳${product.price}</h3>

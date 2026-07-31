@@ -58,12 +58,6 @@ function updateSubmitState() {
     return;
   }
 
-  if (!currentUser) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Checking account...";
-    return;
-  }
-
   submitBtn.disabled = false;
   submitBtn.textContent = "Confirm Order";
 }
@@ -190,23 +184,22 @@ async function decrementStock(orderItems) {
 }
 
 async function saveOrderToFirestore(formValues) {
-  if (!currentUser) {
-    throw new Error("Customer must be signed in before placing an order.");
-  }
-
   const deliveryFee = selectedDeliveryFee();
   const grandTotal = subtotal + deliveryFee;
-  const pointsEarned = Math.floor(grandTotal / 100);
+  const pointsEarned = currentUser ? Math.floor(grandTotal / 100) : 0;
 
   const orderItems = cartItems.map(item => ({
+    id: item.id || "",
     name: item.product,
     qty: Number(item.quantity) || 1,
     price: Number(item.price) || 0
   }));
 
   const orderData = {
-    customerId: currentUser.uid,
-    uid: currentUser.uid,
+    customerId: currentUser ? currentUser.uid : "",
+    uid: currentUser ? currentUser.uid : "",
+    customerType: currentUser ? "registered" : "guest",
+    isGuest: !currentUser,
     fullName: formValues.fullName,
     phone: formValues.phone,
     email: formValues.email,
@@ -234,14 +227,6 @@ async function saveOrderToFirestore(formValues) {
 if (checkoutForm) {
   checkoutForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    if (!currentUser) {
-      setCheckoutMessage("Please log in as a customer before placing an order.", "#c0392b");
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1000);
-      return;
-    }
 
     if (cartItems.length === 0) {
       setCheckoutMessage("Your cart is empty. Add products before confirming.", "#c0392b");
@@ -277,7 +262,7 @@ if (checkoutForm) {
       firstError ??= phone;
     }
 
-    if (!isValidEmail(email.value.trim())) {
+    if (email.value.trim() && !isValidEmail(email.value.trim())) {
       showError(email, "Enter a valid email.");
       valid = false;
       firstError ??= email;
@@ -309,13 +294,15 @@ if (checkoutForm) {
           : ""
       });
 
-      setCheckoutMessage(`Your order is confirmed. You earned ${result.pointsEarned} points!`);
+      setCheckoutMessage(currentUser
+        ? `Your order is confirmed. You earned ${result.pointsEarned} points!`
+        : "Your order is confirmed. Thank you for shopping with NutriNest!");
 
       localStorage.removeItem("cart");
       localStorage.removeItem("cartTotal");
 
       setTimeout(() => {
-        window.location.href = "customer-dashboard.html";
+        window.location.href = currentUser ? "customer-dashboard.html" : "index.html";
       }, 1600);
     } catch (err) {
       console.error("Order save failed:", err);
@@ -329,11 +316,9 @@ if (checkoutForm) {
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     currentUser = null;
+    currentUserData = {};
     updateSubmitState();
-    setCheckoutMessage("Please log in to place an order and earn loyalty points.", "#c0392b");
-    setTimeout(() => {
-      window.location.href = "login.html";
-    }, 1200);
+    setCheckoutMessage("Checking out as a guest. Fill in your delivery details to place the order.");
     return;
   }
 

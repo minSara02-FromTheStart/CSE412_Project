@@ -95,42 +95,87 @@
 
   <script src="js/cart.js"></script>
   <script src="js/script.js"></script>
-  <script src="js/wishlist.js"></script>
+  <script src="js/quickview.js"></script>
+  <script type="module" src="js/wishlist.js"></script>
+  <script type="module" src="js/userStatus.js"></script>
 
   <script>
-    function renderFavourites() {
+    function escapeHTML(value) {
+      const div = document.createElement('div');
+      div.textContent = value == null ? '' : String(value);
+      return div.innerHTML;
+    }
+
+    function escapeJS(value) {
+      return String(value == null ? '' : value)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'");
+    }
+
+    async function renderFavourites() {
       const container = document.getElementById('favourites-container');
       const emptyState = document.getElementById('favourites-empty');
-      const items = NutriNestWishlist.getWishlist();
+      const isCustomer = await NutriNestWishlist.isSignedInCustomer();
+      const items = isCustomer ? await NutriNestWishlist.getWishlist() : [];
 
       if (!items.length) {
         container.innerHTML = '';
+        emptyState.innerHTML = isCustomer
+          ? `
+            <p>You haven't saved any favourites yet.</p>
+            <a href="products.html" class="view-all-link">Start browsing <span class="arrow">→</span></a>
+          `
+          : `
+            <p>Please log in as a customer to view your favourites.</p>
+            <a href="login.html" class="view-all-link">Log in <span class="arrow">→</span></a>
+          `;
         emptyState.style.display = 'block';
         return;
       }
       emptyState.style.display = 'none';
 
-      container.innerHTML = items.map(product => `
+      window.__nutriFavouriteProductsById = {};
+      container.innerHTML = items.map(product => {
+        const productId = product.productId || product.id;
+        const safeId = escapeJS(productId);
+        const safeName = escapeJS(product.name || 'Product');
+        const price = Number(product.price) || 0;
+        const imgSrc = product.image || 'https://via.placeholder.com/300';
+
+        window.__nutriFavouriteProductsById[productId] = {
+          id: productId,
+          name: product.name || 'Product',
+          price,
+          unit: product.unit || 'KG',
+          image: imgSrc,
+          desc: product.desc || 'No description available.'
+        };
+
+        return `
         <div class="card">
           <div class="card-media">
-            <button class="wishlist-btn active" type="button" data-id="${product.id}" aria-label="Remove from favourites" onclick="NutriNestWishlist.removeFromWishlist('${product.id}'); renderFavourites()">♥</button>
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <button class="wishlist-btn active" type="button" data-id="${escapeHTML(productId)}" aria-label="Remove from favourites" onclick="NutriNestWishlist.removeFromWishlist('${safeId}')">♥</button>
+            <img src="${escapeHTML(imgSrc)}" alt="${escapeHTML(product.name)}" loading="lazy">
+            <div class="quick-actions">
+              <button class="quick-view-btn" type="button" onclick="openQuickView(window.__nutriFavouriteProductsById['${safeId}'])">Quick View</button>
+            </div>
           </div>
           <div class="card-body">
-            <h2>${product.name}</h2>
-            <p>${product.desc || ''}</p>
+            <h2>${escapeHTML(product.name)}</h2>
+            <!-- Description is shown only in Quick View. -->
             <div class="card-footer">
               <div>
-                <h3>৳${product.price}</h3>
-                <span class="unit">/ ${product.unit || 'KG'}</span>
+                <h3>৳${price}</h3>
+                <span class="unit">/ ${escapeHTML(product.unit || 'KG')}</span>
               </div>
-              <button class="cart-btn" onclick="addToCart('${product.name.replace(/'/g, "\\'")}', ${product.price})">
+              <button class="cart-btn" onclick="addToCart('${safeId}', '${safeName}', ${price})">
                 Add to Cart
               </button>
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     document.addEventListener('DOMContentLoaded', renderFavourites);
