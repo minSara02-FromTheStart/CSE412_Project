@@ -5,14 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NurtiNest Website</title>
 
+    <meta name="description" content="NutriNest delivers premium, 100% natural dry fruits, fruit powders, and superfoods straight to your door across Bangladesh. Pay after receiving, delivery within 7 days.">
+    <meta property="og:title" content="NutriNest — Pure & Natural Nutrition">
+    <meta property="og:description" content="Premium dry fruits, fruit powders & superfoods delivered to your door.">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/cart.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/checkout.css">
+    <link rel="stylesheet" href="css/coupon.css">
+    <link rel="stylesheet" href="css/footer.css">
 </head>
+
 <body>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ===================== -->
+  <!-- COUPONS PANEL -->
+  <!-- ===================== -->
+  <div class="coupon-overlay" id="couponOverlay"></div>
+
+  <aside class="coupon-panel" id="couponPanel">
+      <div class="coupon-panel-header">
+          <h3>🏷️ Available Coupons</h3>
+          <button class="close-btn" id="closeCouponBtn">✕</button>
+      </div>
+
+      <div class="coupon-list" id="couponList">
+          <!-- Coupon cards are injected here by the script below -->
+      </div>
+  </aside>
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -40,9 +66,9 @@
             </div>
         </div>
 
-        <a href="#" class="sidebar-link">🏷️ Coupons</a>
+        <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
         <a href="#" class="sidebar-link">🔥 Offers</a>
-        <a href="#" class="sidebar-link">❤️ Favourites</a>
+        <a href="favourites.html" class="sidebar-link">❤️ Favourites</a>
         <a href="#" class="sidebar-link">⚡ Flash Sales</a>
         <a href="#" class="sidebar-link">🆕 New Arrivals</a>
     </nav>
@@ -89,7 +115,27 @@
 
     </div>
 </section>
-<section class="dryfruits-section" id = "about">
+
+<div class="trust-bar">
+    <div class="trust-item">
+        <span class="trust-icon">🔒</span>
+        <span>Pay After Receiving</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon">🚚</span>
+        <span>Delivery Within 7 Days</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon">🌿</span>
+        <span>100% Natural & Organic</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon">⭐</span>
+        <span>Trusted by 1,000+ Customers</span>
+    </div>
+</div>
+
+<section class="dryfruits-section fade-in-section" id = "about">
     <div class="overlay">
         
         <h2>About Us</h2>
@@ -99,47 +145,17 @@
             and value-added agricultural products including jackfruit powder, banana powder,
             dried fruits, and healthy snacks.
         </p>
-        <button class="explore-btn">Explore More</button>
     </div>
 </section>
-    <section class="why-choose">
-    <div class="why-header">
-        <p class="why-eyebrow">Why Choose Us</p>
-        <h2>The NutriNest Difference</h2>
-        <p class="why-desc">Everything we do is built around making healthy eating simple, affordable, and trustworthy.</p>
+    
+    <section id="products" class="products fade-in-section">
+
+    <div class="products-header">
+        <h1>Our Products</h1>
+        <a href="products.html" class="view-all-link">View All Products <span class="arrow">→</span></a>
     </div>
 
-    <div class="why-grid">
-        <div class="why-card">
-            <div class="why-icon">🛍️</div>
-            <h3>500+ Premium Products</h3>
-            <p>From rare superfoods to everyday dry fruits — our catalog covers every health need, all in one place.</p>
-        </div>
-
-        <div class="why-card">
-            <div class="why-icon">🔒</div>
-            <h3>Pay After Receiving</h3>
-            <p>Order with full confidence. We only ask for payment once your package is safely in your hands.</p>
-        </div>
-
-        <div class="why-card">
-            <div class="why-icon">🚚</div>
-            <h3>Delivery Within 7 Days</h3>
-            <p>Fast, reliable delivery straight to your door — so your nutrition never has to wait.</p>
-        </div>
-
-        <div class="why-card">
-            <div class="why-icon">💰</div>
-            <h3>Deals That Save More</h3>
-            <p>Exclusive member offers, seasonal discounts, and bundle packs designed to make healthy living affordable.</p>
-        </div>
-    </div>
-</section>
-    <section id="products" class="products">
-
-    <h1>Our Products</h1>
-
-    <div id="product-container" class="product-container">
+    <div id="product-container" class="product-container" data-limit="4">
     </div>
 
 </section>
@@ -173,46 +189,37 @@
     🛒 Cart
 </button>
 
-<script>
-const API_URL = 'http://localhost:3001/api';
 
-async function fetchProducts() {
-  try {
-    const response = await fetch(`${API_URL}/products`);
-    const products = await response.json();
-    displayProducts(products);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    document.getElementById('product-container').innerHTML = 
-      '<p class="error">Failed to load products. Please make sure the server is running.</p>';
-  }
-}
-
-function displayProducts(products) {
-  const container = document.getElementById('product-container');
-  
-  if (products.length === 0) {
-    container.innerHTML = '<p>No products available.</p>';
-    return;
-  }
-
-  container.innerHTML = products.map(product => `
-    <div class="card" data-category="${product.category || ''}">
-      <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}">
-      <h2>${product.name}</h2>
-      <h3>৳${product.price} / ${product.unit || 'KG'}</h3>
-      <p>${product.description || ''}</p>
-      <button class="cart-btn" onclick="addToCart('${product.name}', ${product.price})">
-        Add to Cart
-      </button>
-    </div>
-  `).join('');
-}
-
-document.addEventListener('DOMContentLoaded', fetchProducts);
-</script>
+<script src="js/product.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/wishlist.js"></script>
+<script src="js/quickview.js"></script>
+<script type="module" src="js/products-feed.js"></script>
 <script src="js/script.js"></script>
 <script type="module" src="js/userStatus.js"></script>
+<script src="js/coupon.js"></script>
+<script src="js/footer.js"></script>
+
+<script>
+  // Lightweight scroll-reveal: fades/slides sections in as they enter the
+  // viewport. No dependency on the other scripts, safe to run standalone.
+  document.addEventListener('DOMContentLoaded', () => {
+    const sections = document.querySelectorAll('.fade-in-section');
+    if (!('IntersectionObserver' in window) || !sections.length) {
+      sections.forEach(el => el.classList.add('in-view'));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    sections.forEach(el => observer.observe(el));
+  });
+</script>
+
 </body>
 </html>

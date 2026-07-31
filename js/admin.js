@@ -317,7 +317,7 @@ function renderOrders(orders, search = '', status = '') {
                 ? `<br><span class="src-tag src-added" style="margin-top:4px;display:inline-block;">🏍️ ${sanitize(o.riderName||'')}</span>`
                 : '';
             return `<tr>
-                <td>#${String(i+1).padStart(4,'0')}</td>
+                <td>#${sanitize(o.id.slice(-6).toUpperCase())}</td>
                 <td>${sanitize(o.fullName || o.customerName || '—')}</td>
                 <td>${sanitize(o.phone || '—')}</td>
                 <td>${itemStr}</td>
@@ -547,11 +547,21 @@ function closeProductModal() {
     document.getElementById('productPrice').value   = '';
     document.getElementById('productStock').value   = '';
     document.getElementById('productImage').value   = '';
+    document.getElementById('productImageFile').value = '';
+    document.getElementById('productImagePreview').innerHTML = '';
     document.getElementById('productDesc').value    = '';
     document.getElementById('productError').textContent = '';
     document.getElementById('modalTitle').textContent   = 'Add New Product';
     saveProductBtn.textContent = 'Add Product';
 }
+
+document.getElementById('productImageFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const preview = document.getElementById('productImagePreview');
+    if (!file) { preview.innerHTML = ''; return; }
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `<img src="${url}" alt="preview" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`;
+});
 
 document.getElementById('openAddProduct').addEventListener('click', openProductModal);
 document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
@@ -565,8 +575,12 @@ window.openEditProduct = function(id) {
     document.getElementById('productPrice').value       = p.price;
     document.getElementById('productStock').value       = p.stock != null ? p.stock : '';
     document.getElementById('productImage').value       = p.image || '';
+    document.getElementById('productImageFile').value   = '';
+    document.getElementById('productImagePreview').innerHTML = p.image
+        ? `<img src="${p.image}" alt="current" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`
+        : '';
     document.getElementById('productDesc').value        = p.desc  || '';
-    document.getElementById('productCategory').value   = p.category || 'Nuts';
+    document.getElementById('productCategory').value   = p.category || 'Popular';
     document.getElementById('modalTitle').textContent   = 'Edit Product';
     saveProductBtn.textContent = 'Save Changes';
     openProductModal();
@@ -576,7 +590,8 @@ saveProductBtn.addEventListener('click', async () => {
     const name     = document.getElementById('productName').value.trim();
     const price    = Number(document.getElementById('productPrice').value);
     const stock    = Number(document.getElementById('productStock').value);
-    const image    = document.getElementById('productImage').value.trim();
+    let   image    = document.getElementById('productImage').value.trim();
+    const imageFile = document.getElementById('productImageFile').files[0];
     const desc     = document.getElementById('productDesc').value.trim();
     const category = document.getElementById('productCategory').value;
     const editId   = document.getElementById('editProductId').value;
@@ -587,14 +602,27 @@ saveProductBtn.addEventListener('click', async () => {
     if (document.getElementById('productStock').value === '' || isNaN(stock) || stock < 0) {
         errEl.textContent = '⚠️ Enter a valid stock quantity.'; return;
     }
+    if (!editId && !imageFile) { errEl.textContent = '⚠️ Please choose an image to upload.'; return; }
     errEl.textContent = '';
 
-    const data = { name, price, stock, image, desc, category };
     saveProductBtn.disabled = true;
     saveProductBtn.textContent = 'Saving...';
 
     try {
-        const { db, doc, collection, addDoc, updateDoc } = window._fb;
+        const { db, doc, collection, addDoc, updateDoc, storageRef, uploadBytes, getDownloadURL } = window._fb;
+
+        /* Upload the new picture from the admin's device to Firebase Storage,
+           swapping the old Image URL field for a real file upload. */
+        if (imageFile) {
+            saveProductBtn.textContent = 'Uploading image...';
+            const path = `products/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const fileRef = storageRef(window._fb.storage, path);
+            await uploadBytes(fileRef, imageFile);
+            image = await getDownloadURL(fileRef);
+        }
+
+        const data = { name, price, stock, image, desc, category };
+        saveProductBtn.textContent = 'Saving...';
 
         if (editId) {
             await updateDoc(doc(db, 'products', editId), data);

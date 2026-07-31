@@ -151,6 +151,20 @@
             <span id="subtotal">৳0</span>
         </div>
 
+        <!-- ===================== -->
+        <!-- APPLY COUPON -->
+        <!-- ===================== -->
+        <div class="coupon-apply-box">
+            <input type="text" id="couponInput" placeholder="Enter coupon code">
+            <button type="button" id="applyCouponBtn">Apply</button>
+        </div>
+        <p id="couponMessage" class="coupon-message"></p>
+
+        <div class="price-row" id="discountRow" style="display:none;">
+            <span>Discount <span id="appliedCouponCode"></span></span>
+            <span id="discountAmount">-৳0</span>
+        </div>
+
         <div class="price-row">
             <span>Delivery</span>
             <span id="delivery">৳120</span>

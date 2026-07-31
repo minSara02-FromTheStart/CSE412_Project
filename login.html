@@ -135,7 +135,7 @@
             <h3>Sign up as</h3>
             <div class="roles">
                 <button class="role-btn" data-role="Customer">Customer</button>
-                <button class="role-btn" data-role="Rider">Rider</button>
+                <button class="role-btn" data-role="Deliveryman">Rider</button>
             </div>
             <p class="login-sub" id="riderNotice" style="display:none;margin-top:10px;">
                 Rider accounts are reviewed by our team before you can start taking deliveries.
@@ -156,7 +156,7 @@
             </div>
             <div class="input-group">
                 <label for="signupPhone">Phone</label>
-                <input type="text" id="signupPhone" inputmode="numeric" pattern="01\d{9}" maxlength="11" placeholder="01XXXXXXXXX" required>
+                <input type="tel" id="signupPhone" placeholder="01XXXXXXXXX" required>
             </div>
             <div class="input-group">
                 <label for="signupEmail">Email address</label>
@@ -268,7 +268,7 @@
       setTimeout(() => {
   if (role === 'Admin') {
     window.location.href = 'admin.html';
-  } else if (role === 'Rider' || role === 'Deliveryman') {
+  } else if (role === 'Deliveryman') {
     window.location.href = 'rider-dashboard.html';
   } else {
     window.location.href = 'customer-dashboard.html';
@@ -300,13 +300,6 @@
 
   // -------- SIGNUP MODAL --------
   let selectedRole = '';
-
-  const phoneInput = document.getElementById('signupPhone');
-  if (phoneInput) {
-    phoneInput.addEventListener('input', () => {
-      phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 11);
-    });
-  }
 
   document.getElementById('openSignup').addEventListener('click', (e) => {
     e.preventDefault();
@@ -349,18 +342,8 @@
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
 
-    if (!selectedRole) {
-      showError('signupError', '❌ Please choose a role first.');
-      return;
-    }
-
     if (!fullName || !phone || !email || !password) {
       showError('signupError', '❌ Please fill in all fields.');
-      return;
-    }
-
-    if (!/^01\d{9}$/.test(phone)) {
-      showError('signupError', '❌ Phone number must start with 01 and be 11 digits.');
       return;
     }
 
@@ -380,29 +363,25 @@
         createdAt: new Date().toISOString()
       };
 
-      if (selectedRole === 'Rider') {
-        userDocData.runs = 0;
-        userDocData.earnings = 0;
-        userDocData.rating = 0;
-        userDocData.completedDeliveries = 0;
-        userDocData.riderId = `RD-${Math.floor(1000 + Math.random() * 9000)}`;
-        userDocData.status = 'Online';
-        userDocData.currentDelivery = null;
-        userDocData.upcomingOrders = [];
+      if (selectedRole === 'Deliveryman') {
+        userRecord.riderStatus = 'pending';
       }
 
-      await setDoc(doc(db, 'users', user.uid), userDocData);
+      await setDoc(doc(db, 'users', user.uid), userRecord);
 
-      showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
-
-      setTimeout(() => {
-        document.getElementById('signupOverlay').setAttribute('hidden', '');
-        if (selectedRole === 'Rider') {
-          window.location.href = 'rider-dashboard.html';
-        } else {
-          window.location.href = 'products.html';
-        }
-      }, 1500);
+      if (selectedRole === 'Deliveryman') {
+        showSuccess('signupSuccess', `✅ Application submitted! We'll email you once an admin approves your rider account.`);
+        setTimeout(() => {
+          document.getElementById('signupOverlay').setAttribute('hidden', '');
+          window.location.href = 'index.html';
+        }, 2200);
+      } else {
+        showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
+        setTimeout(() => {
+          document.getElementById('signupOverlay').setAttribute('hidden', '');
+          window.location.href = 'customer-dashboard.html';
+        }, 1500);
+      }
 
     } catch (error) {
       showError('signupError', friendlyError(error.code));
