@@ -51,7 +51,11 @@
     const addBtn = overlay.querySelector('#qvAddBtn');
     addBtn.onclick = () => {
       if (typeof addToCart === 'function') {
-        addToCart(product.name, product.price);
+        addToCart(
+          product.id,
+          product.name,
+          product.price
+        );
       }
       closeQuickView();
     };

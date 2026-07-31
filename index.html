@@ -192,12 +192,21 @@
 
 <script src="js/product.js"></script>
 <script src="js/cart.js"></script>
-<script src="js/wishlist.js"></script>
+<script type="module" src="js/wishlist.js"></script>
 <script src="js/quickview.js"></script>
 <script type="module" src="js/products-feed.js"></script>
 <script src="js/script.js"></script>
 <script type="module" src="js/userStatus.js"></script>
 <script src="js/coupon.js"></script>
+<script src="js/newsletterService.js"></script>
+<!-- EmailJS for newsletter emails -->
+<script>
+window.addEventListener("load", function () {
+    emailjs.init({
+        publicKey: "StGrNaDDao53u1aoA"
+    });
+});
+</script>
 <script src="js/footer.js"></script>
 
 <script>

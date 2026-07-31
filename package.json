@@ -6,9 +6,10 @@
   "directories": {
     "test": "tests"
   },
- "scripts": {
-  "test": "jest"
-},
+  "scripts": {
+    "test": "jest",
+    "mail-server": "node server/offerMailServer.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/minSara02-FromTheStart/CSE412_Project.git"
@@ -24,5 +25,10 @@
   "devDependencies": {
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "nodemailer": "^9.0.3"
   }
 }

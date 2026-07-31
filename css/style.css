@@ -1319,11 +1319,8 @@ nav ul li a{
 
 .product-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 28px;
-    justify-content: center;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(4, 250fr);
+    gap: 20px;
 }
 
 /* Product Card */
@@ -1397,7 +1394,7 @@ nav ul li a{
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 16px;
+    font-size: 25px;
     font-weight: 600;
     color: var(--primary);
     text-decoration: none;
@@ -1676,6 +1673,15 @@ nav ul li a{
     transform: translateY(-2px);
 }
 
-.product-container {
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+
+.product-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    color: #666;
+    line-height: 1.5;
+    min-height: 3em;
 }

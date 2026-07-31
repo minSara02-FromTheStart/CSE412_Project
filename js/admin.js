@@ -5,6 +5,28 @@
    =============================================================  */
 
 'use strict';
+async function uploadToImgBB(file) {
+    const apiKey = "a4b51d4468caa92fa6e3fae1cdc70119";
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=${apiKey}`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new Error("Image upload failed.");
+    }
+
+    return result.data.url;
+}
 
 /* =============================================================
    NAVIGATION
@@ -48,6 +70,28 @@ function showToast(msg, duration = 2800) {
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), duration);
+}
+
+async function triggerFlashSaleAlert() {
+    const service = window.newsletterService;
+    if (!service) return;
+
+    const result = await service.sendOfferAlertToSubscribers(
+        'Flash Sale Alert',
+        'A new flash sale or special offer is now live on NutriNest. Shop now before it ends.'
+    );
+
+    const successful = (result.results || []).filter(item => item.success).length;
+    const failed = (result.results || []).filter(item => !item.success);
+
+    if (successful > 0) {
+        showToast(`Sent offer alerts to ${successful} subscriber(s)`);
+    } else if (failed.length) {
+        const detail = failed[0].message || 'Unknown mail error';
+        showToast(`Could not send alerts: ${detail}`);
+    } else {
+        showToast('Could not send alerts. Check the mail server and SMTP settings.');
+    }
 }
 
 /* =============================================================
@@ -609,17 +653,14 @@ saveProductBtn.addEventListener('click', async () => {
     saveProductBtn.textContent = 'Saving...';
 
     try {
-        const { db, doc, collection, addDoc, updateDoc, storageRef, uploadBytes, getDownloadURL } = window._fb;
+        const { db, doc, collection, addDoc, updateDoc } = window._fb;
 
         /* Upload the new picture from the admin's device to Firebase Storage,
            swapping the old Image URL field for a real file upload. */
         if (imageFile) {
-            saveProductBtn.textContent = 'Uploading image...';
-            const path = `products/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-            const fileRef = storageRef(window._fb.storage, path);
-            await uploadBytes(fileRef, imageFile);
-            image = await getDownloadURL(fileRef);
-        }
+        saveProductBtn.textContent = "Uploading image...";
+        image = await uploadToImgBB(imageFile);
+}
 
         const data = { name, price, stock, image, desc, category };
         saveProductBtn.textContent = 'Saving...';
@@ -630,16 +671,13 @@ saveProductBtn.addEventListener('click', async () => {
             if (idx > -1) window.adminData.products[idx] = { ...window.adminData.products[idx], ...data };
             showToast('✅ Product updated!');
         } else {
-            /* New products added by admin get source:'added'
-               They will automatically appear in products.html because
-               products.html reads from Firestore (see note at bottom) */
-            const ref = await addDoc(collection(db, 'products'), {
-                ...data,
-                source: 'added',
-                createdAt: new Date().toISOString()
-            });
-            window.adminData.products.unshift({ id: ref.id, ...data, source: 'added' });
-            showToast('✅ Product added! It will now appear on the website.');
+           await addDoc(collection(db, 'products'), {
+    ...data,
+    source: 'added',
+    createdAt: new Date().toISOString()
+});
+
+showToast('✅ Product added! It will now appear on the website.');
         }
 
         renderProducts(window.adminData.products);
