@@ -5,6 +5,7 @@ import {
   collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
 const riderNameEl = document.getElementById('riderName');
 const riderAvatarEl = document.getElementById('riderAvatar');
 const riderIdEl = document.getElementById('riderId');
