@@ -31,6 +31,7 @@
             <a class="sb-link" data-page="orders"><span class="sb-icon">🛍️</span> Orders</a>
             <a class="sb-link" data-page="customers"><span class="sb-icon">👥</span> Customers</a>
             <a class="sb-link" data-page="riders"><span class="sb-icon">🏍️</span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
+            <a class="sb-link" data-page="loyalty"><span class="sb-icon">🎁</span> Loyalty & Coupons</a>
 
             <span class="sb-section">System</span>
             <a class="sb-link" data-page="settings"><span class="sb-icon">⚙️</span> Settings</a>
@@ -245,6 +246,102 @@
                 </div>
             </section>
 
+            <!-- ── LOYALTY & COUPONS ── -->
+            <section class="page" id="page-loyalty">
+                <div class="page-header"><h2>Loyalty & Coupons</h2></div>
+                
+                <div class="settings-grid">
+                    <!-- Create New Coupon -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Create Custom Coupon</h3></div>
+                        <div class="settings-body">
+                            <input type="hidden" id="couponEditId" value="">
+                            <div class="field-group">
+                                <label>Coupon Code</label>
+                                <input type="text" id="newCouponCode" placeholder="e.g., LOYALTY50" maxlength="20">
+                            </div>
+                            <div class="field-group">
+                                <label>Title</label>
+                                <input type="text" id="newCouponTitle" placeholder="e.g., Special Loyalty Offer">
+                            </div>
+                            <div class="field-group">
+                                <label>Description</label>
+                                <textarea id="newCouponDesc" rows="2" placeholder="Coupon details..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Discount Type</label>
+                                    <select id="newCouponType">
+                                        <option value="percentage">Percentage Off</option>
+                                        <option value="freeShip">Free Shipping</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <label>Discount Value (%)</label>
+                                    <input type="number" id="newCouponValue" min="0" max="100" placeholder="10">
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label>Min Order Amount (৳)</label>
+                                <input type="number" id="newCouponMinOrder" min="0" placeholder="0">
+                            </div>
+                            <div class="field-group">
+                                <label>
+                                    <input type="checkbox" id="newCouponOneTime">
+                                    One-Time Only (Can be used once per customer)
+                                </label>
+                            </div>
+                            <button class="primary-btn" id="createCouponBtn">Create Coupon</button>
+                            <p class="settings-msg" id="couponCreateMsg"></p>
+                        </div>
+                    </div>
+
+                    <!-- Assign to Customer -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Assign Coupon to Customer</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>Customer Email</label>
+                                <input type="email" id="loyaltyCustomerEmail" placeholder="customer@example.com">
+                            </div>
+                            <div class="field-group">
+                                <label>Select Coupon</label>
+                                <select id="loyaltyCouponSelect">
+                                    <option value="">-- Select a coupon --</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label>Reason for Award</label>
+                                <select id="loyaltyReasonSelect">
+                                    <option value="top_customer">Top Customer (5+ orders)</option>
+                                    <option value="repeat_purchase">Repeat Purchase</option>
+                                    <option value="birthday">Birthday Special</option>
+                                    <option value="referral">Referral Bonus</option>
+                                    <option value="custom">Custom Reward</option>
+                                </select>
+                            </div>
+                            <button class="primary-btn" id="assignCouponBtn">Assign Coupon</button>
+                            <p class="settings-msg" id="couponAssignMsg"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coupons List -->
+                <div class="panel">
+                    <div class="panel-head"><h3>All Coupons</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Code</th><th>Title</th><th>Discount</th><th>Min Order</th><th>One-Time</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="coupons-body">
+                                <tr><td colspan="6" class="empty-cell">No custom coupons yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- ── SETTINGS ── -->
             <section class="page" id="page-settings">
                 <div class="page-header">
@@ -289,10 +386,7 @@
                                 <label>Standard delivery (৳)</label>
                                 <input type="number" id="feeStandard" value="60">
                             </div>
-                            <div class="field-group">
-                                <label>Pickup</label>
-                                <input type="text" value="Free" disabled>
-                            </div>
+                            
                             <button class="primary-btn" id="saveDelivery">Save fees</button>
                             <p class="settings-msg" id="deliveryMsg"></p>
                         </div>
@@ -426,6 +520,7 @@ window.addEventListener("load", function () {
 
 <!-- admin.js must load BEFORE the Firebase module so window.renderAll is defined -->
 <script src="js/newsletterService.js"></script>
+<script src="js/loyaltyService.js"></script>
 <script src="js/admin.js"></script>
 
 <script type="module">
@@ -434,7 +529,7 @@ window.addEventListener("load", function () {
     import {
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, serverTimestamp, onSnapshot
+        query, orderBy, where, serverTimestamp, onSnapshot
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     
 
@@ -530,7 +625,7 @@ window.addEventListener("load", function () {
         db,
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy,
+        query, orderBy, where,
 
         async reloadProducts() {
             const snap = await getDocs(collection(db, 'products'));
@@ -541,6 +636,11 @@ window.addEventListener("load", function () {
             window.adminData.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         }
     };
+    
+    // Initialize loyalty service with Firebase db
+    if (window.initLoyaltyService) {
+        window.initLoyaltyService(db);
+    }
 </script>
 
 </body>

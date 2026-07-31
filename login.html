@@ -121,6 +121,9 @@
             <button class="login-submit" id="loginBtn">Login</button>
 
             <p class="auth-switch">Don't have an account? <a href="#" id="openSignup">Sign up</a></p>
+            <p class="auth-switch" style="font-size: 12px; color: #999; margin-top: 12px;">
+                Are you an admin? <a href="admin-setup.html" style="color: #667eea;">Setup admin account</a>
+            </p>
         </div>
     </div>
 
@@ -225,11 +228,13 @@
     switch(code) {
       case 'auth/user-not-found': return '❌ No account found with this email.';
       case 'auth/wrong-password': return '❌ Wrong password. Please try again.';
+      case 'auth/invalid-credential': return '❌ Wrong email or password. Please try again.';
       case 'auth/email-already-in-use': return '❌ This email is already registered. Please login.';
       case 'auth/weak-password': return '❌ Password must be at least 6 characters.';
       case 'auth/invalid-email': return '❌ Please enter a valid email address.';
       case 'auth/too-many-requests': return '❌ Too many attempts. Try again later.';
-      default: return '❌ Something went wrong. Please try again.';
+      case 'permission-denied': return '❌ Your account exists but Firestore is blocking access to it. This is a security-rules issue, not a login issue.';
+      default: return `❌ Something went wrong (${code || 'unknown error'}). Please try again.`;
     }
   }
 
@@ -248,10 +253,19 @@
     btn.disabled = true;
     btn.textContent = 'Logging in...';
 
+    let user;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      user = userCredential.user;
+    } catch (error) {
+      console.error('Sign-in failed:', error.code, error.message);
+      showError('loginError', friendlyError(error.code));
+      btn.disabled = false;
+      btn.textContent = 'Login';
+      return;
+    }
 
+    try {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       const userData = userDoc.exists() ? userDoc.data() : {};
       const role = userData.role || 'Customer';
@@ -276,6 +290,7 @@
 }, 1200);
 
     } catch (error) {
+      console.error('Post-login role lookup failed:', error.code, error.message);
       showError('loginError', friendlyError(error.code));
       btn.disabled = false;
       btn.textContent = 'Login';

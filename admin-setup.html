@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Setup - NutriNest</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #1A1A1A;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: #F0F4FF;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            background: #DCFCE7;
+            color: #166534;
+            border: 1px solid #86EFAC;
+            display: block;
+        }
+        .status.error {
+            background: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+            display: block;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 14px;
+        }
+        .section { margin-bottom: 30px; }
+        .section-title {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #EEE;
+        }
+        .uid-display {
+            background: #F3F4F6;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #1F2937;
+            margin-top: 8px;
+            border: 1px solid #E5E7EB;
+        }
+        .divider {
+            text-align: center;
+            color: #999;
+            margin: 30px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Admin Setup</h1>
+        <p class="subtitle">Manage admin accounts for NutriNest</p>
+
+        <!-- STEP 1: Get User UID -->
+        <div class="section">
+            <div class="section-title">Step 1: Find Admin User</div>
+            <div class="info">
+                <strong>How it works:</strong><br>
+                1. User must sign up first on login.html (as Customer/Deliveryman)<br>
+                2. Then use this tool to find them and promote to Admin<br>
+                3. They can then log in and access the admin panel immediately
+            </div>
+            <div class="form-group">
+                <label for="lookupEmail">Admin Email:</label>
+                <input type="email" id="lookupEmail" placeholder="mdharunbat1990@gmail.com" value="mdharunbat1990@gmail.com">
+            </div>
+            <button onclick="findUserUID()">🔍 Find User</button>
+            <div class="loading" id="lookupLoading">Searching for user...</div>
+            <div class="status" id="lookupStatus"></div>
+            <div class="uid-display" id="uidDisplay" style="display:none;">
+                <strong>Firebase UID:</strong><br>
+                <span id="uidValue"></span>
+            </div>
+        </div>
+
+        <div class="divider">OR</div>
+
+        <!-- STEP 2: Use Known UID -->
+        <div class="section">
+            <div class="section-title">Step 2: Make Admin</div>
+            <div class="info">
+                If you know the Firebase UID, paste it here. Otherwise, use the finder above first.
+            </div>
+            <div class="form-group">
+                <label for="userUID">Firebase UID:</label>
+                <input type="text" id="userUID" placeholder="Paste Firebase UID here">
+            </div>
+            <div class="form-group">
+                <label for="adminName">Full Name:</label>
+                <input type="text" id="adminName" placeholder="Admin Name" value="Admin">
+            </div>
+            <button onclick="makeAdmin()">✅ Grant Admin Role</button>
+            <div class="loading" id="adminLoading">Granting admin role...</div>
+            <div class="status" id="adminStatus"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, Timestamp, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
+            authDomain: "nutrinest-408d4.firebaseapp.com",
+            projectId: "nutrinest-408d4",
+            storageBucket: "nutrinest-408d4.firebasestorage.app",
+            messagingSenderId: "44196278510",
+            appId: "1:44196278510:web:11acb64840e2d536c843ff"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.findUserUID = async function() {
+            const email = document.getElementById('lookupEmail').value.trim().toLowerCase();
+            const loadingEl = document.getElementById('lookupLoading');
+            const statusEl = document.getElementById('lookupStatus');
+            const uidDisplay = document.getElementById('uidDisplay');
+            const uidValue = document.getElementById('uidValue');
+
+            if (!email) {
+                statusEl.textContent = '❌ Please enter an email';
+                statusEl.className = 'status error';
+                return;
+            }
+
+            loadingEl.style.display = 'block';
+            statusEl.style.display = 'none';
+            uidDisplay.style.display = 'none';
+
+            try {
+                // Search users collection for matching email
+                const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+                
+                if (usersSnap.empty) {
+                    statusEl.textContent = '⚠️ No user found. User must log in first or may not exist.';
+                    statusEl.className = 'status error';
+                    loadingEl.style.display = 'none';
+                    return;
+                }
+
+                const userId = usersSnap.docs[0].id;
+                const userData = usersSnap.docs[0].data();
+                
+                // Populate UID field
+                document.getElementById('userUID').value = userId;
+                document.getElementById('adminName').value = userData.fullName || 'Admin';
+                
+                uidValue.textContent = userId;
+                uidDisplay.style.display = 'block';
+                
+                statusEl.textContent = '✅ User found! Now scroll down and click "Grant Admin Role"';
+                statusEl.className = 'status success';
+            } catch (error) {
+                console.error('Lookup error:', error);
+                statusEl.textContent = '❌ Error: ' + (error.message || 'Unknown error');
+                statusEl.className = 'status error';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        };
+
+        window.makeAdmin = async function() {
+            const uid = document.getElementById('userUID').value.trim();
+            const name = document.getElementById('adminName').value.trim();
+            const loadingEl = document.getElementById('adminLoading');
+            const statusEl = document.getElementById('adminStatus');
+            const btn = event.target;
+
+            if (!uid) {
+                statusEl.textContent = '❌ Please enter a Firebase UID (or use Find User first)';
+                statusEl.className = 'status error';
+                return;
+            }
+
+            if (!name) {
+                statusEl.textContent = '❌ Please enter a name';
+                statusEl.className = 'status error';
+                return;
+            }
+
+            btn.disabled = true;
+            loadingEl.style.display = 'block';
+            statusEl.style.display = 'none';
+
+            try {
+                const adminData = {
+                    fullName: name,
+                    role: 'Admin',
+                    updatedAt: Timestamp.now()
+                };
+
+                // Get existing user data first
+                const userRef = doc(db, 'users', uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    // Merge with existing data
+                    const existingData = userSnap.data();
+                    adminData.email = existingData.email;
+                    adminData.createdAt = existingData.createdAt || Timestamp.now();
+                } else {
+                    // New document
+                    adminData.createdAt = Timestamp.now();
+                }
+
+                await setDoc(userRef, adminData, { merge: true });
+
+                statusEl.innerHTML = `✅ <strong>${name}</strong> is now an Admin!<br><small>They can log in at <strong>login.html</strong> immediately</small>`;
+                statusEl.className = 'status success';
+                
+                // Clear form
+                setTimeout(() => {
+                    document.getElementById('userUID').value = '';
+                    document.getElementById('adminName').value = 'Admin';
+                }, 1500);
+            } catch (error) {
+                console.error('Setup error:', error);
+                statusEl.textContent = '❌ Error: ' + (error.message || 'Unknown error');
+                statusEl.className = 'status error';
+            } finally {
+                btn.disabled = false;
+                loadingEl.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
+

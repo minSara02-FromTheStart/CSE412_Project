@@ -471,6 +471,16 @@ body {
     min-height: 16px;
 }
 
+.settings-msg.error {
+    color: #DC2626;
+}
+
+.settings-msg.success {
+    color: #16A34A;
+}
+
+.settings-panel { background: #fff; }
+
 /* =============================================================
    FORM ELEMENTS (shared by settings + modals)
    ============================================================= */

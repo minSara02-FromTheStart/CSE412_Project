@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const couponOverlay = document.getElementById("couponOverlay");
     const closeCouponBtn = document.getElementById("closeCouponBtn");
     const couponListEl = document.getElementById("couponList");
+    const cartBtn = document.getElementById("open-cart-btn");
 
     function renderCoupons() {
         if (!couponListEl) return;
@@ -79,12 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!couponPanel) return;
         couponPanel.classList.add("active");
         if (couponOverlay) couponOverlay.classList.add("active");
+        if (cartBtn) cartBtn.style.display = "none";
     }
 
     function closeCouponPanel() {
         if (!couponPanel) return;
         couponPanel.classList.remove("active");
         if (couponOverlay) couponOverlay.classList.remove("active");
+        if (cartBtn) cartBtn.style.display = "";
     }
 
     if (couponsLink) {
