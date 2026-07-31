@@ -89,7 +89,7 @@ function renderProducts(products) {
               <h3>৳${product.price}</h3>
               <span class="unit">/ ${product.unit || 'KG'}</span>
             </div>
-            <button class="cart-btn" onclick="addToCart('${safeName}', ${product.price})">
+            <button class="cart-btn" onclick="addToCart('${product.id}', '${safeName}', ${product.price})">
               Add to Cart
             </button>
           </div>
