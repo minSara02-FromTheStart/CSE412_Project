@@ -2,9 +2,18 @@ const API_URL = 'http://localhost:3001/api';
 
 async function fetchProducts() {
   try {
-    const response = await fetch(`${API_URL}/products`);
-    const products = await response.json();
+    import { collection, getDocs } from "firebase/firestore";
+import { db } from "./firebase.js";
+
+async function fetchProducts() {
+    const snapshot = await getDocs(collection(db, "products"));
+    const products = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+
     displayProducts(products);
+}
   } catch (error) {
     console.error('Error fetching products:', error);
     document.getElementById('product-container').innerHTML = 
