@@ -28,6 +28,44 @@ async function uploadToImgBB(file) {
     return result.data.url;
 }
 
+/* Resize + re-compress the chosen image in the browser before it's
+   uploaded, so product photos don't ship at full camera/phone resolution.
+   A 900px-wide JPEG at 82% quality is plenty sharp for a product card and
+   is typically a fraction of the size of the original file -- meaning
+   faster loads on offers.html / flashsale.html / products.html. */
+function compressImage(file, maxDimension = 900, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Could not read the image file.'));
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Could not decode the image file.'));
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width >= height) {
+                        height = Math.round(height * (maxDimension / width));
+                        width = maxDimension;
+                    } else {
+                        width = Math.round(width * (maxDimension / height));
+                        height = maxDimension;
+                    }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob(blob => {
+                    if (!blob) { reject(new Error('Image compression failed.')); return; }
+                    resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+                }, 'image/jpeg', quality);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 /* =============================================================
    NAVIGATION
    ============================================================= */
@@ -316,6 +354,8 @@ function renderProducts(products, search = '', category = '', source = '') {
                     <p class="stock ${(Number(p.stock)||0) <= 10 ? 'stock-low' : ''}">Stock: ${Number(p.stock)||0} kg</p>
                     <span class="cat-tag">${sanitize(p.category||'General')}</span>
                     <span class="src-tag ${srcClass}">${srcLabel}</span>
+                    ${p.onOffer ? `<span class="cat-tag" style="background:#fef3c7;color:#92400e;">🏷️ Offer</span>` : ''}
+                    ${p.flashSale ? `<span class="cat-tag" style="background:#fee2e2;color:#991b1b;">⚡ Flash</span>` : ''}
                 </div>
                 <div class="product-card-actions">
                     <button class="action-btn" onclick="openEditProduct('${p.id}')">✏️ Edit</button>
@@ -595,9 +635,43 @@ function closeProductModal() {
     document.getElementById('productImageFile').value = '';
     document.getElementById('productImagePreview').innerHTML = '';
     document.getElementById('productDesc').value    = '';
+    document.getElementById('productOnOffer').checked   = false;
+    document.getElementById('productDiscount').value    = '';
+    document.getElementById('productOriginalPrice').value = '';
+    document.getElementById('productFlashSale').checked = false;
+    document.getElementById('productFlashSaleEnd').value = '';
+    document.getElementById('flashSaleEndGroup').style.display = 'none';
     document.getElementById('productError').textContent = '';
     document.getElementById('modalTitle').textContent   = 'Add New Product';
     saveProductBtn.textContent = 'Add Product';
+}
+
+/* Show the "ends at" picker only when Flash Sale is checked */
+document.getElementById('productFlashSale').addEventListener('change', (e) => {
+    document.getElementById('flashSaleEndGroup').style.display = e.target.checked ? 'block' : 'none';
+});
+
+/* Auto-calculate the sale price from Original Price + Discount %, so the
+   admin doesn't have to do the subtraction themselves (and can't forget
+   to update Price after setting a discount). Still editable afterward. */
+function updateComputedPrice() {
+    const originalPrice = Number(document.getElementById('productOriginalPrice').value);
+    const discount = Number(document.getElementById('productDiscount').value);
+    if (originalPrice > 0 && discount > 0 && discount <= 100) {
+        document.getElementById('productPrice').value = Math.round(originalPrice * (1 - discount / 100));
+    }
+}
+document.getElementById('productOriginalPrice').addEventListener('input', updateComputedPrice);
+document.getElementById('productDiscount').addEventListener('input', updateComputedPrice);
+
+/* Convert a Firestore Timestamp / ISO string / Date into the string
+   format <input type="datetime-local"> expects (local time, no seconds). */
+function toDatetimeLocalValue(value) {
+    if (!value) return '';
+    const d = (value && typeof value.toDate === 'function') ? value.toDate() : new Date(value);
+    if (isNaN(d)) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 document.getElementById('productImageFile').addEventListener('change', (e) => {
@@ -626,6 +700,12 @@ window.openEditProduct = function(id) {
         : '';
     document.getElementById('productDesc').value        = p.desc  || '';
     document.getElementById('productCategory').value   = p.category || 'Popular';
+    document.getElementById('productOnOffer').checked   = !!p.onOffer;
+    document.getElementById('productDiscount').value    = p.discount || '';
+    document.getElementById('productOriginalPrice').value = p.originalPrice || '';
+    document.getElementById('productFlashSale').checked = !!p.flashSale;
+    document.getElementById('productFlashSaleEnd').value = toDatetimeLocalValue(p.flashSaleEnd);
+    document.getElementById('flashSaleEndGroup').style.display = p.flashSale ? 'block' : 'none';
     document.getElementById('modalTitle').textContent   = 'Edit Product';
     saveProductBtn.textContent = 'Save Changes';
     openProductModal();
@@ -642,12 +722,30 @@ saveProductBtn.addEventListener('click', async () => {
     const editId   = document.getElementById('editProductId').value;
     const errEl    = document.getElementById('productError');
 
+    const onOffer       = document.getElementById('productOnOffer').checked;
+    const discountRaw   = document.getElementById('productDiscount').value;
+    const discount       = discountRaw !== '' ? Number(discountRaw) : null;
+    const origPriceRaw  = document.getElementById('productOriginalPrice').value;
+    const originalPrice = origPriceRaw !== '' ? Number(origPriceRaw) : null;
+    const flashSale      = document.getElementById('productFlashSale').checked;
+    const flashSaleEndRaw = document.getElementById('productFlashSaleEnd').value;
+
     if (!name)  { errEl.textContent = '⚠️ Product name is required.'; return; }
     if (!price || price <= 0) { errEl.textContent = '⚠️ Enter a valid price.'; return; }
     if (document.getElementById('productStock').value === '' || isNaN(stock) || stock < 0) {
         errEl.textContent = '⚠️ Enter a valid stock quantity.'; return;
     }
     if (!editId && !imageFile) { errEl.textContent = '⚠️ Please choose an image to upload.'; return; }
+    if (discount !== null && (isNaN(discount) || discount < 0 || discount > 100)) {
+        errEl.textContent = '⚠️ Discount must be between 0 and 100.'; return;
+    }
+    if (flashSale && !flashSaleEndRaw) {
+        errEl.textContent = '⚠️ Set an end date/time for the flash sale.'; return;
+    }
+    const flashSaleEnd = flashSale ? new Date(flashSaleEndRaw) : null;
+    if (flashSale && isNaN(flashSaleEnd)) {
+        errEl.textContent = '⚠️ Flash sale end date/time is invalid.'; return;
+    }
     errEl.textContent = '';
 
     saveProductBtn.disabled = true;
@@ -659,11 +757,16 @@ saveProductBtn.addEventListener('click', async () => {
         /* Upload the new picture from the admin's device to Firebase Storage,
            swapping the old Image URL field for a real file upload. */
         if (imageFile) {
+        saveProductBtn.textContent = "Optimizing image...";
+        const compressed = await compressImage(imageFile);
         saveProductBtn.textContent = "Uploading image...";
-        image = await uploadToImgBB(imageFile);
+        image = await uploadToImgBB(compressed);
 }
 
-        const data = { name, price, stock, image, desc, category };
+        const data = {
+            name, price, stock, image, desc, category,
+            onOffer, discount, originalPrice, flashSale, flashSaleEnd
+        };
         saveProductBtn.textContent = 'Saving...';
 
         if (editId) {

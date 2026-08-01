@@ -10,7 +10,17 @@
   color: #c9b99a;
   font-family: 'Segoe UI', Arial, sans-serif;
 }
+.lucide {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  stroke: currentColor;
+}
 
+.heart-icon {
+  stroke: #e0455f;
+  fill: #e0455f;
+}
 /* ── TOP STRIP — newsletter ───────────────────────────────── */
 .footer-newsletter {
   background: #2D5A3D;

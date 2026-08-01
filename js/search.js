@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allProducts = [];
 
-    function getAllProducts() {
+    // Fallback only, for pages with static cards and no products-feed.js
+    // (i.e. products:loaded never fires, so this is all we have).
+    function getAllProductsFromDOM() {
         if (!productContainer) return [];
         return Array.from(productContainer.querySelectorAll('.card')).map(card => {
             const nameEl = card.querySelector('h2');
@@ -16,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 image: imgEl ? imgEl.src : ''
             };
         });
+    }
+
+    function fmtPrice(product) {
+        return typeof product.price === 'number'
+            ? `৳${product.price} / ${product.unit || 'KG'}`
+            : (product.price || '');
     }
 
     function filterProducts(query, exact = false) {
@@ -33,21 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const initialQuery = params.get('search') || '';
 
-    function refreshProductsAndApplyInitialQuery() {
-        allProducts = getAllProducts();
-        if (initialQuery) {
-            filterProducts(initialQuery);
-        }
-    }
-
     // Cards may be static (already in the HTML) or loaded dynamically from
-    // Firestore by products-feed.js. If dynamic, wait for its "products:loaded"
-    // event before reading cards -- otherwise DOMContentLoaded fires before
-    // the async Firestore fetch finishes and we'd see zero products.
-    document.addEventListener('products:loaded', refreshProductsAndApplyInitialQuery);
+    // Firestore by products-feed.js. When dynamic, products-feed.js hands us
+    // the FULL catalog via event.detail.products -- not just whatever subset
+    // got rendered into the DOM. This matters because pages like the
+    // homepage cap rendering to a handful of cards (data-limit="4"), but a
+    // customer typing in the search box still expects to find every product,
+    // not just the ones currently on screen.
+    document.addEventListener('products:loaded', (e) => {
+        const products = (e.detail && e.detail.products) || [];
+        allProducts = products.length
+            ? products.map(p => ({
+                name: p.name || '',
+                price: fmtPrice(p),
+                image: p.image || 'https://via.placeholder.com/300'
+              }))
+            : getAllProductsFromDOM();
+        if (initialQuery) filterProducts(initialQuery);
+    });
 
-    // Fallback for pages with static cards and no products-feed.js at all.
-    refreshProductsAndApplyInitialQuery();
+    // Fallback for pages with static cards and no products-feed.js at all
+    // (products:loaded will simply never fire on those pages).
+    allProducts = getAllProductsFromDOM();
+    if (initialQuery) filterProducts(initialQuery);
 
     document.querySelectorAll('form.search-box, form.nav-search-box').forEach(form => {
         const input = form.querySelector('input[name="search"]');
@@ -112,9 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         input.value = product.name;
                         closeSuggestions();
 
-                        if (productContainer) {
+                        // products.html renders the full, uncapped catalog, so
+                        // filtering in place is safe there. Everywhere else
+                        // (e.g. the homepage's capped 4-card grid), the chosen
+                        // product may not even be in the DOM -- filtering in
+                        // place would just hide every card with nothing to
+                        // show. Send them to the full listing instead.
+                        if (isProductsPage && productContainer) {
                             filterProducts(product.name, true);
-                        } else if (!isProductsPage) {
+                        } else {
                             window.location.href = `products.html?search=${encodeURIComponent(product.name)}`;
                         }
                     });
