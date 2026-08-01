@@ -143,6 +143,7 @@ window.renderAll = function () {
     renderOrders(orders);
     renderCustomers(users);
     renderRiders(users);
+    if (window.renderTopSpenders) window.renderTopSpenders();
 };
 
 /* =============================================================
@@ -763,6 +764,137 @@ window.deleteCustomer = async function(id) {
         showToast('❌ Remove failed.');
     }
 };
+
+/* =============================================================
+   ADMIN SETUP  (find a signed-up user, promote them to Admin)
+   Moved in from the standalone admin-setup.html tool so it lives
+   inside the already-authenticated admin panel instead of a
+   separate unguarded page.
+   ============================================================= */
+document.getElementById('setupFindUserBtn')?.addEventListener('click', async () => {
+    const email = document.getElementById('setupLookupEmail').value.trim().toLowerCase();
+    const msgEl = document.getElementById('setupLookupMsg');
+    const uidDisplay = document.getElementById('setupUidDisplay');
+    const uidValue = document.getElementById('setupUidValue');
+    const btn = document.getElementById('setupFindUserBtn');
+
+    msgEl.textContent = '';
+    msgEl.className = 'settings-msg';
+    uidDisplay.style.display = 'none';
+
+    if (!email) {
+        msgEl.textContent = '❌ Please enter an email.';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+
+    try {
+        const { db, collection, getDocs, query, where } = window._fb;
+        const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+
+        if (usersSnap.empty) {
+            msgEl.textContent = '⚠️ No user found. They must sign up first.';
+            msgEl.className = 'settings-msg error';
+            return;
+        }
+
+        const userId = usersSnap.docs[0].id;
+        const userData = usersSnap.docs[0].data();
+
+        document.getElementById('setupUserUID').value = userId;
+        document.getElementById('setupAdminName').value = userData.fullName || 'Admin';
+
+        uidValue.textContent = userId;
+        uidDisplay.style.display = 'block';
+
+        msgEl.textContent = '✅ User found! Now click "Grant Admin Role" below.';
+        msgEl.className = 'settings-msg success';
+    } catch (err) {
+        console.error('Admin setup lookup error:', err);
+        msgEl.textContent = '❌ Error: ' + (err.message || 'Unknown error');
+        msgEl.className = 'settings-msg error';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🔍 Find User';
+    }
+});
+
+document.getElementById('setupGrantAdminBtn')?.addEventListener('click', async () => {
+    const uid = document.getElementById('setupUserUID').value.trim();
+    const name = document.getElementById('setupAdminName').value.trim();
+    const msgEl = document.getElementById('setupGrantMsg');
+    const btn = document.getElementById('setupGrantAdminBtn');
+
+    msgEl.textContent = '';
+    msgEl.className = 'settings-msg';
+
+    if (!uid) {
+        msgEl.textContent = '❌ Please enter a Firebase UID (or use Find User above).';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+    if (!name) {
+        msgEl.textContent = '❌ Please enter a name.';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+    if (!confirm(`Grant Admin access to "${name}"? This gives full control of the store.`)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Granting...';
+
+    try {
+        const { db, doc, getDoc, setDoc, serverTimestamp } = window._fb;
+
+        const adminData = {
+            fullName: name,
+            role: 'Admin',
+            updatedAt: serverTimestamp()
+        };
+
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const existingData = userSnap.data();
+            adminData.email = existingData.email;
+            adminData.createdAt = existingData.createdAt || serverTimestamp();
+        } else {
+            adminData.createdAt = serverTimestamp();
+        }
+
+        await setDoc(userRef, adminData, { merge: true });
+
+        // Reflect the promotion immediately in the Customers table without a reload
+        const idx = window.adminData.users.findIndex(u => u.id === uid);
+        if (idx > -1) {
+            window.adminData.users[idx] = { ...window.adminData.users[idx], ...adminData };
+        }
+        renderCustomers(window.adminData.users);
+        renderDashboard(window.adminData.orders, window.adminData.users, window.adminData.products);
+
+        msgEl.innerHTML = `✅ <strong>${name}</strong> is now an Admin! They can log in immediately.`;
+        msgEl.className = 'settings-msg success';
+        showToast(`✅ ${name} promoted to Admin.`);
+
+        setTimeout(() => {
+            document.getElementById('setupUserUID').value = '';
+            document.getElementById('setupAdminName').value = 'Admin';
+            document.getElementById('setupLookupEmail').value = '';
+            document.getElementById('setupUidDisplay').style.display = 'none';
+        }, 1500);
+    } catch (err) {
+        console.error('Admin setup grant error:', err);
+        msgEl.textContent = '❌ Error: ' + (err.message || 'Unknown error');
+        msgEl.className = 'settings-msg error';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ Grant Admin Role';
+    }
+});
 
 /* =============================================================
    SETTINGS
