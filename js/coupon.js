@@ -1,7 +1,9 @@
 // =====================
-// COUPON DATA — edit this list to add/change offers
+// COUPON DATA
 // =====================
-const couponList = [
+// Built-in coupons are always available — these are NOT admin
+// managed, they're the store's standing offers.
+const builtInCoupons = [
     {
         code: "FIRST10",
         badge: "New Customer",
@@ -28,6 +30,32 @@ const couponList = [
     }
 ];
 
+// Admin-created coupons — loaded live from Firestore below, so this
+// page always matches whatever's on the "Loyalty & Coupons" admin page.
+let liveCoupons = [];
+
+function couponSummary(c) {
+    if (c.type === 'freeShip') return 'Free shipping on this order.';
+    if (c.value) return `Get ${c.value}% off.`;
+    return '';
+}
+
+function mapLiveCoupon(c) {
+    const badge = c.oneTimeOnly
+        ? 'One-Time Use'
+        : (c.minOrder > 0 ? `Min Order ৳${c.minOrder}` : 'Limited Time');
+    return {
+        code: c.code,
+        badge,
+        title: c.title || c.code,
+        desc: [c.description, couponSummary(c)].filter(Boolean).join(' ')
+    };
+}
+
+function getCouponList() {
+    return [...builtInCoupons, ...liveCoupons.map(mapLiveCoupon)];
+}
+
 // =====================
 // COUPON PANEL LOGIC
 // =====================
@@ -41,6 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderCoupons() {
         if (!couponListEl) return;
+
+        const couponList = getCouponList();
 
         couponListEl.innerHTML = couponList.map((coupon, index) => `
             <div class="coupon-card">
@@ -100,5 +130,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (closeCouponBtn) closeCouponBtn.addEventListener("click", closeCouponPanel);
     if (couponOverlay) couponOverlay.addEventListener("click", closeCouponPanel);
 
+    // Render immediately with built-ins, then again once Firestore's
+    // admin-created coupons arrive (and any time they change live).
     renderCoupons();
+
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js").then(({ initializeApp, getApps }) => {
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js").then(({ getFirestore, collection, onSnapshot }) => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
+                authDomain: "nutrinest-408d4.firebaseapp.com",
+                projectId: "nutrinest-408d4",
+                storageBucket: "nutrinest-408d4.firebasestorage.app",
+                messagingSenderId: "44196278510",
+                appId: "1:44196278510:web:11acb64840e2d536c843ff"
+            };
+            const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            onSnapshot(collection(db, 'custom_coupons'), (snap) => {
+                liveCoupons = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderCoupons();
+            }, (err) => console.error('Live coupon listener error:', err));
+        });
+    });
 });
