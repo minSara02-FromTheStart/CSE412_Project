@@ -1,27 +1,24 @@
 // flashsale-feed.js
-// Loads live products from Firestore and renders only the ones currently
-// part of the flash sale, then drives the countdown banner in flashsale.html.
+// Loads only products marked `flashSale: true` via a Firestore query, then
+// drops any whose `flashSaleEnd` has already passed. That second check
+// matters: without it, a product stays listed as a flash sale forever
+// after the timer hits zero, until someone manually unchecks it in the
+// admin panel. (Longer term, a scheduled Cloud Function that flips
+// `flashSale` back to false at `flashSaleEnd` is the cleanest fix -- this
+// client-side filter is the safety net for the time in between.)
 //
-// A product qualifies as a flash-sale item if either:
-//   - it has `flashSale: true` set (optionally with `flashSaleEnd`, an ISO
-//     date string or Firestore Timestamp, set from the admin panel), or
-//   - as a fallback (so this page isn't empty before the admin panel adds
-//     flash-sale support), it carries the "sale" badge.
-//
-// The countdown counts down to the earliest `flashSaleEnd` among the
-// qualifying products. If none of them specify an end time, it falls back
-// to the end of the current day, framed as a "today only" sale.
+// `flashSaleEnd` should be a Firestore Timestamp (or an ISO date string)
+// set from the admin panel alongside the `flashSale` checkbox. If it's
+// missing, the sale is treated as "today only" rather than indefinite.
 
 import { db } from "./firebase-config.js";
 import {
   collection,
+  query,
+  where,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-function isFlashSale(product) {
-  const badge = (product.badge || '').toLowerCase();
-  return product.flashSale === true || badge === 'sale';
-}
+import { renderCard, renderEmptyState } from "./promoCard.js";
 
 function toDate(value) {
   if (!value) return null;
@@ -30,16 +27,17 @@ function toDate(value) {
   return isNaN(d.getTime()) ? null : d;
 }
 
-function getEndTime(products) {
-  const explicitEnds = products
-    .map(p => toDate(p.flashSaleEnd))
-    .filter(d => d && d.getTime() > Date.now());
+function isStillRunning(product) {
+  const end = toDate(product.flashSaleEnd);
+  if (!end) return true; // no end set -> falls back to "today only" below
+  return end.getTime() > Date.now();
+}
 
+function getEndTime(products) {
+  const explicitEnds = products.map(p => toDate(p.flashSaleEnd)).filter(Boolean);
   if (explicitEnds.length > 0) {
     return new Date(Math.min(...explicitEnds.map(d => d.getTime())));
   }
-
-  // Fallback: end of today, local time.
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
   return endOfDay;
@@ -61,6 +59,9 @@ function startCountdown(endTime) {
       if (minsEl) minsEl.textContent = '00';
       if (secsEl) secsEl.textContent = '00';
       clearInterval(timer);
+      // Re-query so expired items drop off the page without a manual
+      // refresh -- otherwise the last render just sits there at 00:00:00.
+      loadFlashSale();
       return;
     }
     const totalSeconds = Math.floor(diff / 1000);
@@ -77,85 +78,25 @@ function startCountdown(endTime) {
   const timer = setInterval(tick, 1000);
 }
 
-function renderEmptyState() {
-  const container = document.getElementById('product-container');
-  if (!container) return;
-  container.innerHTML = `
-    <div class="promo-empty">
-      <span class="promo-empty-icon">⚡</span>
-      <h3>No flash sale running right now</h3>
-      <p>There's no active flash sale at the moment — check back soon, or browse the full catalog.</p>
-      <a class="explore-btn" href="products.html">Browse All Products</a>
-    </div>
-  `;
-}
-
 function renderProducts(products) {
   const container = document.getElementById('product-container');
   if (!container) return;
 
   if (products.length === 0) {
-    renderEmptyState();
+    renderEmptyState(container, {
+      icon: '⚡',
+      title: 'No flash sale running right now',
+      message: "There's no active flash sale at the moment — check back soon, or browse the full catalog."
+    });
     document.dispatchEvent(new CustomEvent('products:loaded', { detail: { products: [] } }));
     return;
   }
 
-  window.__nutriProductsById = window.__nutriProductsById || {};
-
   container.innerHTML = products.map(product => {
-    const safeName = product.name.replace(/'/g, "\\'");
-    const imgSrc = product.image || 'https://via.placeholder.com/300';
-    const desc = product.desc || product.description || '';
-
-    window.__nutriProductsById[product.id] = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      unit: product.unit || 'KG',
-      image: imgSrc,
-      desc
-    };
-
-    const discountHtml = product.discount
+    const badgeHtml = product.discount
       ? `<span class="discount-badge">-${product.discount}%</span>`
       : `<span class="discount-badge">⚡ Flash</span>`;
-
-    const ratingHtml = product.rating
-      ? `<div class="rating">
-           <span class="stars">${'★'.repeat(Math.round(product.rating))}${'☆'.repeat(5 - Math.round(product.rating))}</span>
-           <span class="rating-count">(${product.reviewCount || 0})</span>
-         </div>`
-      : '';
-
-    const priceHtml = product.originalPrice
-      ? `<h3>৳${product.price} <span style="text-decoration:line-through;color:var(--text-muted);font-weight:500;font-size:13px;">৳${product.originalPrice}</span></h3>`
-      : `<h3>৳${product.price}</h3>`;
-
-    return `
-      <div class="card" data-category="${product.category || ''}">
-        <div class="card-media">
-          ${discountHtml}
-          <button class="wishlist-btn" type="button" data-id="${product.id}" aria-label="Add to favourites" onclick="NutriNestWishlist.toggleWishlist(window.__nutriProductsById['${product.id}'], this)">♥</button>
-          <img src="${imgSrc}" alt="${product.name}" loading="lazy">
-          <div class="quick-actions">
-            <button class="quick-view-btn" type="button" onclick="openQuickView(window.__nutriProductsById['${product.id}'])">Quick View</button>
-          </div>
-        </div>
-        <div class="card-body">
-          <h2>${product.name}</h2>
-          ${ratingHtml}
-          <div class="card-footer">
-            <div>
-              ${priceHtml}
-              <span class="unit">/ ${product.unit || 'KG'}</span>
-            </div>
-            <button class="cart-btn" onclick="addToCart('${product.id}', '${safeName}', ${product.price})">
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
+    return renderCard(product, { badgeHtml });
   }).join('');
 
   document.dispatchEvent(new CustomEvent('products:loaded', { detail: { products } }));
@@ -164,8 +105,12 @@ function renderProducts(products) {
 async function loadFlashSale() {
   const container = document.getElementById('product-container');
   try {
-    const snap = await getDocs(collection(db, 'products'));
-    const products = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(isFlashSale);
+    const flashQuery = query(collection(db, 'products'), where('flashSale', '==', true));
+    const snap = await getDocs(flashQuery);
+    const products = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(isStillRunning);
+
     renderProducts(products);
     if (products.length > 0) {
       startCountdown(getEndTime(products));

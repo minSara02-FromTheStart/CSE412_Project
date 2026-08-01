@@ -1,203 +1,198 @@
-/* ========================
-   PROMO PAGES (Offers / Flash Sales)
-   Shared styles — uses the same design tokens as style.css
-   ======================== */
+/* ============================================================
+   promo.css — Offers & Flash Sale pages
+   Palette: the site's own brand green + warm neutrals. No neon,
+   no rainbow badges — one accent color, used sparingly.
+   Intentionally does NOT define .product-container or .card
+   layout rules, so the grid matches products.html / index.html
+   exactly (those live in style.css).
+   ============================================================ */
 
-/* ---- Generic promo hero banner ---- */
+:root {
+  --promo-accent: #006b3c;      /* same green used elsewhere on the site */
+  --promo-accent-dark: #00532e;
+  --promo-ink: #1f2a24;
+  --promo-muted: #6b7a72;
+  --promo-line: #e4e8e2;
+  --promo-surface: #f7f8f5;
+}
+
+/* ── Banner ── */
 .promo-banner {
-    position: relative;
-    padding: 90px 40px 60px;
-    margin-top: 0;
-    text-align: center;
-    overflow: hidden;
-    color: var(--white);
-}
-
-.promo-banner.offers-banner {
-    background: linear-gradient(135deg, var(--primary) 0%, #16302a 100%);
-}
-
-.promo-banner.flash-banner {
-    background: linear-gradient(135deg, #7a2418 0%, #d9534f 100%);
-}
-
-.promo-banner::before {
-    content: "";
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 280px;
-    height: 280px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.promo-banner::after {
-    content: "";
-    position: absolute;
-    bottom: -110px;
-    left: -80px;
-    width: 240px;
-    height: 240px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+  background: var(--promo-surface);
+  border-bottom: 1px solid var(--promo-line);
+  padding: 56px 24px;
+  text-align: center;
 }
 
 .promo-banner-content {
-    position: relative;
-    z-index: 1;
-    max-width: 700px;
-    margin: 0 auto;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .promo-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 20px;
-    border-radius: 50px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.1);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 18px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--promo-accent);
+  background: #fff;
+  border: 1px solid var(--promo-line);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
 }
 
 .promo-banner h1 {
-    font-size: 40px;
-    font-weight: 700;
-    line-height: 1.25;
-    margin-bottom: 14px;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--promo-ink);
+  margin: 0 0 10px;
 }
 
 .promo-banner p {
-    font-size: 15px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.7;
-    max-width: 520px;
-    margin: 0 auto;
+  color: var(--promo-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
 }
 
-/* ---- Countdown timer (Flash Sales) ---- */
+/* ── Countdown (flash sale only) ── */
 .countdown {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 30px;
-    flex-wrap: wrap;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
 }
 
 .countdown-unit {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 74px;
-    padding: 12px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(4px);
+  background: #fff;
+  border: 1px solid var(--promo-line);
+  border-radius: 10px;
+  min-width: 72px;
+  padding: 12px 10px;
+  text-align: center;
 }
 
-.countdown-unit span.value {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
+.countdown-unit .value {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--promo-ink);
+  font-variant-numeric: tabular-nums;
 }
 
-.countdown-unit span.label {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.75);
-    margin-top: 6px;
+.countdown-unit .label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--promo-muted);
+  margin-top: 2px;
 }
 
-.countdown.ended .countdown-unit span.value {
-    opacity: 0.5;
+.countdown.ended .value {
+  color: var(--promo-muted);
 }
 
-/* ---- Section wrapper for the filtered product grid ---- */
+/* ── Section header above the grid ── */
 .promo-products {
-    padding: 60px 20px 80px;
-    background: var(--background);
+  padding: 40px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .promo-products h2 {
-    text-align: center;
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 40px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--promo-ink);
+  margin: 0 0 20px;
 }
 
-/* Reuses .product-container / .card from style.css so cards render identically
-   to Home and Products pages. */
+/* ── Discount / flash badge on the card image ──
+   Card layout itself (.card, .card-media) comes from style.css;
+   this only styles the small overlay tag so it matches this
+   toned-down palette instead of a bright/loud default. */
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: var(--promo-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
 
-/* ---- Empty state (no offer / no flash-sale products right now) ---- */
+/* If a product ALSO carries a New/Bestseller badge (.product-badge,
+   styled in style.css) in the same top-left corner, push this one
+   down below it instead of overlapping. Order in the HTML matters:
+   .product-badge must come first, .discount-badge second, for this
+   sibling selector to catch it. */
+.product-badge + .discount-badge {
+  top: 42px;
+}
+
+/* ── Empty state ── */
 .promo-empty {
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 70px 20px;
-    text-align: center;
-    color: var(--text-light);
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--promo-muted);
 }
 
-.promo-empty .promo-empty-icon {
-    font-size: 42px;
-    display: block;
-    margin-bottom: 16px;
+.promo-empty-icon {
+  font-size: 34px;
+  display: block;
+  margin-bottom: 14px;
+  opacity: 0.7;
 }
 
 .promo-empty h3 {
-    font-size: 20px;
-    color: var(--text);
-    margin-bottom: 10px;
+  color: var(--promo-ink);
+  font-size: 17px;
+  margin: 0 0 8px;
 }
 
 .promo-empty p {
-    font-size: 14px;
-    line-height: 1.7;
-    margin-bottom: 24px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0 auto 20px;
 }
 
 .promo-empty .explore-btn {
-    text-decoration: none;
-    display: inline-block;
+  display: inline-block;
+  background: var(--promo-accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
 }
 
-/* Discount badge shown on cards that are part of the current promotion */
-.discount-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: #d9534f;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 5px 10px;
-    border-radius: 20px;
-    z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+.promo-empty .explore-btn:hover {
+  background: var(--promo-accent-dark);
 }
 
-@media (max-width: 640px) {
-    .promo-banner {
-        padding: 80px 20px 44px;
-    }
-    .promo-banner h1 {
-        font-size: 30px;
-    }
-    .countdown-unit {
-        min-width: 62px;
-        padding: 10px 8px;
-    }
-    .countdown-unit span.value {
-        font-size: 22px;
-    }
+/* ── Loading state (before products:loaded fires) ── */
+.loading-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--promo-muted);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 560px) {
+  .promo-banner { padding: 40px 18px; }
+  .promo-banner h1 { font-size: 24px; }
+  .countdown-unit { min-width: 60px; padding: 10px 6px; }
+  .countdown-unit .value { font-size: 20px; }
 }
