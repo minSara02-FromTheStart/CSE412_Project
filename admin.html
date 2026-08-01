@@ -34,6 +34,7 @@
             <a class="sb-link" data-page="loyalty"><span class="sb-icon">🎁</span> Loyalty & Coupons</a>
 
             <span class="sb-section">System</span>
+            <a class="sb-link" data-page="adminsetup"><span class="sb-icon">🛡️</span> Admin Setup</a>
             <a class="sb-link" data-page="settings"><span class="sb-icon">⚙️</span> Settings</a>
             <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon">🚪</span> Logout</a>
         </nav>
@@ -296,33 +297,54 @@
                         </div>
                     </div>
 
-                    <!-- Assign to Customer -->
+                    <!-- Auto-Reward Top Spenders -->
                     <div class="panel settings-panel">
-                        <div class="panel-head"><h3>Assign Coupon to Customer</h3></div>
+                        <div class="panel-head"><h3>Auto-Reward Top Spenders</h3></div>
                         <div class="settings-body">
+                            <p class="panel-subtext">
+                                Coupons are no longer assigned manually. The website ranks customers by
+                                total spend and rewards the highest spenders automatically when you run it below.
+                            </p>
                             <div class="field-group">
-                                <label>Customer Email</label>
-                                <input type="email" id="loyaltyCustomerEmail" placeholder="customer@example.com">
-                            </div>
-                            <div class="field-group">
-                                <label>Select Coupon</label>
-                                <select id="loyaltyCouponSelect">
+                                <label>Select Coupon to Reward With</label>
+                                <select id="autoAssignCouponSelect">
                                     <option value="">-- Select a coupon --</option>
                                 </select>
                             </div>
-                            <div class="field-group">
-                                <label>Reason for Award</label>
-                                <select id="loyaltyReasonSelect">
-                                    <option value="top_customer">Top Customer (5+ orders)</option>
-                                    <option value="repeat_purchase">Repeat Purchase</option>
-                                    <option value="birthday">Birthday Special</option>
-                                    <option value="referral">Referral Bonus</option>
-                                    <option value="custom">Custom Reward</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Reward Top</label>
+                                    <input type="number" id="autoAssignTopCount" min="1" max="500" value="10">
+                                </div>
+                                <div class="field-group">
+                                    <label>Minimum Total Spend (৳)</label>
+                                    <input type="number" id="autoAssignMinSpend" min="0" value="0">
+                                </div>
                             </div>
-                            <button class="primary-btn" id="assignCouponBtn">Assign Coupon</button>
+                            <div class="field-group">
+                                <label class="inline-checkbox">
+                                    <input type="checkbox" id="autoAssignDeliveredOnly" checked>
+                                    Count only Delivered orders as spend
+                                </label>
+                            </div>
+                            <button class="primary-btn" id="autoAssignBtn">🎯 Auto-Assign to Top Spenders</button>
                             <p class="settings-msg" id="couponAssignMsg"></p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Top Spenders -->
+                <div class="panel">
+                    <div class="panel-head"><h3>Top Spenders</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Rank</th><th>Customer</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Reward Status</th></tr>
+                            </thead>
+                            <tbody id="topSpenders-body">
+                                <tr><td colspan="6" class="empty-cell">No spending data yet.</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -336,6 +358,21 @@
                             </thead>
                             <tbody id="coupons-body">
                                 <tr><td colspan="6" class="empty-cell">No custom coupons yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Auto-Assignments -->
+                <div class="panel">
+                    <div class="panel-head"><h3>Recent Auto-Assignments</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Customer</th><th>Email</th><th>Coupon</th><th>Total Spent</th><th>Assigned</th><th>Seen</th><th>Used</th></tr>
+                            </thead>
+                            <tbody id="assignments-body">
+                                <tr><td colspan="7" class="empty-cell">No coupons have been auto-assigned yet.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -389,6 +426,53 @@
                             
                             <button class="primary-btn" id="saveDelivery">Save fees</button>
                             <p class="settings-msg" id="deliveryMsg"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── ADMIN SETUP ── -->
+            <section class="page" id="page-adminsetup">
+                <div class="page-header"><h2>Admin Setup</h2></div>
+
+                <div class="info" style="background:#FEF3C7;border-left:4px solid #D97706;padding:14px 16px;border-radius:6px;margin-bottom:20px;font-size:13px;color:#92400E;line-height:1.6;">
+                    ⚠️ <strong>Sensitive area.</strong> Granting Admin gives full access to this panel — products, orders,
+                    customer data, and coupons. Only promote people you trust. The person must sign up first
+                    (as Customer or Deliveryman) before you can find and promote them here.
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Step 1: Find user -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Step 1 — Find User</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>User's Email</label>
+                                <input type="email" id="setupLookupEmail" placeholder="user@example.com">
+                            </div>
+                            <button class="primary-btn" id="setupFindUserBtn">🔍 Find User</button>
+                            <p class="settings-msg" id="setupLookupMsg"></p>
+                            <div class="uid-display" id="setupUidDisplay" style="display:none;background:#F3F4F6;padding:10px;border-radius:6px;font-family:monospace;font-size:12px;word-break:break-all;color:#1F2937;margin-top:8px;border:1px solid #E5E7EB;">
+                                <strong>Firebase UID:</strong><br>
+                                <span id="setupUidValue"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Grant admin -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Step 2 — Grant Admin Role</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>Firebase UID</label>
+                                <input type="text" id="setupUserUID" placeholder="Use Find User above, or paste a UID">
+                            </div>
+                            <div class="field-group">
+                                <label>Full Name</label>
+                                <input type="text" id="setupAdminName" placeholder="Admin Name" value="Admin">
+                            </div>
+                            <button class="primary-btn" id="setupGrantAdminBtn">✅ Grant Admin Role</button>
+                            <p class="settings-msg" id="setupGrantMsg"></p>
                         </div>
                     </div>
                 </div>
@@ -625,7 +709,7 @@ window.addEventListener("load", function () {
         db,
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, where,
+        query, orderBy, where, serverTimestamp,
 
         async reloadProducts() {
             const snap = await getDocs(collection(db, 'products'));
