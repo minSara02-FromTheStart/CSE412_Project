@@ -143,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                if (!/^01\d{9}$/.test(phone)) {
+                    alert('Phone number must start with 01 and be 11 digits.');
+                    return;
+                }
+
                 const users = getUsers();
                 if (users[email]) {
                     alert('An account with this email already exists. Please login or use another email.');
