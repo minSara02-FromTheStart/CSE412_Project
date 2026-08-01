@@ -99,7 +99,7 @@
 .products-cart-open .product-container {
 
     display: grid;
-    grid-template-columns: repeat(4, 250fr);
+    grid-template-columns: repeat(4, 100fr);
     gap: 20px;
 
 }

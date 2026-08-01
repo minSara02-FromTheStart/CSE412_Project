@@ -6,6 +6,10 @@
     <title>Admin Panel - NutriNest</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 <body>
 
@@ -14,7 +18,7 @@
     <!-- ───────── SIDEBAR ───────── -->
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="sb-brand">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <div>
                 <h2>NutriNest</h2>
                 <p>Admin Panel</p>
@@ -22,21 +26,21 @@
         </div>
         <nav class="sb-nav">
             <span class="sb-section">Overview</span>
-            <a class="sb-link active" data-page="dashboard"><span class="sb-icon">📊</span> Dashboard</a>
+            <a class="sb-link active" data-page="dashboard"><span class="sb-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
 
             <span class="sb-section">Catalogue</span>
-            <a class="sb-link" data-page="products"><span class="sb-icon">📦</span> Products</a>
+            <a class="sb-link" data-page="products"><span class="sb-icon"><i data-lucide="package"></i></span> Products</a>
 
             <span class="sb-section">Commerce</span>
-            <a class="sb-link" data-page="orders"><span class="sb-icon">🛍️</span> Orders</a>
-            <a class="sb-link" data-page="customers"><span class="sb-icon">👥</span> Customers</a>
-            <a class="sb-link" data-page="riders"><span class="sb-icon">🏍️</span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
-            <a class="sb-link" data-page="loyalty"><span class="sb-icon">🎁</span> Loyalty & Coupons</a>
+            <a class="sb-link" data-page="orders"><span class="sb-icon"><i data-lucide="shopping-bag"></i></span> Orders</a>
+            <a class="sb-link" data-page="customers"><span class="sb-icon"><i data-lucide="users"></i></span> Customers</a>
+            <a class="sb-link" data-page="riders"><span class="sb-icon"><i data-lucide="bike"></i></span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
+            <a class="sb-link" data-page="loyalty"><span class="sb-icon"><i data-lucide="gift"></i></span> Loyalty & Coupons</a>
 
             <span class="sb-section">System</span>
-            <a class="sb-link" data-page="adminsetup"><span class="sb-icon">🛡️</span> Admin Setup</a>
-            <a class="sb-link" data-page="settings"><span class="sb-icon">⚙️</span> Settings</a>
-            <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon">🚪</span> Logout</a>
+            <a class="sb-link" data-page="adminsetup"><span class="sb-icon"><i data-lucide="shield"></i></span> Admin Setup</a>
+            <a class="sb-link" data-page="settings"><span class="sb-icon"><i data-lucide="settings"></i></span> Settings</a>
+            <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon"><i data-lucide="log-out"></i></span> Logout</a>
         </nav>
     </aside>
 
@@ -45,7 +49,7 @@
 
         <header class="admin-topbar">
             <div class="topbar-left">
-                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+                <button class="sidebar-toggle" id="sidebarToggle"><i data-lucide="menu"></i></button>
                 <h1 id="topbarTitle">Dashboard</h1>
             </div>
             <div class="topbar-right">
@@ -60,25 +64,25 @@
             <section class="page active" id="page-dashboard">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon si-green">💰</div>
+                        <div class="stat-icon si-green"><i data-lucide="wallet"></i></div>
                         <p class="stat-label">Total Revenue</p>
                         <h3 class="stat-value" id="stat-revenue">৳0</h3>
                         <p class="stat-trend up" id="stat-revenue-trend">Updated live</p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-amber">🛍️</div>
+                        <div class="stat-icon si-amber"><i data-lucide="shopping-bag"></i></div>
                         <p class="stat-label">Total Orders</p>
                         <h3 class="stat-value" id="stat-orders">0</h3>
                         <p class="stat-trend up" id="stat-orders-trend"></p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-blue">👥</div>
+                        <div class="stat-icon si-blue"><i data-lucide="users"></i></div>
                         <p class="stat-label">Customers</p>
                         <h3 class="stat-value" id="stat-customers">0</h3>
                         <p class="stat-trend up" id="stat-customers-trend">Registered users</p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-red">⏳</div>
+                        <div class="stat-icon si-red"><i data-lucide="hourglass"></i></div>
                         <p class="stat-label">Pending Orders</p>
                         <h3 class="stat-value" id="stat-pending">0</h3>
                         <p class="stat-trend down" id="stat-pending-trend">Needs attention</p>
@@ -327,7 +331,7 @@
                                     Count only Delivered orders as spend
                                 </label>
                             </div>
-                            <button class="primary-btn" id="autoAssignBtn">🎯 Auto-Assign to Top Spenders</button>
+                            <button class="primary-btn" id="autoAssignBtn"><i data-lucide="target"></i> Auto-Assign to Top Spenders</button>
                             <p class="settings-msg" id="couponAssignMsg"></p>
                         </div>
                     </div>
@@ -436,7 +440,7 @@
                 <div class="page-header"><h2>Admin Setup</h2></div>
 
                 <div class="info" style="background:#FEF3C7;border-left:4px solid #D97706;padding:14px 16px;border-radius:6px;margin-bottom:20px;font-size:13px;color:#92400E;line-height:1.6;">
-                    ⚠️ <strong>Sensitive area.</strong> Granting Admin gives full access to this panel — products, orders,
+                    <i data-lucide="alert-triangle"></i> <strong>Sensitive area.</strong> Granting Admin gives full access to this panel — products, orders,
                     customer data, and coupons. Only promote people you trust. The person must sign up first
                     (as Customer or Deliveryman) before you can find and promote them here.
                 </div>
@@ -450,7 +454,7 @@
                                 <label>User's Email</label>
                                 <input type="email" id="setupLookupEmail" placeholder="user@example.com">
                             </div>
-                            <button class="primary-btn" id="setupFindUserBtn">🔍 Find User</button>
+                            <button class="primary-btn" id="setupFindUserBtn"><i data-lucide="search"></i> Find User</button>
                             <p class="settings-msg" id="setupLookupMsg"></p>
                             <div class="uid-display" id="setupUidDisplay" style="display:none;background:#F3F4F6;padding:10px;border-radius:6px;font-family:monospace;font-size:12px;word-break:break-all;color:#1F2937;margin-top:8px;border:1px solid #E5E7EB;">
                                 <strong>Firebase UID:</strong><br>
@@ -471,7 +475,7 @@
                                 <label>Full Name</label>
                                 <input type="text" id="setupAdminName" placeholder="Admin Name" value="Admin">
                             </div>
-                            <button class="primary-btn" id="setupGrantAdminBtn">✅ Grant Admin Role</button>
+                            <button class="primary-btn" id="setupGrantAdminBtn"><i data-lucide="check-circle"></i> Grant Admin Role</button>
                             <p class="settings-msg" id="setupGrantMsg"></p>
                         </div>
                     </div>
@@ -487,7 +491,7 @@
     <div class="modal-box">
         <div class="modal-head">
             <h3 id="modalTitle">Add New Product</h3>
-            <button class="modal-close" id="closeProductModal">✕</button>
+            <button class="modal-close" id="closeProductModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <input type="hidden" id="editProductId">
@@ -529,7 +533,7 @@
             <div class="field-group" style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
                     <input type="checkbox" id="productOnOffer" style="width:auto;">
-                    🏷️ Show on Offers page
+                    <i data-lucide="tag"></i> Show on Offers page
                 </label>
             </div>
             <div class="form-row">
@@ -547,7 +551,7 @@
             <div class="field-group" style="border-top:1px solid var(--border);padding-top:14px;">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
                     <input type="checkbox" id="productFlashSale" style="width:auto;">
-                    ⚡ Show on Flash Sale page
+                    <i data-lucide="zap"></i> Show on Flash Sale page
                 </label>
             </div>
             <div class="field-group" id="flashSaleEndGroup" style="display:none;">
@@ -569,7 +573,7 @@
     <div class="modal-box modal-sm">
         <div class="modal-head">
             <h3>Update Order Status</h3>
-            <button class="modal-close" id="closeOrderModal">✕</button>
+            <button class="modal-close" id="closeOrderModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <p id="orderModalInfo" class="order-modal-info"></p>
@@ -596,7 +600,7 @@
     <div class="modal-box modal-sm">
         <div class="modal-head">
             <h3>Assign Rider</h3>
-            <button class="modal-close" id="closeAssignRiderModal">✕</button>
+            <button class="modal-close" id="closeAssignRiderModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <p id="assignRiderInfo" class="order-modal-info"></p>
@@ -756,5 +760,11 @@ window.addEventListener("load", function () {
         window.initLoyaltyService(db);
     }
 </script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

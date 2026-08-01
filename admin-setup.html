@@ -139,10 +139,14 @@
             font-size: 14px;
         }
     </style>
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🛡️ Admin Setup</h1>
+        <h1><i data-lucide="shield"></i> Admin Setup</h1>
         <p class="subtitle">Manage admin accounts for NutriNest</p>
 
         <!-- STEP 1: Get User UID -->
@@ -158,7 +162,7 @@
                 <label for="lookupEmail">Admin Email:</label>
                 <input type="email" id="lookupEmail" placeholder="mdharunbat1990@gmail.com" value="mdharunbat1990@gmail.com">
             </div>
-            <button onclick="findUserUID()">🔍 Find User</button>
+            <button onclick="findUserUID()"><i data-lucide="search"></i> Find User</button>
             <div class="loading" id="lookupLoading">Searching for user...</div>
             <div class="status" id="lookupStatus"></div>
             <div class="uid-display" id="uidDisplay" style="display:none;">
@@ -183,7 +187,7 @@
                 <label for="adminName">Full Name:</label>
                 <input type="text" id="adminName" placeholder="Admin Name" value="Admin">
             </div>
-            <button onclick="makeAdmin()">✅ Grant Admin Role</button>
+            <button onclick="makeAdmin()"><i data-lucide="check-circle"></i> Grant Admin Role</button>
             <div class="loading" id="adminLoading">Granting admin role...</div>
             <div class="status" id="adminStatus"></div>
         </div>
@@ -320,5 +324,11 @@
             }
         };
     </script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

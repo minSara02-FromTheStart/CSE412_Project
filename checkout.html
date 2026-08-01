@@ -7,16 +7,20 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/checkout.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 
 <body>
 
 <header class="navbar">
     <div class="logo">
-        <span class="menu-icon">☰</span>
+        <span class="menu-icon"><i data-lucide="menu"></i></span>
 
         <div>
-            <h1>NutriNest</h1>
+            <h1><i data-lucide="leaf"></i> NutriNest</h1>
             <p class="tagline">PURE & NATURAL</p>
         </div>
     </div>
@@ -160,5 +164,11 @@
 
 <script type="module" src="js/checkout.js"></script>
 <script type="module" src="js/userStatus.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>
