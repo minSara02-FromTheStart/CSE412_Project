@@ -20,6 +20,10 @@
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/notifications.css">
     <link rel="stylesheet" href="css/promo.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 
 <body>
@@ -33,8 +37,8 @@
 
   <aside class="coupon-panel" id="couponPanel">
       <div class="coupon-panel-header">
-          <h3>🏷️ Available Coupons</h3>
-          <button class="close-btn" id="closeCouponBtn">✕</button>
+          <h3><i data-lucide="tag"></i> Available Coupons</h3>
+          <button class="close-btn" id="closeCouponBtn"><i data-lucide="x"></i></button>
       </div>
 
       <div class="coupon-list" id="couponList">
@@ -45,41 +49,41 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <span>NutriNest</span>
         </div>
-        <button class="sidebar-close" id="sidebarClose">✕</button>
+        <button class="sidebar-close" id="sidebarClose"><i data-lucide="x"></i></button>
     </div>
 
     <nav class="sidebar-nav">
-        <a href="#home" class="sidebar-link">🏠 Home</a>
-        <a href="#about" class="sidebar-link">🌿 About</a>
+        <a href="#home" class="sidebar-link"><i data-lucide="home"></i> Home</a>
+        <a href="#about" class="sidebar-link"><i data-lucide="leaf"></i> About</a>
 
         <div class="sidebar-dropdown">
             <div class="sidebar-link dropdown-toggle" id="productToggle">
-                🛍️ Products <span class="arrow">▸</span>
+                <i data-lucide="shopping-bag"></i> Products <span class="arrow">▸</span>
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
-                <a href="products.html?category=Popular" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="products.html?category=Mom" class="sidebar-sublink">🤱 Mom & Baby Pack</a>
-                <a href="products.html?category=Gym" class="sidebar-sublink">💪 Gym Pack</a>
-                <a href="products.html?category=Family" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
+                <a href="products.html?category=Popular" class="sidebar-sublink"><i data-lucide="star"></i> Popular Products</a>
+                <a href="products.html?category=Mom" class="sidebar-sublink"><i data-lucide="baby"></i> Mom & Baby Pack</a>
+                <a href="products.html?category=Gym" class="sidebar-sublink"><i data-lucide="dumbbell"></i> Gym Pack</a>
+                <a href="products.html?category=Family" class="sidebar-sublink"><i data-lucide="users"></i> Family Pack</a>
+                <a href="products.html?category=Gift" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
             </div>
         </div>
 
-        <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
-        <a href="offers.html" class="sidebar-link">🔥 Offers</a>
-        <a href="favourites.html" class="sidebar-link">❤️ Favourites</a>
-        <a href="flashsale.html" class="sidebar-link">⚡ Flash Sales</a>
-        <a href="#" class="sidebar-link">🆕 New Arrivals</a>
+        <a href="#" class="sidebar-link" id="couponsLink"><i data-lucide="tag"></i> Coupons</a>
+        <a href="offers.html" class="sidebar-link"><i data-lucide="flame"></i> Offers</a>
+        <a href="favourites.html" class="sidebar-link"><i data-lucide="heart"></i> Favourites</a>
+        <a href="flashsale.html" class="sidebar-link"><i data-lucide="zap"></i> Flash Sales</a>
+        <a href="#" class="sidebar-link"><i data-lucide="sparkles"></i> New Arrivals</a>
     </nav>
 </div>
    <header class="navbar">
     <div class="logo">
-      <span class="menu-icon">☰</span>
+      <span class="menu-icon"><i data-lucide="menu"></i></span>
       <div>
-        <h1>NutriNest</h1>
+        <h1><i data-lucide="leaf"></i> NutriNest</h1>
         <p class="tagline">PURE & NATURAL</p>
       </div>
     </div>
@@ -99,7 +103,7 @@
     <section class="hero" id="home">
     <div class="hero-content">
 <div class="natural-box">
-    🌿 100% Natural & Organic Nutrition
+    <i data-lucide="leaf"></i> 100% Natural & Organic Nutrition
 </div>
 
 <div class="quote-wrapper">
@@ -120,19 +124,19 @@
 
 <div class="trust-bar">
     <div class="trust-item">
-        <span class="trust-icon">🔒</span>
+        <span class="trust-icon"><i data-lucide="lock"></i></span>
         <span>Pay After Receiving</span>
     </div>
     <div class="trust-item">
-        <span class="trust-icon">🚚</span>
+        <span class="trust-icon"><i data-lucide="truck"></i></span>
         <span>Delivery Within 7 Days</span>
     </div>
     <div class="trust-item">
-        <span class="trust-icon">🌿</span>
+        <span class="trust-icon"><i data-lucide="leaf"></i></span>
         <span>100% Natural & Organic</span>
     </div>
     <div class="trust-item">
-        <span class="trust-icon">⭐</span>
+        <span class="trust-icon"><i data-lucide="star"></i></span>
         <span>Trusted by 1,000+ Customers</span>
     </div>
 </div>
@@ -166,7 +170,7 @@
     <div class="cart-header">
         <h2>Your Cart</h2>
 
-        <button id="close-cart">✖</button>
+        <button id="close-cart"><i data-lucide="x"></i></button>
     </div>
 
     <div id="cart-items"></div>
@@ -188,7 +192,7 @@
 
 
 <button id="open-cart-btn">
-    🛒 Cart
+    <i data-lucide="shopping-cart"></i> Cart
 </button>
 
 
@@ -234,5 +238,10 @@ window.addEventListener("load", function () {
 </script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

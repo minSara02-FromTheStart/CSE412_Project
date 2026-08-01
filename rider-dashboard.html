@@ -6,12 +6,17 @@
   <title>Rider Dashboard - NutriNest</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/rider-dashboard.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 <body>
   <main class="dashboard-main-shell">
     <header class="rider-header">
       <div class="rider-header-left">
         <div class="rider-brand-row">
+          <i data-lucide="leaf"></i>
           <span class="rider-brand-name">NutriNest</span>
           <span class="role-pill">RIDER</span>
         </div>
@@ -80,5 +85,11 @@ git           <span class="status-dot online" id="riderStatusDot"></span>
   </main>
 
   <script type="module" src="js/rider-dashboard.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

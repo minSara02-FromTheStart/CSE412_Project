@@ -29,6 +29,10 @@
       cursor: not-allowed;
     }
   </style>
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 <body>
 
@@ -36,39 +40,39 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <span>NutriNest</span>
         </div>
-        <button class="sidebar-close" id="sidebarClose">✕</button>
+        <button class="sidebar-close" id="sidebarClose"><i data-lucide="x"></i></button>
     </div>
     <nav class="sidebar-nav">
-        <a href="index.html" class="sidebar-link">🏠 Home</a>
-        <a href="index.html#about" class="sidebar-link">🌿 About</a>
+        <a href="index.html" class="sidebar-link"><i data-lucide="home"></i> Home</a>
+        <a href="index.html#about" class="sidebar-link"><i data-lucide="leaf"></i> About</a>
         <div class="sidebar-dropdown">
             <div class="sidebar-link dropdown-toggle" id="productToggle">
-                🛍️ Products <span class="arrow">▸</span>
+                <i data-lucide="shopping-bag"></i> Products <span class="arrow">▸</span>
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
-                <a href="#" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="#" class="sidebar-sublink">🎓 Student Pack</a>
-                <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
-                <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="star"></i> Popular Products</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="graduation-cap"></i> Student Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="dumbbell"></i> Gym Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="users"></i> Family Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
             </div>
         </div>
-        <a href="#" class="sidebar-link">🏷️ Coupons</a>
-        <a href="#" class="sidebar-link">🔥 Offers</a>
-        <a href="#" class="sidebar-link">❤️ Favourites</a>
-        <a href="#" class="sidebar-link">⚡ Flash Sales</a>
-        <a href="#" class="sidebar-link">🆕 New Arrivals</a>
+        <a href="#" class="sidebar-link"><i data-lucide="tag"></i> Coupons</a>
+        <a href="#" class="sidebar-link"><i data-lucide="flame"></i> Offers</a>
+        <a href="#" class="sidebar-link"><i data-lucide="heart"></i> Favourites</a>
+        <a href="#" class="sidebar-link"><i data-lucide="zap"></i> Flash Sales</a>
+        <a href="#" class="sidebar-link"><i data-lucide="sparkles"></i> New Arrivals</a>
     </nav>
 </div>
 
 <header class="navbar">
     <div class="logo">
-        <span class="menu-icon">☰</span>
+        <span class="menu-icon"><i data-lucide="menu"></i></span>
         <div>
-            <h1>NutriNest</h1>
+            <h1><i data-lucide="leaf"></i> NutriNest</h1>
             <p class="tagline">PURE & NATURAL</p>
         </div>
     </div>
@@ -81,15 +85,15 @@
 
     <div class="login-left">
         <div class="login-brand">
-            <div class="login-brand-icon">🌿</div>
+            <div class="login-brand-icon"><i data-lucide="leaf"></i></div>
             <h2>Welcome back to NutriNest</h2>
             <p>Your trusted source for premium dry fruits, superfoods & healthy snacks.</p>
         </div>
         <ul class="login-perks">
-            <li>✦ 100% organic & naturally sourced</li>
-            <li>✦ Exclusive member discounts & coupons</li>
-            <li>✦ Track orders & save favourites</li>
-            <li>✦ Flash sale early access</li>
+            <li><i data-lucide="sparkle"></i> 100% organic & naturally sourced</li>
+            <li><i data-lucide="sparkle"></i> Exclusive member discounts & coupons</li>
+            <li><i data-lucide="sparkle"></i> Track orders & save favourites</li>
+            <li><i data-lucide="sparkle"></i> Flash sale early access</li>
         </ul>
     </div>
 
@@ -129,7 +133,7 @@
 <!-- Signup Modal -->
 <div class="modal-overlay" id="signupOverlay" hidden>
     <div class="signup-modal" role="dialog" aria-modal="true" id="signupModal">
-        <button class="modal-close" id="signupClose">✕</button>
+        <button class="modal-close" id="signupClose"><i data-lucide="x"></i></button>
 
         <div class="signup-options" id="signupOptions">
             <h3>Sign up as</h3>
@@ -404,5 +408,11 @@
 
 </script>
 
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>
