@@ -154,3 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// Export for unit testing (Node/CommonJS only — harmless in the browser,
+// since `module` doesn't exist there and this block is skipped).
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { couponSummary, mapLiveCoupon, getCouponList, builtInCoupons };
+}
