@@ -30,6 +30,7 @@
 
             <span class="sb-section">Catalogue</span>
             <a class="sb-link" data-page="products"><span class="sb-icon"><i data-lucide="package"></i></span> Products</a>
+            <a class="sb-link" data-page="inventory"><span class="sb-icon"><i data-lucide="boxes"></i></span> Inventory</a>
 
             <span class="sb-section">Commerce</span>
             <a class="sb-link" data-page="orders"><span class="sb-icon"><i data-lucide="shopping-bag"></i></span> Orders</a>
@@ -122,12 +123,45 @@
                             <canvas id="salesChart"></canvas>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    <div class="panel">
-                        <div class="panel-head"><h3>Stock Levels</h3></div>
-                        <div style="padding:16px; height:280px;">
-                            <canvas id="stockChart"></canvas>
+            <!-- ── INVENTORY ── -->
+            <section class="page" id="page-inventory">
+                <div class="page-header">
+                    <h2>Inventory</h2>
+                    <span class="product-count" id="inventoryPageCount">0 products</span>
+                </div>
+                <div class="panel">
+                    <div class="inventory-summary inventory-summary-page">
+                        <div class="inventory-kpi">
+                            <span>Total products</span>
+                            <strong id="inventoryPageTotal">0</strong>
                         </div>
+                        <div class="inventory-kpi warning">
+                            <span>Low stock</span>
+                            <strong id="inventoryPageLow">0</strong>
+                        </div>
+                        <div class="inventory-kpi danger">
+                            <span>Out of stock</span>
+                            <strong id="inventoryPageOut">0</strong>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryPageBody">
+                                <tr><td colspan="5" class="empty-cell">Loading inventory...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

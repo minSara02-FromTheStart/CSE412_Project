@@ -362,7 +362,11 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-  return /^01[3-9]\d{8}$/.test(phone);
+  const cleaned = String(phone || "").trim();
+  if (!cleaned) return false;
+
+  const normalized = cleaned.replace(/^\+88/, "").replace(/^88/, "").replace(/[^0-9]/g, "");
+  return /^(01[3-9]\d{8})$/.test(normalized) || /^(3|4|5|6|7|8|9)\d{9}$/.test(normalized);
 }
 
 function prefillCustomer(user, userData) {
@@ -385,26 +389,35 @@ function getSelectedDeliveryLabel() {
 async function decrementStock(orderItems) {
   for (const item of orderItems) {
     try {
+      const matchCandidates = [];
+
+      if (item.id) {
+        matchCandidates.push(doc(db, "products", item.id));
+      }
+
       const productsQuery = query(collection(db, "products"), where("name", "==", item.name));
       const snap = await getDocs(productsQuery);
+      if (!snap.empty) {
+        snap.docs.forEach(docSnap => matchCandidates.push(docSnap.ref));
+      }
 
-      if (snap.empty) {
+      const uniqueRefs = [...new Map(matchCandidates.map(ref => [ref.path, ref])).values()];
+
+      if (uniqueRefs.length === 0) {
         console.warn(`No product found matching "${item.name}", stock not updated.`);
         continue;
       }
 
-      const productRef = snap.docs[0].ref;
+      for (const productRef of uniqueRefs) {
+        await runTransaction(db, async (transaction) => {
+          const productSnap = await transaction.get(productRef);
+          if (!productSnap.exists()) return;
 
-      // Transaction avoids two simultaneous orders both reading the same
-      // "old" stock number and overwriting each other's update.
-      await runTransaction(db, async (transaction) => {
-        const productSnap = await transaction.get(productRef);
-        if (!productSnap.exists()) return;
-
-        const currentStock = Number(productSnap.data().stock) || 0;
-        const newStock = Math.max(0, currentStock - item.qty);
-        transaction.update(productRef, { stock: newStock });
-      });
+          const currentStock = Number(productSnap.data().stock) || 0;
+          const newStock = Math.max(0, currentStock - item.qty);
+          transaction.update(productRef, { stock: newStock });
+        });
+      }
     } catch (err) {
       console.error(`Failed to update stock for "${item.name}":`, err);
     }
@@ -539,7 +552,7 @@ if (checkoutForm) {
       localStorage.removeItem("cartTotal");
 
       setTimeout(() => {
-        window.location.href = currentUser ? "customer-dashboard.html" : "index.html";
+        window.location.href = "index.html";
       }, 1600);
     } catch (err) {
       console.error("Order save failed:", err);

@@ -230,14 +230,100 @@ function renderDashboard(orders, users, products) {
             </div>`).join('')
         : `<p class="empty-cell">No products yet.</p>`;
 
-    renderCharts(orders, products);
+    renderInventory(products);
+    renderInventoryPage(products);
+    renderCharts(orders);
+}
+
+function renderInventory(products) {
+    const listEl = document.getElementById('inventory-list');
+    const totalEl = document.getElementById('inventory-total');
+    const lowEl = document.getElementById('inventory-low');
+    const outEl = document.getElementById('inventory-out');
+
+    if (!listEl || !totalEl || !lowEl || !outEl) return;
+
+    const items = [...products].sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+    const lowStock = items.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= 10).length;
+    const outOfStock = items.filter(p => (Number(p.stock) || 0) <= 0).length;
+
+    totalEl.textContent = items.length;
+    lowEl.textContent = lowStock;
+    outEl.textContent = outOfStock;
+
+    listEl.innerHTML = items.length
+        ? items.map(p => {
+            const stock = Number(p.stock) || 0;
+            let badgeClass = 'healthy';
+            let badgeText = 'In stock';
+            if (stock <= 0) {
+                badgeClass = 'danger';
+                badgeText = 'Out of stock';
+            } else if (stock <= 10) {
+                badgeClass = 'warning';
+                badgeText = 'Low stock';
+            }
+            return `
+                <div class="inventory-item">
+                    <div>
+                        <div class="inventory-item-title">${sanitize(p.name)}</div>
+                        <div class="inventory-item-meta">${sanitize(p.category || 'General')} • ${fmtCurrency(p.price)}</div>
+                    </div>
+                    <span class="inventory-qty">${stock} kg</span>
+                    <span class="inventory-badge ${badgeClass}">${badgeText}</span>
+                </div>`;
+          }).join('')
+        : '<p class="empty-cell">No products in inventory yet.</p>';
+}
+
+function renderInventoryPage(products) {
+    const body = document.getElementById('inventoryPageBody');
+    const countEl = document.getElementById('inventoryPageCount');
+    const totalEl = document.getElementById('inventoryPageTotal');
+    const lowEl = document.getElementById('inventoryPageLow');
+    const outEl = document.getElementById('inventoryPageOut');
+
+    if (!body || !countEl || !totalEl || !lowEl || !outEl) return;
+
+    const items = [...products].sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+    const lowStock = items.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= 10).length;
+    const outOfStock = items.filter(p => (Number(p.stock) || 0) <= 0).length;
+
+    countEl.textContent = `${items.length} product${items.length === 1 ? '' : 's'}`;
+    totalEl.textContent = items.length;
+    lowEl.textContent = lowStock;
+    outEl.textContent = outOfStock;
+
+    body.innerHTML = items.length
+        ? items.map(p => {
+            const stock = Number(p.stock) || 0;
+            let badgeClass = 'healthy';
+            let badgeText = 'In stock';
+            if (stock <= 0) {
+                badgeClass = 'danger';
+                badgeText = 'Out of stock';
+            } else if (stock <= 10) {
+                badgeClass = 'warning';
+                badgeText = 'Low stock';
+            }
+            return `
+                <tr>
+                    <td>
+                        <strong>${sanitize(p.name)}</strong>
+                    </td>
+                    <td>${sanitize(p.category || 'General')}</td>
+                    <td>${fmtCurrency(p.price)}</td>
+                    <td>${stock} kg</td>
+                    <td><span class="inventory-badge ${badgeClass}">${badgeText}</span></td>
+                </tr>`;
+          }).join('')
+        : '<tr><td colspan="5" class="empty-cell">No products in inventory yet.</td></tr>';
 }
 
 /* =============================================================
-   DASHBOARD CHARTS  (sales over time + stock levels)
+   DASHBOARD CHARTS  (sales over time)
    ============================================================= */
 let salesChartInstance = null;
-let stockChartInstance = null;
 
 function orderDateKey(o) {
     const ts = o.createdAt;
@@ -246,7 +332,7 @@ function orderDateKey(o) {
     return d.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-function renderCharts(orders, products) {
+function renderCharts(orders) {
     if (typeof Chart === 'undefined') return; // Chart.js failed to load (offline)
 
     /* ── Sales over the last 14 days ── */
@@ -292,34 +378,6 @@ function renderCharts(orders, products) {
         });
     }
 
-    /* ── Stock levels per product ── */
-    const stockCanvas = document.getElementById('stockChart');
-    if (stockCanvas) {
-        const stocked = [...products].sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0));
-        const labels = stocked.map(p => p.name);
-        const data = stocked.map(p => Number(p.stock) || 0);
-        const colors = data.map(v => v <= 10 ? '#dc2626' : v <= 25 ? '#d97706' : '#006b3c');
-
-        if (stockChartInstance) stockChartInstance.destroy();
-        stockChartInstance = new Chart(stockCanvas, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Stock (KG)',
-                    data,
-                    backgroundColor: colors
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                indexAxis: labels.length > 6 ? 'y' : 'x',
-                scales: { x: { beginAtZero: true } }
-            }
-        });
-    }
 }
 
 /* =============================================================
@@ -1059,7 +1117,7 @@ if (!window.adminData) {
              <h2>${p.name}</h2>
              <h3>৳${p.price} / KG</h3>
              <p>${p.desc}</p>
-             <button class="cart-btn" onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>
+             <button class="cart-btn" onclick="addToCart('${p.id}', '${sanitize(p.name)}', ${p.price})">Add to Cart</button>
            </div>`;
        });
      });

@@ -35,7 +35,7 @@ function displayProducts(products) {
       <h2>${product.name}</h2>
       <h3>৳${product.price} / ${product.unit || 'KG'}</h3>
       <p>${product.description || ''}</p>
-      <button class="cart-btn" onclick="addToCart('${product.name}', ${product.price})">
+      <button class="cart-btn" onclick="addToCart('${product.id}', '${product.name}', ${product.price})">
         Add to Cart
       </button>
     </div>

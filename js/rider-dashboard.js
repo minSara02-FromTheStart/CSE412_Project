@@ -196,7 +196,12 @@ onAuthStateChanged(auth, async user => {
   const userDoc = await getDoc(doc(db, 'users', user.uid));
   const userData = userDoc.exists() ? userDoc.data() : {};
 
-  if (userData.role !== 'Deliveryman' || userData.riderStatus !== 'approved') {
+  if (userData.role !== 'Deliveryman') {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  if (userData.riderStatus !== 'approved') {
     window.location.href = 'login.html';
     return;
   }

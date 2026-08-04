@@ -284,9 +284,15 @@
   if (role === 'Admin') {
     window.location.href = 'admin.html';
   } else if (role === 'Deliveryman') {
-    window.location.href = 'rider-dashboard.html';
+    if (userData.riderStatus === 'approved') {
+      window.location.href = 'rider-dashboard.html';
+    } else {
+      showError('loginError', '⏳ Your rider application is still under review. Please wait for admin approval.');
+      btn.disabled = false;
+      btn.textContent = 'Login';
+    }
   } else {
-    window.location.href = 'customer-dashboard.html';
+    window.location.href = 'index.html';
   }
 }, 1200);
 
@@ -395,7 +401,7 @@
         showSuccess('signupSuccess', `✅ Account created! Welcome, ${fullName}! Redirecting...`);
         setTimeout(() => {
           document.getElementById('signupOverlay').setAttribute('hidden', '');
-          window.location.href = 'customer-dashboard.html';
+          window.location.href = 'index.html';
         }, 1500);
       }
 

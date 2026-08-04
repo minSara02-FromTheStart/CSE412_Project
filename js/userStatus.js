@@ -11,8 +11,12 @@ function dashboardFor(role) {
 }
 
 function displayNameFrom(user, userData) {
-    const name = userData.fullName || user.displayName || user.email || "Customer";
-    return name.split(" ")[0] || "Customer";
+    const rawName = userData.fullName || user.displayName || user.email || "Customer";
+    const emailLocalPart = user.email ? user.email.split("@")[0] : "";
+    const nameSource = rawName && rawName.includes("@") ? emailLocalPart : rawName;
+    const name = (nameSource || emailLocalPart || "Customer").toString();
+    const firstPart = name.split(" ")[0] || "Customer";
+    return firstPart.charAt(0).toUpperCase() + firstPart.slice(1);
 }
 
 onAuthStateChanged(auth, async (user) => {
