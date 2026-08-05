@@ -15,6 +15,20 @@ describe('newsletter subscription helpers', () => {
     expect(newsletter.getStoredSubscriberEmails()).toEqual(['hello@example.com']);
   });
 
+  test('trims and lowercases email before saving', () => {
+    const newsletter = require('../js/newsletterService');
+
+    newsletter.saveSubscriberEmail('  HELLO@Example.COM  ');
+    expect(newsletter.getStoredSubscriberEmails()).toEqual(['hello@example.com']);
+  });
+
+  test('returns an empty array when stored JSON is invalid', () => {
+    localStorage.setItem('nn_subscribers', 'not-valid-json');
+    const newsletter = require('../js/newsletterService');
+
+    expect(newsletter.getStoredSubscriberEmails()).toEqual([]);
+  });
+
   test('builds a sale alert message with the offer title', () => {
     const newsletter = require('../js/newsletterService');
 

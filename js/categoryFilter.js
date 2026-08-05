@@ -1,7 +1,6 @@
-const params = new URLSearchParams(window.location.search);
-const category = params.get('category');
-
-function applyCategoryFilter() {
+function applyCategoryFilter(search = window.location.search) {
+  const params = new URLSearchParams(search);
+  const category = params.get('category');
   if (!category) return;
 
   document.querySelectorAll('.card').forEach(card => {
@@ -28,3 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ranAfterLoad) applyCategoryFilter();
   }, 300);
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { applyCategoryFilter };
+}
