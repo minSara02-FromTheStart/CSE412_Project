@@ -90,6 +90,20 @@ async function loadCustomCoupons() {
   }
 }
 
+const couponStrategy = {
+  percentage: {
+    calculate: ({ subtotal, value }) => (subtotal * value) / 100
+  },
+  freeShip: {
+    calculate: () => 0
+  }
+};
+
+function calculateCouponDiscount(coupon) {
+  const strategy = couponStrategy[coupon.type] || couponStrategy.percentage;
+  return strategy.calculate({ subtotal, value: coupon.value });
+}
+
 function escapeHTML(value) {
   const div = document.createElement("div");
   div.textContent = value == null ? "" : String(value);
@@ -262,12 +276,7 @@ async function applyCoupon() {
   }
 
   // Calculate discount
-  let discount = 0;
-  if (coupon.type === "percentage") {
-    discount = (subtotal * coupon.value) / 100;
-  } else if (coupon.type === "freeShip") {
-    discount = 0; // Free shipping handled separately
-  }
+  const discount = calculateCouponDiscount(coupon);
 
   appliedCoupon = coupon;
   appliedDiscount = discount;

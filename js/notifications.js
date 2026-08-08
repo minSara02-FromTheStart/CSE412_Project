@@ -67,6 +67,28 @@ function saveSeenSet(set) {
 }
 let seenCoupons = getSeenSet();
 
+class NotificationSubject {
+  constructor() {
+    this.observers = [];
+  }
+
+  subscribe(observer) {
+    if (typeof observer === 'function') {
+      this.observers.push(observer);
+    }
+  }
+
+  unsubscribe(observer) {
+    this.observers = this.observers.filter(o => o !== observer);
+  }
+
+  notify() {
+    this.observers.forEach(observer => observer());
+  }
+}
+
+const notificationSubject = new NotificationSubject();
+
 /* =============================================================
    HELPERS
    ============================================================= */
@@ -243,7 +265,7 @@ async function markAllSeen() {
     rewards = rewards.map(r => r.seenAt ? r : { ...r, seenAt: nowIso });
   }
 
-  renderDropdown();
+  notificationSubject.notify();
 }
 
 /* =============================================================
@@ -264,7 +286,7 @@ function watchCoupons() {
     firstCouponLoad = false;
 
     coupons = docs;
-    renderDropdown();
+    notificationSubject.notify();
   }, (err) => console.error('Coupon notification listener error:', err));
 }
 
@@ -284,7 +306,7 @@ function watchRewards(uid) {
     firstRewardLoad = false;
 
     rewards = docs;
-    renderDropdown();
+    notificationSubject.notify();
   }, (err) => console.error('Reward notification listener error:', err));
 }
 
@@ -293,6 +315,7 @@ function watchRewards(uid) {
    ============================================================= */
 function start() {
   injectBellUI();
+  notificationSubject.subscribe(renderDropdown);
   watchCoupons(); // always — guests included
 
   onAuthStateChanged(auth, (user) => {
