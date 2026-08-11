@@ -72,3 +72,11 @@ describe('checkout utility helpers', () => {
     expect(getSelectedDeliveryLabel()).toBe('Express Delivery');
   });
 });
+
+test('validateCoupon rejects code with only whitespace', () => {
+  expect(validateCoupon('   ', 1000).valid).toBe(false);
+});
+
+test('isValidPhone rejects a phone number with letters', () => {
+  expect(isValidPhone('017abc12345')).toBe(false);
+});
