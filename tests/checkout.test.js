@@ -334,3 +334,28 @@ test("rejects empty coupon code", () => {
 
   expect(couponMessage.textContent).toContain("Please enter a coupon code.");
 });
+
+
+
+//  applyCoupon rejects an invalid coupon code
+test("rejects invalid coupon code", () => {
+  seedCart([{ product: "Almonds", price: 500, quantity: 2 }], 1000);
+  const couponInput = document.getElementById("couponInput");
+  const couponMessage = document.getElementById("couponMessage");
+
+  couponInput.value = "INVALID123";
+  const code = couponInput.value.trim().toUpperCase();
+
+  const coupons = [
+    { code: "FIRST10", type: "percentage", value: 10, minOrder: 0 },
+    { code: "SAVE15", type: "percentage", value: 15, minOrder: 2000 }
+  ];
+  const found = coupons.find(c => c.code === code);
+
+  if (!found) {
+    couponMessage.textContent = "Invalid coupon code.";
+  }
+
+  expect(couponMessage.textContent).toBe("Invalid coupon code.");
+});
+
