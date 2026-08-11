@@ -161,3 +161,11 @@ test('buildSummaryHTML calculates item totals correctly', () => {
   expect(html).toContain('Almonds x 2');
   expect(html).toContain('৳1,000');
 });
+
+
+//  updateSubmitState disables submit when cart is empty
+test('computeSubmitState disables submit when cart is empty', () => {
+  const state = computeSubmitState([], { uid: 'u1' });
+  expect(state.disabled).toBe(true);
+  expect(state.text).toBe('Cart is empty');
+});
