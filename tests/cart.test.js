@@ -469,3 +469,14 @@ describe('addToCart', () => {
 
 describe('quantity controls', () => {
 
+
+
+
+  test('increaseQuantity increases the correct item', () => {
+    addToCart('Almonds', 500);
+    addToCart('Cashew', 800);
+    increaseQuantity(1);
+    const cart = JSON.parse(localStorage.getItem('cart'));
+    expect(cart[1].quantity).toBe(2);
+    expect(cart[0].quantity).toBe(1);
+
