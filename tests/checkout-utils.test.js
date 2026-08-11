@@ -139,3 +139,12 @@ test('selectedDeliveryFee returns the numeric value of the checked radio input',
   `;
   expect(selectedDeliveryFee(document)).toBe(120);
 });
+
+
+
+//  renderSummary displays a fallback message for an empty cart
+test('buildSummaryHTML shows fallback message for empty cart', () => {
+  const { html, subtotal } = buildSummaryHTML([]);
+  expect(html).toContain('No items found in your cart.');
+  expect(subtotal).toBe(0);
+});
