@@ -24,3 +24,9 @@ describe("normaliseProduct", () => {
     expect(normalized.desc).toBe("Fresh stock");
   });
 });
+
+
+
+test('normaliseProduct returns null when product is an empty object', () => {
+  expect(normaliseProduct({})).toBeNull();
+});
