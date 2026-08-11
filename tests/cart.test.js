@@ -437,7 +437,9 @@ beforeEach(() => {
 });
 
 describe('addToCart', () => {
-  // 16
+  
+
+  
   test('adds an item when cart is empty', () => {
     addToCart('Almonds', 500);
     const cart = JSON.parse(localStorage.getItem('cart'));
@@ -445,4 +447,12 @@ describe('addToCart', () => {
     expect(cart[0]).toMatchObject({ product: 'Almonds', price: 500, quantity: 1 });
   });
 
-  
+
+
+
+  test('increments quantity for an existing item', () => {
+    addToCart('Almonds', 500);
+    addToCart('Almonds', 500);
+    const cart = JSON.parse(localStorage.getItem('cart'));
+    expect(cart).toHaveLength(1);
+    expect(cart[0].quantity).toBe(2);
