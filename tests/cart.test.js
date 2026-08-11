@@ -519,3 +519,9 @@ describe('updateCart rendering', () => {
 });
 
 describe('updateCheckoutButton', () => {
+
+
+
+   test('disables checkout when cart is empty', () => {
+    expect(document.getElementById('checkout-btn').disabled).toBe(true);
+  });
