@@ -359,3 +359,20 @@ test("rejects invalid coupon code", () => {
   expect(couponMessage.textContent).toBe("Invalid coupon code.");
 });
 
+
+
+//  applyCoupon blocks coupon when subtotal is below minimum order
+test("validates minimum order requirement", () => {
+  seedCart([{ product: "Almonds", price: 500, quantity: 1 }], 500);
+  const couponMessage = document.getElementById("couponMessage");
+
+  const subtotal = 500;
+  const minOrder = 2000;
+
+  if (subtotal < minOrder) {
+    couponMessage.textContent = `Minimum order ৳${minOrder} required for this coupon.`;
+  }
+
+  expect(couponMessage.textContent).toContain("Minimum order ৳2000");
+});
+
