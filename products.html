@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/cart.css">
   <link rel="stylesheet" href="css/search.css">
   <link rel="stylesheet" href="css/promo.css">
+  <link rel="stylesheet" href="css/coupon.css">
     <style>
         /* Lucide icon sizing - matches surrounding text */
         .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
@@ -41,11 +42,11 @@
                   <a href="products.html?category=Gift" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
               </div>
           </div>
-          <a href="#" class="sidebar-link"><i data-lucide="tag"></i> Coupons</a>
+          <a href="#" class="sidebar-link" id="couponsLink"><i data-lucide="tag"></i> Coupons</a>
           <a href="offers.html" class="sidebar-link"><i data-lucide="flame"></i> Offers</a>
           <a href="favourites.html" class="sidebar-link"><i data-lucide="heart"></i> Favourites</a>
           <a href="flashsale.html" class="sidebar-link"><i data-lucide="zap"></i> Flash Sales</a>
-          <a href="#" class="sidebar-link"><i data-lucide="sparkles"></i> New Arrivals</a>
+          <a href="new-arrivals.html" class="sidebar-link"><i data-lucide="sparkles"></i> New Arrivals</a>
       </nav>
   </div>
 
@@ -95,6 +96,15 @@ Search
     </section>
   </main>
 
+  <div class="coupon-overlay" id="couponOverlay"></div>
+  <div class="coupon-panel" id="couponPanel">
+    <div class="coupon-panel-header">
+      <h2>Available Coupons</h2>
+      <button class="coupon-close-btn" id="closeCouponBtn"><i data-lucide="x"></i></button>
+    </div>
+    <div id="couponList" class="coupon-list"></div>
+  </div>
+
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
       <h2>Your Cart</h2>
@@ -115,6 +125,7 @@ Search
   <script type="module" src="js/wishlist.js"></script>
   <script src="js/quickview.js"></script>
   <script type="module" src="js/products-feed.js"></script>
+  <script src="js/coupon.js"></script>
   <script src="js/script.js"></script>
   <script src="js/search.js"></script>
   <script type="module" src="js/userStatus.js"></script>
