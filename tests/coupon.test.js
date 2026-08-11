@@ -160,3 +160,19 @@ describe('copyCode', () => {
     expect(btn.textContent).toBe('Copied!');
     expect(btn.classList.contains('copied')).toBe(true);
   });
+
+
+
+  //  copyCode falls back to alert when clipboard write fails
+  test('falls back to alert when clipboard write fails', async () => {
+    const writeText = jest.fn().mockRejectedValue(new Error('denied'));
+    Object.assign(navigator, { clipboard: { writeText } });
+    window.alert = jest.fn();
+
+    copyCode('SAVE15', btn);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(window.alert).toHaveBeenCalledWith('Coupon code: SAVE15');
+  });
+});
