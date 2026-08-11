@@ -525,3 +525,14 @@ describe('updateCheckoutButton', () => {
    test('disables checkout when cart is empty', () => {
     expect(document.getElementById('checkout-btn').disabled).toBe(true);
   });
+
+
+
+  test('enables checkout when cart has items', () => {
+    addToCart('Almonds', 500);
+    expect(document.getElementById('checkout-btn').disabled).toBe(false);
+  });
+});
+
+describe('openCart / closeCart', () => {
+
