@@ -96,3 +96,21 @@ test('formatPrice treats undefined as 0', () => {
   expect(formatPrice(undefined)).toBe('৳0');
 });
 
+
+
+//  blocks one-time coupon reuse
+describe('validateCoupon — one-time coupon reuse', () => {
+  const oneTimeCoupons = {
+    WELCOME50: { type: 'percentage', value: 50, minOrder: 0, oneTimeOnly: true }
+  };
+
+  test('blocks one-time coupon reuse', () => {
+    const result = validateCoupon('WELCOME50', 1000, {
+      coupons: oneTimeCoupons,
+      usedCoupons: ['WELCOME50']
+    });
+
+    expect(result.valid).toBe(false);
+    expect(result.message).toContain('already used');
+    expect(result.message).toContain('WELCOME50');
+  });
