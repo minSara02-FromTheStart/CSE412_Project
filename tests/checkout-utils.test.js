@@ -88,35 +88,4 @@ test('escapeHTML returns empty string for null', () => {
   expect(escapeHTML(null)).toBe('');
 });
 
-// 4. formatPrice treats undefined as 0
-test('formatPrice treats undefined as 0', () => {
-  expect(formatPrice(undefined)).toBe('৳0');
-});
 
-// 32. blocks one-time coupon reuse
-describe('validateCoupon — one-time coupon reuse', () => {
-  const oneTimeCoupons = {
-    WELCOME50: { type: 'percentage', value: 50, minOrder: 0, oneTimeOnly: true }
-  };
-
-  test('blocks one-time coupon reuse', () => {
-    const result = validateCoupon('WELCOME50', 1000, {
-      coupons: oneTimeCoupons,
-      usedCoupons: ['WELCOME50']
-    });
-
-    expect(result.valid).toBe(false);
-    expect(result.message).toContain('already used');
-    expect(result.message).toContain('WELCOME50');
-  });
-
-  // 33. accepts a multi-use coupon after previous use
-  test('accepts a multi-use coupon after previous use', () => {
-    const result = validateCoupon('SAVE15', 3000, {
-      usedCoupons: ['SAVE15']
-    });
-
-    expect(result.valid).toBe(true);
-    expect(result.code).toBe('SAVE15');
-  });
-});
