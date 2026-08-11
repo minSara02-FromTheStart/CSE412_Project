@@ -95,7 +95,7 @@ describe('getCouponList', () => {
 
 
 
-// 13. getCouponList includes built-in coupons plus live coupon mappings
+//  getCouponList includes built-in coupons plus live coupon mappings
 describe('mergeCoupons', () => {
   test('combines built-in coupons with mapped live coupons, no duplicates lost', () => {
     const built = [{ code: 'FIRST10', badge: 'x', title: 'x', desc: 'x' }];
