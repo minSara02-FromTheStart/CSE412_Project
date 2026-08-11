@@ -502,3 +502,9 @@ describe('quantity controls', () => {
 
 describe('updateCart rendering', () => {
 
+
+
+
+  test('renders empty-cart message when empty', () => {
+    expect(document.querySelector('.empty-summary')).not.toBeNull();
+  });
