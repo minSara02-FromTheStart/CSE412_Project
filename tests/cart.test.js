@@ -555,3 +555,12 @@ describe('openCart / closeCart', () => {
 
 describe('cart proxy persistence', () => {
 
+
+
+  test('persists updates automatically to localStorage', () => {
+    addToCart('Almonds', 500);
+    increaseQuantity(0);
+    expect(JSON.parse(localStorage.getItem('cart'))[0].quantity).toBe(2);
+  });
+});
+
