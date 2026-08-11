@@ -146,3 +146,17 @@ describe('copyCode', () => {
     expect(window.alert).toHaveBeenCalledWith('Coupon code: SAVE15');
   });
 });
+
+
+//  copyCode uses clipboard API when available
+  test('uses clipboard API when available and shows "Copied!"', async () => {
+    const writeText = jest.fn().mockResolvedValue();
+    Object.assign(navigator, { clipboard: { writeText } });
+
+    copyCode('FIRST10', btn);
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalledWith('FIRST10');
+    expect(btn.textContent).toBe('Copied!');
+    expect(btn.classList.contains('copied')).toBe(true);
+  });
