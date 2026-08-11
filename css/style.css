@@ -236,7 +236,8 @@ section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 40px;
+    gap: 28px;
+    padding: 16px 32px;
     position: fixed;
     top: 0;
     left: 0;
@@ -252,7 +253,7 @@ section {
 .logo {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
     color: var(--white);
     cursor: pointer;
     transition: opacity 0.2s;
@@ -266,11 +267,29 @@ section {
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    color: var(--white);
     transition: var(--transition);
 }
 
 .menu-icon:hover {
     background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-icon i[data-lucide="menu"]::before {
+    content: "\2630";
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.menu-icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .logo h1 {
@@ -290,7 +309,8 @@ section {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 36px;
+    gap: 40px;
+    margin-left: 40px;
 }
 
 .nav-links a {
@@ -361,6 +381,7 @@ nav ul li a{
 
 .hero {
     position: relative;
+    min-height: 100vh;
     height: 100vh;
     background: url('../images/bg.jpg') no-repeat center center;
     background-size: cover;
@@ -490,14 +511,15 @@ nav ul li a{
 .nav-search-box {
     display:flex;
     align-items:center;
-    width:100%;
-    max-width: 100%;
+    width: min(100%, 520px);
+    max-width: 520px;
     min-width: 0;
     height:48px;
-    background:rgba(255,255,255,0.15);
+    margin: 0 auto;
+    background:rgba(255,255,255,0.20);
     border-radius:35px;
-    padding:5px 8px 5px 16px;
-    border:1px solid rgba(255,255,255,0.3);
+    padding:8px 14px;
+    border:1px solid rgba(255,255,255,0.35);
     gap:10px;
     box-sizing: border-box;
 }
@@ -1368,27 +1390,68 @@ nav ul li a{
 @media (max-width: 980px) {
     .navbar {
         padding: 14px 20px;
+        flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        gap: 10px 14px;
     }
 
     .nav-links {
         display: none;
     }
 
-    .nav-right {
-        margin-left: auto;
-        flex-shrink: 0;
+    .logo {
+        order: 1;
     }
 
     .nav-search-box {
         width: 100%;
-        max-width: 640px;
-        height: auto;
-        padding: 6px 8px 6px 12px;
-        flex: 1;
+        max-width: 100%;
+        height: 44px;
+        padding: 6px 8px 6px 14px;
+        flex: 1 1 100%;
         min-width: 0;
+        order: 3;
+        background: rgba(255,255,255,0.22);
+        border-radius: 24px;
+        align-self: stretch;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nav-search-box input {
+        width: auto;
+        font-size: 14px;
+        padding: 8px 4px;
+    }
+
+    .nav-search-box button {
+        width: auto;
+        white-space: nowrap;
+        padding: 8px 14px;
+    }
+
+    .nav-right {
+        margin-left: auto;
+        width: auto;
+        display: flex;
+        justify-content: flex-end;
+        order: 2;
+        gap: 10px;
+        margin-top: 0;
+        align-self: center;
+        flex-shrink: 0;
+    }
+
+    .login-btn {
+        width: auto;
+        max-width: 220px;
+        padding: 9px 16px;
+        font-size: 13px;
+        text-align: center;
+        white-space: nowrap;
     }
 
     .sidebar {
@@ -1396,8 +1459,9 @@ nav ul li a{
     }
 
     .hero {
-        min-height: 100svh;
-        padding: 100px 16px 40px;
+        min-height: 100vh;
+        height: 100vh;
+        padding: 0 16px 0;
     }
 
     .hero-content {
@@ -1440,15 +1504,18 @@ nav ul li a{
 
 @media (max-width: 640px) {
     .navbar {
-        padding: 14px 16px;
+        padding: 12px 14px;
+        flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 8px 10px;
     }
 
     .logo {
         gap: 10px;
+        min-width: 0;
+        flex: 1 1 auto;
     }
 
     .logo h1 {
@@ -1459,36 +1526,57 @@ nav ul li a{
         display: none;
     }
 
-    .nav-right {
-        gap: 10px;
-        width: 100%;
-        justify-content: flex-end;
-        order: 2;
-    }
-
     .nav-search-box {
         width: 100%;
         max-width: 100%;
-        padding: 10px 14px;
-        flex-wrap: wrap;
-        align-items: stretch;
-        gap: 10px;
+        height: 42px;
+        padding: 5px 6px 5px 12px;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        order: 3;
+        background: rgba(255,255,255,0.28);
+        border-radius: 22px;
+        align-self: stretch;
+    }
+
+    .nav-search-box input {
+        width: auto;
+        font-size: 13px;
+        padding: 7px 3px;
     }
 
     .nav-search-box button {
-        width: 100%;
-        white-space: normal;
-        padding: 12px 16px;
+        width: auto;
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .nav-right {
+        gap: 8px;
+        width: auto;
+        justify-content: flex-end;
+        order: 2;
+        margin-top: 0;
+        align-self: center;
+        flex-shrink: 0;
     }
 
     .login-btn {
-        padding: 9px 14px;
-        font-size: 13px;
+        width: auto;
+        max-width: 140px;
+        padding: 8px 12px;
+        font-size: 12px;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .hero {
-        min-height: auto;
-        padding: 96px 14px 50px;
+        min-height: 60vh;
+        padding: 60px 14px 30px;
     }
 
     .hero-content {
@@ -1528,7 +1616,7 @@ nav ul li a{
     }
 
     .quote-wrapper {
-        height: 140px;
+        height: 110px;
         margin-bottom: 8px;
     }
 
@@ -1558,7 +1646,8 @@ nav ul li a{
     }
 
     .product-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-auto-rows: 1fr;
     }
 
     .card img {
@@ -1582,7 +1671,7 @@ nav ul li a{
 
 @media (max-width: 480px) {
     .navbar {
-        padding: 12px 14px;
+        padding: 10px 12px;
     }
 
     .logo div {
@@ -1602,7 +1691,8 @@ nav ul li a{
     }
 
     .login-btn {
-        padding: 8px 12px;
+        max-width: 116px;
+        padding: 8px 10px;
         font-size: 12px;
     }
 
@@ -1744,8 +1834,9 @@ nav ul li a{
 
 @media (max-width: 980px) {
     .product-container {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 16px;
+        grid-auto-rows: 1fr;
     }
 }
 
@@ -1761,6 +1852,7 @@ nav ul li a{
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 14px;
         padding: 0 14px;
+        grid-auto-rows: 1fr;
     }
 
     .card img {

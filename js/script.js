@@ -54,15 +54,18 @@ if (heroSection && navbar && navRight) {
     // insert BEFORE nav-right, so order is: logo | search | login
     navbar.insertBefore(navSearch, navRight);
 
-    window.addEventListener('scroll', () => {
+    function syncNavSearch() {
         const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-
         if (window.scrollY > heroBottom - 80) {
             navSearch.style.display = 'flex';
         } else {
             navSearch.style.display = 'none';
         }
-    });
+    }
+
+    window.addEventListener('scroll', syncNavSearch);
+    window.addEventListener('resize', syncNavSearch);
+    syncNavSearch();
 }
 
 // Signup modal and client-side auth using localStorage
