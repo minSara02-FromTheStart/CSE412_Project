@@ -128,3 +128,14 @@ describe('validateCoupon — one-time coupon reuse', () => {
     expect(result.code).toBe('SAVE15');
   });
 });
+
+
+
+//  selectedDeliveryFee returns numeric value of checked radio
+test('selectedDeliveryFee returns the numeric value of the checked radio input', () => {
+  document.body.innerHTML = `
+    <input type="radio" name="delivery" value="60">
+    <input type="radio" name="delivery" value="120" checked>
+  `;
+  expect(selectedDeliveryFee(document)).toBe(120);
+});
