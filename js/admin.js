@@ -893,20 +893,98 @@ document.getElementById('cancelOrderModal').addEventListener('click', () => orde
 document.getElementById('saveOrderStatus').addEventListener('click', async () => {
     const id     = document.getElementById('editOrderId').value;
     const status = document.getElementById('newOrderStatus').value;
+
+    const idx = window.adminData.orders.findIndex(o => o.id === id);
+    const previousStatus = idx > -1 ? window.adminData.orders[idx].status : null;
+    const becameDelivered = status === 'Delivered' && previousStatus !== 'Delivered';
+
     try {
-        const { db, doc, updateDoc } = window._fb;
-        await updateDoc(doc(db, 'orders', id), { status });
-        const idx = window.adminData.orders.findIndex(o => o.id === id);
+        if (becameDelivered) {
+            // Order is being marked Delivered for the first time -> deduct
+            // stock for every item in the order, inside a transaction.
+            await deductStockForOrder(id, status);
+        } else {
+            const { db, doc, updateDoc } = window._fb;
+            await updateDoc(doc(db, 'orders', id), { status });
+        }
+
         if (idx > -1) window.adminData.orders[idx].status = status;
+        // Stock numbers changed -> refresh products from Firestore so the
+        // Inventory / Products pages reflect the new stock immediately
+        // (the onSnapshot listener will also catch this, this just avoids
+        // a flash of stale numbers).
+        if (becameDelivered && window._fb.reloadProducts) {
+            await window._fb.reloadProducts();
+        }
         renderOrders(window.adminData.orders);
         renderDashboard(window.adminData.orders, window.adminData.users, window.adminData.products);
         orderModal.classList.remove('open');
         showToast('✅ Order status updated.');
     } catch(err) {
         console.error(err);
-        showToast('❌ Update failed.');
+        showToast('❌ Update failed: ' + (err.message || 'Unknown error'));
     }
 });
+
+/* =============================================================
+   STOCK DEDUCTION ON DELIVERY
+   Runs the read+write as a single Firestore transaction so that:
+   - stock is only ever deducted ONCE per order (guarded by the
+     order's own `stockDeducted` flag, checked inside the transaction),
+     even if two admins click "Save" at the same time, or the order
+     was already marked Delivered elsewhere (e.g. rider dashboard).
+   - each product's stock read and write happen atomically, so two
+     orders finishing at the same moment can't overwrite each other's
+     stock update.
+   ============================================================= */
+async function deductStockForOrder(orderId, newStatus) {
+    const { db, doc, runTransaction } = window._fb;
+    const orderRef = doc(db, 'orders', orderId);
+
+    await runTransaction(db, async (tx) => {
+        const orderSnap = await tx.get(orderRef);
+        if (!orderSnap.exists()) throw new Error('Order not found.');
+        const order = orderSnap.data();
+
+        // Already deducted (double click / already delivered elsewhere) -
+        // just update the status, don't touch stock again.
+        if (order.stockDeducted) {
+            tx.update(orderRef, { status: newStatus });
+            return;
+        }
+
+        const items = Array.isArray(order.items) ? order.items : [];
+
+        // Work out which product doc each item refers to. Cart/checkout
+        // items are expected to carry the product's Firestore doc id as
+        // `productId` (or `id`). If neither is present, fall back to
+        // matching by product name against the already-loaded product list.
+        const lines = items.map(item => {
+            const pid = item.productId || item.id || null;
+            let productId = pid;
+            if (!productId) {
+                const match = window.adminData.products.find(
+                    p => (p.name || '').toLowerCase() === (item.name || '').toLowerCase()
+                );
+                productId = match ? match.id : null;
+            }
+            return { productId, qty: Number(item.qty) || 0 };
+        }).filter(line => line.productId && line.qty > 0);
+
+        // All reads must happen before any writes inside a transaction.
+        const productRefs = lines.map(l => doc(db, 'products', l.productId));
+        const productSnaps = await Promise.all(productRefs.map(ref => tx.get(ref)));
+
+        productSnaps.forEach((snap, i) => {
+            if (!snap.exists()) return; // product was deleted since order was placed
+            const currentStock = Number(snap.data().stock) || 0;
+            const newStock = Math.max(0, currentStock - lines[i].qty);
+            tx.update(productRefs[i], { stock: newStock });
+        });
+
+        tx.update(orderRef, { status: newStatus, stockDeducted: true });
+    });
+}
 
 /* =============================================================
    DELETE CUSTOMER
