@@ -203,3 +203,11 @@ test('badge is "One-Time Use" when oneTimeOnly is true', () => {
   const result = mapLiveCoupon({ code: 'ABC', oneTimeOnly: true });
   expect(result.badge).toBe('One-Time Use');
 });
+
+
+
+//  mapLiveCoupon maps minOrder to "Min Order" badge
+test('badge shows min order when minOrder > 0 and not oneTimeOnly', () => {
+  const result = mapLiveCoupon({ code: 'ABC', minOrder: 500 });
+  expect(result.badge).toBe('Min Order ৳500');
+});
