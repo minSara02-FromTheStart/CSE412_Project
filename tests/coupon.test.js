@@ -176,3 +176,10 @@ describe('copyCode', () => {
     expect(window.alert).toHaveBeenCalledWith('Coupon code: SAVE15');
   });
 });
+
+
+//  couponSummary returns free shipping text for freeShip
+test('returns free shipping message when type is freeShip', () => {
+  expect(couponSummary({ type: 'freeShip' })).toBe('Free shipping on this order.');
+});
+
