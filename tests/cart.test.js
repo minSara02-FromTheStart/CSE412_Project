@@ -490,3 +490,15 @@ describe('quantity controls', () => {
     expect(JSON.parse(localStorage.getItem('cart'))[0].quantity).toBe(1);
   });
 
+
+
+
+  test('decreaseQuantity removes item at quantity zero', () => {
+    addToCart('Almonds', 500);
+    decreaseQuantity(0);
+    expect(JSON.parse(localStorage.getItem('cart'))).toHaveLength(0);
+  });
+});
+
+describe('updateCart rendering', () => {
+
