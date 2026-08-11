@@ -148,3 +148,16 @@ test('buildSummaryHTML shows fallback message for empty cart', () => {
   expect(html).toContain('No items found in your cart.');
   expect(subtotal).toBe(0);
 });
+
+
+
+//  renderSummary calculates item totals correctly
+test('buildSummaryHTML calculates item totals correctly', () => {
+  const { html, subtotal } = buildSummaryHTML([
+    { product: 'Almonds', price: 500, quantity: 2 },
+    { product: 'Cashew', price: 800, quantity: 1 }
+  ]);
+  expect(subtotal).toBe(1800);
+  expect(html).toContain('Almonds x 2');
+  expect(html).toContain('৳1,000');
+});
