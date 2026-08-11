@@ -211,3 +211,15 @@ test('badge shows min order when minOrder > 0 and not oneTimeOnly', () => {
   const result = mapLiveCoupon({ code: 'ABC', minOrder: 500 });
   expect(result.badge).toBe('Min Order ৳500');
 });
+
+
+
+// mapLiveCoupon falls back to title/code correctly
+test('title falls back to code when no title given', () => {
+  const result = mapLiveCoupon({ code: 'SUMMER25' });
+  expect(result.title).toBe('SUMMER25');
+});
+test('title uses given title when present', () => {
+  const result = mapLiveCoupon({ code: 'SUMMER25', title: 'Summer Sale' });
+  expect(result.title).toBe('Summer Sale');
+});
