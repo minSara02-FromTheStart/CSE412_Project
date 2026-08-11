@@ -114,3 +114,17 @@ describe('validateCoupon — one-time coupon reuse', () => {
     expect(result.message).toContain('already used');
     expect(result.message).toContain('WELCOME50');
   });
+
+
+
+
+  //  accepts a multi-use coupon after previous use
+  test('accepts a multi-use coupon after previous use', () => {
+    const result = validateCoupon('SAVE15', 3000, {
+      usedCoupons: ['SAVE15']
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.code).toBe('SAVE15');
+  });
+});
