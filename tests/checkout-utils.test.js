@@ -83,9 +83,16 @@ test('isValidPhone rejects a phone number with letters', () => {
 
 
 
-// 2. escapeHTML returns empty string for null
+ //escapeHTML returns empty string for null
 test('escapeHTML returns empty string for null', () => {
   expect(escapeHTML(null)).toBe('');
 });
 
+
+
+
+//formatPrice treats undefined as 0
+test('formatPrice treats undefined as 0', () => {
+  expect(formatPrice(undefined)).toBe('৳0');
+});
 
