@@ -543,3 +543,15 @@ describe('openCart / closeCart', () => {
     expect(document.getElementById('cart-sidebar').classList.contains('active')).toBe(true);
     expect(document.getElementById('open-cart-btn').classList.contains('hide')).toBe(true);
   });
+
+
+  test('closeCart removes active sidebar and restores button visibility', () => {
+    document.getElementById('open-cart-btn').dispatchEvent(new Event('click'));
+    document.getElementById('close-cart').dispatchEvent(new Event('click'));
+    expect(document.getElementById('cart-sidebar').classList.contains('active')).toBe(false);
+    expect(document.getElementById('open-cart-btn').classList.contains('hide')).toBe(false);
+  });
+});
+
+describe('cart proxy persistence', () => {
+
