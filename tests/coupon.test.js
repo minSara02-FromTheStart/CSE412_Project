@@ -183,3 +183,10 @@ test('returns free shipping message when type is freeShip', () => {
   expect(couponSummary({ type: 'freeShip' })).toBe('Free shipping on this order.');
 });
 
+
+
+//  couponSummary returns percentage text when value exists
+test('returns percentage-off message when value is present', () => {
+  expect(couponSummary({ value: 20 })).toBe('Get 20% off.');
+});
+
