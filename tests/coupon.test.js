@@ -190,3 +190,9 @@ test('returns percentage-off message when value is present', () => {
   expect(couponSummary({ value: 20 })).toBe('Get 20% off.');
 });
 
+
+
+// couponSummary returns empty string when no type or value
+test('returns empty string when neither type nor value is present', () => {
+  expect(couponSummary({})).toBe('');
+});
