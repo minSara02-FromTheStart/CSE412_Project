@@ -400,3 +400,8 @@ describe("globalThis exposure", () => {
     expect(typeof globalThis.decreaseQuantity).toBe("function");
   });
 });
+
+
+test('addToCart ignores negative price gracefully (does not crash)', () => {
+  expect(() => addToCart('Test Item', -100)).not.toThrow();
+});
