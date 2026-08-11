@@ -536,3 +536,10 @@ describe('updateCheckoutButton', () => {
 
 describe('openCart / closeCart', () => {
 
+
+
+  test('openCart toggles active sidebar and hides open button', () => {
+    document.getElementById('open-cart-btn').dispatchEvent(new Event('click'));
+    expect(document.getElementById('cart-sidebar').classList.contains('active')).toBe(true);
+    expect(document.getElementById('open-cart-btn').classList.contains('hide')).toBe(true);
+  });
