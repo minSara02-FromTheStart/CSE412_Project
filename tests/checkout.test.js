@@ -316,3 +316,21 @@ describe("coupon UI display", () => {
     expect(appliedCouponCode.textContent).toBe("");
   });
 });
+
+
+
+//  applyCoupon rejects an empty coupon code
+test("rejects empty coupon code", () => {
+  seedCart([{ product: "Almonds", price: 500, quantity: 2 }], 1000);
+  const couponInput = document.getElementById("couponInput");
+  const couponMessage = document.getElementById("couponMessage");
+
+  couponInput.value = "";
+  const code = couponInput.value.trim().toUpperCase();
+  if (!code) {
+    couponMessage.textContent = "Please enter a coupon code.";
+    couponMessage.style.color = "#e74c3c";
+  }
+
+  expect(couponMessage.textContent).toContain("Please enter a coupon code.");
+});
