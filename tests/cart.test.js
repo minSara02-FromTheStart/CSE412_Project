@@ -508,3 +508,14 @@ describe('updateCart rendering', () => {
   test('renders empty-cart message when empty', () => {
     expect(document.querySelector('.empty-summary')).not.toBeNull();
   });
+
+
+
+  test('computes the total price correctly', () => {
+    addToCart('Almonds', 500);
+    addToCart('Cashew', 800);
+    expect(document.getElementById('cart-total').textContent).toBe('Total: ৳1300');
+  });
+});
+
+describe('updateCheckoutButton', () => {
