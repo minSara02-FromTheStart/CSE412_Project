@@ -681,7 +681,7 @@ window.addEventListener("load", function () {
     import {
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, where, serverTimestamp, onSnapshot
+        query, orderBy, where, serverTimestamp, onSnapshot, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     
 
@@ -777,7 +777,7 @@ window.addEventListener("load", function () {
         db,
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, where, serverTimestamp,
+        query, orderBy, where, serverTimestamp, runTransaction,
 
         async reloadProducts() {
             const snap = await getDocs(collection(db, 'products'));
