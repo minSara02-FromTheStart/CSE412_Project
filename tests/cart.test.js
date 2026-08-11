@@ -480,3 +480,13 @@ describe('quantity controls', () => {
     expect(cart[1].quantity).toBe(2);
     expect(cart[0].quantity).toBe(1);
 
+
+
+
+    test('decreaseQuantity decreases quantity correctly', () => {
+    addToCart('Almonds', 500);
+    increaseQuantity(0);
+    decreaseQuantity(0);
+    expect(JSON.parse(localStorage.getItem('cart'))[0].quantity).toBe(1);
+  });
+
