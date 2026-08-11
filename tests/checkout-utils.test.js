@@ -169,3 +169,11 @@ test('computeSubmitState disables submit when cart is empty', () => {
   expect(state.disabled).toBe(true);
   expect(state.text).toBe('Cart is empty');
 });
+
+
+//  updateSubmitState enables submit when cart has items
+test('computeSubmitState enables submit when cart has items and user is signed in', () => {
+  const state = computeSubmitState([{ product: 'Almonds', price: 500 }], { uid: 'u1' });
+  expect(state.disabled).toBe(false);
+  expect(state.text).toBe('Confirm Order');
+});
