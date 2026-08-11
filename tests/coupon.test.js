@@ -196,3 +196,10 @@ test('returns percentage-off message when value is present', () => {
 test('returns empty string when neither type nor value is present', () => {
   expect(couponSummary({})).toBe('');
 });
+
+
+//  mapLiveCoupon maps oneTimeOnly to "One-Time Use" badge
+test('badge is "One-Time Use" when oneTimeOnly is true', () => {
+  const result = mapLiveCoupon({ code: 'ABC', oneTimeOnly: true });
+  expect(result.badge).toBe('One-Time Use');
+});
