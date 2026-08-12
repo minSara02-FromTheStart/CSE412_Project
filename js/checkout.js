@@ -452,7 +452,7 @@ function isValidPhone(phone) {
   return /^(01[3-9]\d{8})$/.test(normalized) || /^(3|4|5|6|7|8|9)\d{9}$/.test(normalized);
 }
 
-function prefillCustomer(user, userData) {
+export function prefillCustomer(user, userData) {
   const fullName = document.getElementById("fullName");
   const phone = document.getElementById("phone");
   const email = document.getElementById("email");
