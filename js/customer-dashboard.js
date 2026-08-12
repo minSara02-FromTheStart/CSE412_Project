@@ -1,15 +1,19 @@
-﻿import { auth, db } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc,
   getDoc,
+  updateDoc,
   collection,
   query,
   where,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const CURRENCY = "\u09F3";
+import {
+  TIERS, escapeHTML, getTier, fmtCurrency, toDate, fmtDate,
+  estimateDelivery, orderItemsSummary, statusPillClass, getInitials,
+  orderPoints, safePhoneHref
+} from "./customer-dashboard-utils.js";
 
 const customerNameEl = document.getElementById("customerName");
 const customerAvatarEl = document.getElementById("customerAvatar");
@@ -29,123 +33,6 @@ const offersGrid = document.getElementById("offersGrid");
 const statOrdersEl = document.getElementById("statOrders");
 const statSpentEl = document.getElementById("statSpent");
 const statDeliveredEl = document.getElementById("statDelivered");
-
-const TIERS = [
-  { name: "Bronze", min: 0 },
-  { name: "Silver", min: 50 },
-  { name: "Gold", min: 150 },
-  { name: "Platinum", min: 300 }
-];
-
-function escapeHTML(value) {
-  const div = document.createElement("div");
-  div.textContent = value == null ? "" : String(value);
-  return div.innerHTML;
-}
-
-function getTier(points) {
-  let current = TIERS[0];
-  let next = null;
-
-  for (let i = 0; i < TIERS.length; i++) {
-    if (points >= TIERS[i].min) {
-      current = TIERS[i];
-      next = TIERS[i + 1] || null;
-    }
-  }
-
-  return { current, next };
-}
-
-function fmtCurrency(n) {
-  const num = Number(n) || 0;
-  return CURRENCY + num.toLocaleString();
-}
-
-function toDate(ts) {
-  if (!ts) return null;
-  if (ts.toDate) return ts.toDate();
-  const d = new Date(ts);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function fmtDate(ts) {
-  const d = toDate(ts);
-  if (!d) return "-";
-  return d.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-}
-
-function estimateDelivery(order) {
-  const placed = toDate(order.createdAt) || new Date();
-  const type = (order.deliveryType || "").toLowerCase();
-  const status = order.status || "Pending";
-
-  if (status === "Delivered") return "Delivered";
-  if (status === "Out for Delivery") return "Arriving soon";
-
-  if (type.includes("instant")) {
-    return "Expected today";
-  }
-
-  if (type.includes("pickup")) {
-    return "Ready at pickup point";
-  }
-
-  const earliest = new Date(placed);
-  const latest = new Date(placed);
-  earliest.setDate(earliest.getDate() + 3);
-  latest.setDate(latest.getDate() + 7);
-
-  const opts = { day: "numeric", month: "short" };
-  return `Expected ${earliest.toLocaleDateString("en-GB", opts)} - ${latest.toLocaleDateString("en-GB", opts)}`;
-}
-
-function orderItemsSummary(order) {
-  if (!Array.isArray(order.items) || order.items.length === 0) {
-    return escapeHTML(order.product || "-");
-  }
-
-  return order.items
-    .map(item => `${escapeHTML(item.name)} x ${Number(item.qty) || 1}`)
-    .join(", ");
-}
-
-function statusPillClass(status) {
-  switch (status) {
-    case "Delivered":
-      return "pill pill-delivered";
-    case "Out for Delivery":
-      return "pill pill-outfordelivery";
-    case "Processing":
-      return "pill pill-processing";
-    default:
-      return "pill pill-pending";
-  }
-}
-
-function getInitials(name) {
-  return (name || "Customer")
-    .split(" ")
-    .map(part => part[0]?.toUpperCase())
-    .slice(0, 2)
-    .join("") || "C";
-}
-
-function orderPoints(order) {
-  if (Number.isFinite(Number(order.pointsEarned))) {
-    return Number(order.pointsEarned);
-  }
-
-  return Math.floor((Number(order.grandTotal || order.total) || 0) / 1500);
-}
-
-function safePhoneHref(phone) {
-  return "tel:" + String(phone || "").replace(/[^\d+]/g, "");
-}
 
 function renderProfile(userData) {
   const name = userData.fullName || "Customer";
@@ -285,9 +172,35 @@ function renderActiveOrders(orders) {
   }).join("");
 }
 
+let currentOrders = [];
+
+function ratingCellHTML(order) {
+  if (!order.riderId) {
+    return `<span class="rating-muted">—</span>`;
+  }
+
+  if (order.riderRating) {
+    const filled = "★".repeat(order.riderRating);
+    const empty = "☆".repeat(5 - order.riderRating);
+    return `<span class="stars-display">${filled}${empty}</span>`;
+  }
+
+  if (order.status !== "Delivered") {
+    return `<span class="rating-muted">Rate after delivery</span>`;
+  }
+
+  return `
+    <div class="rate-stars" data-order-id="${escapeHTML(order.id)}">
+      ${[1, 2, 3, 4, 5].map(n => `<span class="rate-star" data-value="${n}">☆</span>`).join("")}
+    </div>
+  `;
+}
+
 function renderHistory(orders) {
+  currentOrders = orders;
+
   if (orders.length === 0) {
-    historyBody.innerHTML = `<tr><td colspan="5" class="empty-cell">No orders yet. Your purchases will show up here.</td></tr>`;
+    historyBody.innerHTML = `<tr><td colspan="6" class="empty-cell">No orders yet. Your purchases will show up here.</td></tr>`;
     return;
   }
 
@@ -300,10 +213,54 @@ function renderHistory(orders) {
         <td>${orderItemsSummary(order)}</td>
         <td>${fmtCurrency(order.grandTotal || order.total)}</td>
         <td><span class="${statusPillClass(status)}">${escapeHTML(status)}</span></td>
+        <td>${ratingCellHTML(order)}</td>
       </tr>
     `;
   }).join("");
 }
+
+// Star hover preview + click-to-submit, delegated on the table body since
+// rows are re-rendered whenever orders reload.
+historyBody.addEventListener("mouseover", (e) => {
+  const star = e.target.closest(".rate-star");
+  if (!star) return;
+  const value = Number(star.dataset.value);
+  const siblings = star.parentElement.querySelectorAll(".rate-star");
+  siblings.forEach((s, i) => {
+    s.classList.toggle("hovered", i < value);
+    s.textContent = i < value ? "★" : "☆";
+  });
+});
+
+historyBody.addEventListener("mouseout", (e) => {
+  const wrap = e.target.closest(".rate-stars");
+  if (!wrap) return;
+  wrap.querySelectorAll(".rate-star").forEach(s => {
+    s.classList.remove("hovered");
+    s.textContent = "☆";
+  });
+});
+
+historyBody.addEventListener("click", async (e) => {
+  const star = e.target.closest(".rate-star");
+  if (!star) return;
+
+  const wrap = star.closest(".rate-stars");
+  const orderId = wrap.dataset.orderId;
+  const value = Number(star.dataset.value);
+
+  wrap.innerHTML = "Saving...";
+
+  try {
+    await updateDoc(doc(db, "orders", orderId), { riderRating: value });
+    const order = currentOrders.find(o => o.id === orderId);
+    if (order) order.riderRating = value;
+    renderHistory(currentOrders);
+  } catch (err) {
+    console.error("Failed to save rating:", err);
+    wrap.innerHTML = `<span class="rating-muted">Failed to save, try again</span>`;
+  }
+});
 
 function renderStats(orders) {
   const delivered = orders.filter(order => order.status === "Delivered").length;
@@ -366,5 +323,3 @@ onAuthStateChanged(auth, async (user) => {
 
   init(user, userData);
 });
-
-

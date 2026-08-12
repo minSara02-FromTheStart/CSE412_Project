@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products - NutriNest</title>
+  <meta name="description" content="Browse NutriNest's full range of premium dry fruits, fruit powders, and superfoods — 100% natural, delivered to your door.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/cart.css">
   <link rel="stylesheet" href="css/search.css">
@@ -349,24 +351,24 @@
   <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
           <div class="sidebar-logo">
-              <span>🌿</span>
+              <span><i data-lucide="leaf"></i></span>
               <span>NutriNest</span>
           </div>
-          <button class="sidebar-close" id="sidebarClose">✕</button>
+          <button class="sidebar-close" id="sidebarClose"><i data-lucide="x"></i></button>
       </div>
       <nav class="sidebar-nav">
-          <a href="index.html" class="sidebar-link">🏠 Home</a>
-          <a href="about.html" class="sidebar-link">🌿 About</a>
+          <a href="index.html" class="sidebar-link"><i data-lucide="home"></i> Home</a>
+          <a href="about.html" class="sidebar-link"><i data-lucide="leaf"></i> About</a>
           <div class="sidebar-dropdown">
               <div class="sidebar-link dropdown-toggle" id="productToggle">
-                  🛍️ Products <span class="arrow">▸</span>
+                  <i data-lucide="shopping-bag"></i> Products <span class="arrow">▸</span>
               </div>
               <div class="sidebar-submenu" id="productSubmenu">
-                  <a href="products.html?category=Popular" class="sidebar-sublink">⭐ Popular Products</a>
-                  <a href="products.html?category=Mom" class="sidebar-sublink">🤱 Mom & Baby Pack</a>
-                  <a href="products.html?category=Gym" class="sidebar-sublink">💪 Gym Pack</a>
-                  <a href="products.html?category=Family" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                  <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
+                  <a href="products.html?category=Popular" class="sidebar-sublink"><i data-lucide="star"></i> Popular Products</a>
+                  <a href="products.html?category=Mom" class="sidebar-sublink"><i data-lucide="baby"></i> Mom & Baby Pack</a>
+                  <a href="products.html?category=Gym" class="sidebar-sublink"><i data-lucide="dumbbell"></i> Gym Pack</a>
+                  <a href="products.html?category=Family" class="sidebar-sublink"><i data-lucide="users"></i> Family Pack</a>
+                  <a href="products.html?category=Gift" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
               </div>
           </div>
           <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
@@ -379,9 +381,9 @@
 
   <header class="navbar">
     <div class="logo">
-      <span class="menu-icon">☰</span>
+      <span class="menu-icon"><i data-lucide="menu"></i></span>
       <div>
-        <h1>NutriNest</h1>
+        <h1><i data-lucide="leaf"></i> NutriNest</h1>
         <p class="tagline">PURE & NATURAL</p>
       </div>
     </div>
@@ -504,10 +506,19 @@ Search
     </section>
   </main>
 
+  <div class="coupon-overlay" id="couponOverlay"></div>
+  <div class="coupon-panel" id="couponPanel">
+    <div class="coupon-panel-header">
+      <h2>Available Coupons</h2>
+      <button class="coupon-close-btn" id="closeCouponBtn"><i data-lucide="x"></i></button>
+    </div>
+    <div id="couponList" class="coupon-list"></div>
+  </div>
+
   <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
       <h2>Your Cart</h2>
-      <button id="close-cart">✖</button>
+      <button id="close-cart"><i data-lucide="x"></i></button>
     </div>
 
     <div id="cart-items"></div>
@@ -518,11 +529,15 @@ Search
     </div>
   </div>
 
-  <button id="open-cart-btn">🛒 Cart</button>
+  <button id="open-cart-btn"><i data-lucide="shopping-cart"></i> Cart</button>
 
   <script src="js/cart.js"></script>
+  <script type="module" src="js/wishlist.js"></script>
+  <script src="js/quickview.js"></script>
+  <script type="module" src="js/products-feed.js"></script>
+  <script src="js/coupon.js"></script>
   <script src="js/script.js"></script>
-  <script src = "js/search.js"></script>
+  <script src="js/search.js"></script>
   <script type="module" src="js/userStatus.js"></script>
   <script src="js/categoryFilter.js"></script>
 

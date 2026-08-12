@@ -46,6 +46,82 @@ const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
 let subtotal = Number(localStorage.getItem("cartTotal")) || 0;
 let currentUser = null;
 let currentUserData = {};
+let appliedCoupon = null;
+let appliedDiscount = 0;
+
+// Coupon definitions
+let couponList = [
+    {
+        code: "FIRST10",
+        badge: "New Customer",
+        title: "10% Off First Purchase",
+        desc: "Get 10% off on all products when you shop with us for the first time. Apply this code at checkout.",
+        type: "percentage",
+        value: 10,
+        minOrder: 0,
+        oneTimeOnly: true
+    },
+    {
+        code: "SAVE15",
+        badge: "Min Order ৳2000",
+        title: "15% Off on Orders Above ৳2000",
+        desc: "Spend ৳2000 or more on any product and get a flat 15% discount using this code.",
+        type: "percentage",
+        value: 15,
+        minOrder: 2000,
+        oneTimeOnly: false
+    },
+    {
+        code: "FLASH20",
+        badge: "Limited Time",
+        title: "20% Off Flash Sale Items",
+        desc: "Use this code on any item listed under Flash Sales to enjoy an extra 20% discount.",
+        type: "percentage",
+        value: 20,
+        minOrder: 0,
+        oneTimeOnly: false
+    },
+    {
+        code: "FREESHIP",
+        badge: "Delivery",
+        title: "Free Delivery on Orders Above ৳1000",
+        desc: "Skip the delivery charge entirely when your order total crosses ৳1000.",
+        type: "freeShip",
+        value: 0,
+        minOrder: 1000,
+        oneTimeOnly: false
+    }
+];
+
+// Load custom coupons from Firestore
+async function loadCustomCoupons() {
+  try {
+    const snapshot = await getDocs(collection(db, "custom_coupons"));
+    snapshot.forEach(doc => {
+      const customCoupon = { id: doc.id, ...doc.data() };
+      // Merge with built-in coupons (avoid duplicates)
+      if (!couponList.find(c => c.code === customCoupon.code)) {
+        couponList.push(customCoupon);
+      }
+    });
+  } catch (err) {
+    console.error("Error loading custom coupons:", err);
+  }
+}
+
+const couponStrategy = {
+  percentage: {
+    calculate: ({ subtotal, value }) => (subtotal * value) / 100
+  },
+  freeShip: {
+    calculate: () => 0
+  }
+};
+
+function calculateCouponDiscount(coupon) {
+  const strategy = couponStrategy[coupon.type] || couponStrategy.percentage;
+  return strategy.calculate({ subtotal, value: coupon.value });
+}
 
 function escapeHTML(value) {
   const div = document.createElement("div");
@@ -74,12 +150,6 @@ function updateSubmitState() {
   if (cartItems.length === 0) {
     submitBtn.disabled = true;
     submitBtn.textContent = "Cart is empty";
-    return;
-  }
-
-  if (!currentUser) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Checking account...";
     return;
   }
 
@@ -204,6 +274,147 @@ deliveryOptions.forEach(option => {
   option.addEventListener("change", updateTotal);
 });
 
+// =====================
+// COUPON APPLICATION LOGIC
+// =====================
+
+async function hasUserUsedCoupon(couponCode) {
+  // Only applies to logged-in users
+  if (!currentUser) return false;
+
+  try {
+    // Query for any orders by this user with this coupon code
+    const ordersQuery = query(
+      collection(db, "orders"),
+      where("uid", "==", currentUser.uid),
+      where("discountCode", "==", couponCode)
+    );
+    const snapshot = await getDocs(ordersQuery);
+    return snapshot.size > 0;
+  } catch (error) {
+    console.error("Error checking coupon usage:", error);
+    return false;
+  }
+}
+
+async function applyCoupon() {
+  const couponInput = document.getElementById("couponInput");
+  const couponMessage = document.getElementById("couponMessage");
+  const appliedCouponCode = document.getElementById("appliedCouponCode");
+
+  if (!couponInput || !couponMessage) return;
+
+  const code = couponInput.value.trim().toUpperCase();
+
+  if (!code) {
+    couponMessage.textContent = "Please enter a coupon code.";
+    couponMessage.style.color = "#e74c3c";
+    appliedCoupon = null;
+    appliedDiscount = 0;
+    updateTotal();
+    return;
+  }
+
+  const coupon = couponList.find(c => c.code === code);
+
+  if (!coupon) {
+    couponMessage.textContent = "Invalid coupon code.";
+    couponMessage.style.color = "#e74c3c";
+    appliedCoupon = null;
+    appliedDiscount = 0;
+    updateTotal();
+    return;
+  }
+
+  // Check if this is a one-time coupon that user has already used
+  if (coupon.oneTimeOnly) {
+    const alreadyUsed = await hasUserUsedCoupon(code);
+    if (alreadyUsed) {
+      couponMessage.textContent = `You have already used the "${code}" coupon. This coupon can only be used once.`;
+      couponMessage.style.color = "#e74c3c";
+      appliedCoupon = null;
+      appliedDiscount = 0;
+      updateTotal();
+      return;
+    }
+  }
+
+  // Check minimum order requirement
+  if (subtotal < coupon.minOrder) {
+    couponMessage.textContent = `Minimum order ৳${coupon.minOrder} required for this coupon.`;
+    couponMessage.style.color = "#e74c3c";
+    appliedCoupon = null;
+    appliedDiscount = 0;
+    updateTotal();
+    return;
+  }
+
+  // Calculate discount
+  const discount = calculateCouponDiscount(coupon);
+
+  appliedCoupon = coupon;
+  appliedDiscount = discount;
+
+  couponMessage.textContent = `Coupon "${code}" applied successfully! You save ৳${Math.floor(discount)}.`;
+  couponMessage.style.color = "#27ae60";
+
+  if (appliedCouponCode) {
+    appliedCouponCode.textContent = `(${code})`;
+  }
+
+  // Hide apply button and show remove button
+  const applyCouponBtn = document.getElementById("applyCouponBtn");
+  const removeCouponBtn = document.getElementById("removeCouponBtn");
+  if (applyCouponBtn) applyCouponBtn.style.display = "none";
+  if (removeCouponBtn) removeCouponBtn.style.display = "block";
+
+  updateTotal();
+}
+
+function removeCoupon() {
+  const couponInput = document.getElementById("couponInput");
+  const couponMessage = document.getElementById("couponMessage");
+  const appliedCouponCode = document.getElementById("appliedCouponCode");
+  const applyCouponBtn = document.getElementById("applyCouponBtn");
+  const removeCouponBtn = document.getElementById("removeCouponBtn");
+
+  appliedCoupon = null;
+  appliedDiscount = 0;
+
+  if (couponInput) couponInput.value = "";
+  if (couponMessage) couponMessage.textContent = "";
+  if (appliedCouponCode) appliedCouponCode.textContent = "";
+  
+  // Show apply button and hide remove button
+  if (applyCouponBtn) applyCouponBtn.style.display = "block";
+  if (removeCouponBtn) removeCouponBtn.style.display = "none";
+
+  updateTotal();
+}
+
+// Attach coupon button events
+const applyCouponBtn = document.getElementById("applyCouponBtn");
+const removeCouponBtn = document.getElementById("removeCouponBtn");
+
+if (applyCouponBtn) {
+  applyCouponBtn.addEventListener("click", applyCoupon);
+}
+
+if (removeCouponBtn) {
+  removeCouponBtn.addEventListener("click", removeCoupon);
+}
+
+// Allow Enter key in coupon input
+const couponInput = document.getElementById("couponInput");
+if (couponInput) {
+  couponInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyCoupon();
+    }
+  });
+}
+
 function showError(input, message) {
   const group = input.closest(".input-group");
   group.classList.add("error");
@@ -234,7 +445,11 @@ function isValidEmail(email) {
 }
 
 function isValidPhone(phone) {
-  return /^01[3-9]\d{8}$/.test(phone);
+  const cleaned = String(phone || "").trim();
+  if (!cleaned) return false;
+
+  const normalized = cleaned.replace(/^\+88/, "").replace(/^88/, "").replace(/[^0-9]/g, "");
+  return /^(01[3-9]\d{8})$/.test(normalized) || /^(3|4|5|6|7|8|9)\d{9}$/.test(normalized);
 }
 
 function prefillCustomer(user, userData) {
@@ -257,26 +472,35 @@ function getSelectedDeliveryLabel() {
 async function decrementStock(orderItems) {
   for (const item of orderItems) {
     try {
+      const matchCandidates = [];
+
+      if (item.id) {
+        matchCandidates.push(doc(db, "products", item.id));
+      }
+
       const productsQuery = query(collection(db, "products"), where("name", "==", item.name));
       const snap = await getDocs(productsQuery);
+      if (!snap.empty) {
+        snap.docs.forEach(docSnap => matchCandidates.push(docSnap.ref));
+      }
 
-      if (snap.empty) {
+      const uniqueRefs = [...new Map(matchCandidates.map(ref => [ref.path, ref])).values()];
+
+      if (uniqueRefs.length === 0) {
         console.warn(`No product found matching "${item.name}", stock not updated.`);
         continue;
       }
 
-      const productRef = snap.docs[0].ref;
+      for (const productRef of uniqueRefs) {
+        await runTransaction(db, async (transaction) => {
+          const productSnap = await transaction.get(productRef);
+          if (!productSnap.exists()) return;
 
-      // Transaction avoids two simultaneous orders both reading the same
-      // "old" stock number and overwriting each other's update.
-      await runTransaction(db, async (transaction) => {
-        const productSnap = await transaction.get(productRef);
-        if (!productSnap.exists()) return;
-
-        const currentStock = Number(productSnap.data().stock) || 0;
-        const newStock = Math.max(0, currentStock - item.qty);
-        transaction.update(productRef, { stock: newStock });
-      });
+          const currentStock = Number(productSnap.data().stock) || 0;
+          const newStock = Math.max(0, currentStock - item.qty);
+          transaction.update(productRef, { stock: newStock });
+        });
+      }
     } catch (err) {
       console.error(`Failed to update stock for "${item.name}":`, err);
     }
@@ -284,8 +508,12 @@ async function decrementStock(orderItems) {
 }
 
 async function saveOrderToFirestore(formValues) {
-  if (!currentUser) {
-    throw new Error("Customer must be signed in before placing an order.");
+  const deliveryFee = selectedDeliveryFee();
+  let finalDelivery = deliveryFee;
+
+  // Apply free shipping if FREESHIP coupon is active
+  if (appliedCoupon && appliedCoupon.code === "FREESHIP" && subtotal >= appliedCoupon.minOrder) {
+    finalDelivery = 0;
   }
 
   const deliveryFee = selectedDeliveryFee();
@@ -294,14 +522,17 @@ async function saveOrderToFirestore(formValues) {
   const pointsEarned = Math.floor(grandTotal / 100);
 
   const orderItems = cartItems.map(item => ({
+    id: item.id || "",
     name: item.product,
     qty: Number(item.quantity) || 1,
     price: Number(item.price) || 0
   }));
 
   const orderData = {
-    customerId: currentUser.uid,
-    uid: currentUser.uid,
+    customerId: currentUser ? currentUser.uid : "",
+    uid: currentUser ? currentUser.uid : "",
+    customerType: currentUser ? "registered" : "guest",
+    isGuest: !currentUser,
     fullName: formValues.fullName,
     phone: formValues.phone,
     email: formValues.email,
@@ -309,7 +540,9 @@ async function saveOrderToFirestore(formValues) {
     notes: formValues.notes,
     items: orderItems,
     subtotal,
-    deliveryFee,
+    discount: appliedDiscount,
+    discountCode: appliedCoupon ? appliedCoupon.code : "",
+    deliveryFee: finalDelivery,
     deliveryType: getSelectedDeliveryLabel(),
     couponCode: appliedCoupon ? appliedCoupon.code : "",
     discountAmount: discount,
@@ -331,14 +564,6 @@ async function saveOrderToFirestore(formValues) {
 if (checkoutForm) {
   checkoutForm.addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    if (!currentUser) {
-      setCheckoutMessage("Please log in as a customer before placing an order.", "#c0392b");
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1000);
-      return;
-    }
 
     if (cartItems.length === 0) {
       setCheckoutMessage("Your cart is empty. Add products before confirming.", "#c0392b");
@@ -374,7 +599,7 @@ if (checkoutForm) {
       firstError ??= phone;
     }
 
-    if (!isValidEmail(email.value.trim())) {
+    if (email.value.trim() && !isValidEmail(email.value.trim())) {
       showError(email, "Enter a valid email.");
       valid = false;
       firstError ??= email;
@@ -406,13 +631,15 @@ if (checkoutForm) {
           : ""
       });
 
-      setCheckoutMessage(`Your order is confirmed. You earned ${result.pointsEarned} points!`);
+      setCheckoutMessage(currentUser
+        ? `Your order is confirmed. You earned ${result.pointsEarned} points!`
+        : "Your order is confirmed. Thank you for shopping with NutriNest!");
 
       localStorage.removeItem("cart");
       localStorage.removeItem("cartTotal");
 
       setTimeout(() => {
-        window.location.href = "customer-dashboard.html";
+        window.location.href = "index.html";
       }, 1600);
     } catch (err) {
       console.error("Order save failed:", err);
@@ -426,11 +653,9 @@ if (checkoutForm) {
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     currentUser = null;
+    currentUserData = {};
     updateSubmitState();
-    setCheckoutMessage("Please log in to place an order and earn loyalty points.", "#c0392b");
-    setTimeout(() => {
-      window.location.href = "login.html";
-    }, 1200);
+    setCheckoutMessage("Checking out as a guest. Fill in your delivery details to place the order.");
     return;
   }
 
@@ -452,6 +677,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUserData = userData;
   prefillCustomer(user, currentUserData);
   updateSubmitState();
+  loadCustomCoupons(); // Load custom loyalty coupons from Firestore
 });
 
 renderSummary();

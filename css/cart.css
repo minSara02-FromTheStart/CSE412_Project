@@ -98,7 +98,9 @@
 
 .products-cart-open .product-container {
 
-    grid-template-columns: repeat(3,1fr);
+    display: grid;
+    grid-template-columns: repeat(4, 100fr);
+    gap: 20px;
 
 }
 

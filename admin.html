@@ -6,6 +6,10 @@
     <title>Admin Panel - NutriNest</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 <body>
 
@@ -14,7 +18,7 @@
     <!-- ───────── SIDEBAR ───────── -->
     <aside class="admin-sidebar" id="adminSidebar">
         <div class="sb-brand">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <div>
                 <h2>NutriNest</h2>
                 <p>Admin Panel</p>
@@ -22,19 +26,22 @@
         </div>
         <nav class="sb-nav">
             <span class="sb-section">Overview</span>
-            <a class="sb-link active" data-page="dashboard"><span class="sb-icon">📊</span> Dashboard</a>
+            <a class="sb-link active" data-page="dashboard"><span class="sb-icon"><i data-lucide="bar-chart-3"></i></span> Dashboard</a>
 
             <span class="sb-section">Catalogue</span>
-            <a class="sb-link" data-page="products"><span class="sb-icon">📦</span> Products</a>
+            <a class="sb-link" data-page="products"><span class="sb-icon"><i data-lucide="package"></i></span> Products</a>
+            <a class="sb-link" data-page="inventory"><span class="sb-icon"><i data-lucide="boxes"></i></span> Inventory</a>
 
             <span class="sb-section">Commerce</span>
-            <a class="sb-link" data-page="orders"><span class="sb-icon">🛍️</span> Orders</a>
-            <a class="sb-link" data-page="customers"><span class="sb-icon">👥</span> Customers</a>
-            <a class="sb-link" data-page="riders"><span class="sb-icon">🏍️</span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
+            <a class="sb-link" data-page="orders"><span class="sb-icon"><i data-lucide="shopping-bag"></i></span> Orders</a>
+            <a class="sb-link" data-page="customers"><span class="sb-icon"><i data-lucide="users"></i></span> Customers</a>
+            <a class="sb-link" data-page="riders"><span class="sb-icon"><i data-lucide="bike"></i></span> Riders <span class="pending-badge" id="riderPendingBadge" style="display:none;"></span></a>
+            <a class="sb-link" data-page="loyalty"><span class="sb-icon"><i data-lucide="gift"></i></span> Loyalty & Coupons</a>
 
             <span class="sb-section">System</span>
-            <a class="sb-link" data-page="settings"><span class="sb-icon">⚙️</span> Settings</a>
-            <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon">🚪</span> Logout</a>
+            <a class="sb-link" data-page="adminsetup"><span class="sb-icon"><i data-lucide="shield"></i></span> Admin Setup</a>
+            <a class="sb-link" data-page="settings"><span class="sb-icon"><i data-lucide="settings"></i></span> Settings</a>
+            <a class="sb-link sb-logout" href="logout.html"><span class="sb-icon"><i data-lucide="log-out"></i></span> Logout</a>
         </nav>
     </aside>
 
@@ -43,7 +50,7 @@
 
         <header class="admin-topbar">
             <div class="topbar-left">
-                <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+                <button class="sidebar-toggle" id="sidebarToggle"><i data-lucide="menu"></i></button>
                 <h1 id="topbarTitle">Dashboard</h1>
             </div>
             <div class="topbar-right">
@@ -58,25 +65,25 @@
             <section class="page active" id="page-dashboard">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon si-green">💰</div>
+                        <div class="stat-icon si-green"><i data-lucide="wallet"></i></div>
                         <p class="stat-label">Total Revenue</p>
                         <h3 class="stat-value" id="stat-revenue">৳0</h3>
                         <p class="stat-trend up" id="stat-revenue-trend">Updated live</p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-amber">🛍️</div>
+                        <div class="stat-icon si-amber"><i data-lucide="shopping-bag"></i></div>
                         <p class="stat-label">Total Orders</p>
                         <h3 class="stat-value" id="stat-orders">0</h3>
                         <p class="stat-trend up" id="stat-orders-trend"></p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-blue">👥</div>
+                        <div class="stat-icon si-blue"><i data-lucide="users"></i></div>
                         <p class="stat-label">Customers</p>
                         <h3 class="stat-value" id="stat-customers">0</h3>
                         <p class="stat-trend up" id="stat-customers-trend">Registered users</p>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon si-red">⏳</div>
+                        <div class="stat-icon si-red"><i data-lucide="hourglass"></i></div>
                         <p class="stat-label">Pending Orders</p>
                         <h3 class="stat-value" id="stat-pending">0</h3>
                         <p class="stat-trend down" id="stat-pending-trend">Needs attention</p>
@@ -116,12 +123,45 @@
                             <canvas id="salesChart"></canvas>
                         </div>
                     </div>
+                </div>
+            </section>
 
-                    <div class="panel">
-                        <div class="panel-head"><h3>Stock Levels</h3></div>
-                        <div style="padding:16px; height:280px;">
-                            <canvas id="stockChart"></canvas>
+            <!-- ── INVENTORY ── -->
+            <section class="page" id="page-inventory">
+                <div class="page-header">
+                    <h2>Inventory</h2>
+                    <span class="product-count" id="inventoryPageCount">0 products</span>
+                </div>
+                <div class="panel">
+                    <div class="inventory-summary inventory-summary-page">
+                        <div class="inventory-kpi">
+                            <span>Total products</span>
+                            <strong id="inventoryPageTotal">0</strong>
                         </div>
+                        <div class="inventory-kpi warning">
+                            <span>Low stock</span>
+                            <strong id="inventoryPageLow">0</strong>
+                        </div>
+                        <div class="inventory-kpi danger">
+                            <span>Out of stock</span>
+                            <strong id="inventoryPageOut">0</strong>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryPageBody">
+                                <tr><td colspan="5" class="empty-cell">Loading inventory...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -137,9 +177,11 @@
                         <input type="text" id="productSearch" placeholder="Search products..." class="filter-input">
                         <select id="categoryFilter" class="filter-select">
                             <option value="">All categories</option>
-                            <option value="Nuts">Nuts</option>
-                            <option value="Dry Fruits">Dry Fruits</option>
-                            <option value="Superfoods">Superfoods</option>
+                            <option value="Popular">Popular Products</option>
+                            <option value="Mom">Mom & Baby Pack</option>
+                            <option value="Gym">Gym Pack</option>
+                            <option value="Family">Family Pack</option>
+                            <option value="Gift">Gift Pack</option>
                         </select>
                         <select id="sourceFilter" class="filter-select">
                             <option value="">All sources</option>
@@ -243,9 +285,146 @@
                 </div>
             </section>
 
+            <!-- ── LOYALTY & COUPONS ── -->
+            <section class="page" id="page-loyalty">
+                <div class="page-header"><h2>Loyalty & Coupons</h2></div>
+                
+                <div class="settings-grid">
+                    <!-- Create New Coupon -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Create Custom Coupon</h3></div>
+                        <div class="settings-body">
+                            <input type="hidden" id="couponEditId" value="">
+                            <div class="field-group">
+                                <label>Coupon Code</label>
+                                <input type="text" id="newCouponCode" placeholder="e.g., LOYALTY50" maxlength="20">
+                            </div>
+                            <div class="field-group">
+                                <label>Title</label>
+                                <input type="text" id="newCouponTitle" placeholder="e.g., Special Loyalty Offer">
+                            </div>
+                            <div class="field-group">
+                                <label>Description</label>
+                                <textarea id="newCouponDesc" rows="2" placeholder="Coupon details..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Discount Type</label>
+                                    <select id="newCouponType">
+                                        <option value="percentage">Percentage Off</option>
+                                        <option value="freeShip">Free Shipping</option>
+                                    </select>
+                                </div>
+                                <div class="field-group">
+                                    <label>Discount Value (%)</label>
+                                    <input type="number" id="newCouponValue" min="0" max="100" placeholder="10">
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label>Min Order Amount (৳)</label>
+                                <input type="number" id="newCouponMinOrder" min="0" placeholder="0">
+                            </div>
+                            <div class="field-group">
+                                <label>
+                                    <input type="checkbox" id="newCouponOneTime">
+                                    One-Time Only (Can be used once per customer)
+                                </label>
+                            </div>
+                            <button class="primary-btn" id="createCouponBtn">Create Coupon</button>
+                            <p class="settings-msg" id="couponCreateMsg"></p>
+                        </div>
+                    </div>
+
+                    <!-- Auto-Reward Top Spenders -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Auto-Reward Top Spenders</h3></div>
+                        <div class="settings-body">
+                            <p class="panel-subtext">
+                                Coupons are no longer assigned manually. The website ranks customers by
+                                total spend and rewards the highest spenders automatically when you run it below.
+                            </p>
+                            <div class="field-group">
+                                <label>Select Coupon to Reward With</label>
+                                <select id="autoAssignCouponSelect">
+                                    <option value="">-- Select a coupon --</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="field-group">
+                                    <label>Reward Top</label>
+                                    <input type="number" id="autoAssignTopCount" min="1" max="500" value="10">
+                                </div>
+                                <div class="field-group">
+                                    <label>Minimum Total Spend (৳)</label>
+                                    <input type="number" id="autoAssignMinSpend" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="field-group">
+                                <label class="inline-checkbox">
+                                    <input type="checkbox" id="autoAssignDeliveredOnly" checked>
+                                    Count only Delivered orders as spend
+                                </label>
+                            </div>
+                            <button class="primary-btn" id="autoAssignBtn"><i data-lucide="target"></i> Auto-Assign to Top Spenders</button>
+                            <p class="settings-msg" id="couponAssignMsg"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Spenders -->
+                <div class="panel">
+                    <div class="panel-head"><h3>Top Spenders</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Rank</th><th>Customer</th><th>Email</th><th>Orders</th><th>Total Spent</th><th>Reward Status</th></tr>
+                            </thead>
+                            <tbody id="topSpenders-body">
+                                <tr><td colspan="6" class="empty-cell">No spending data yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Coupons List -->
+                <div class="panel">
+                    <div class="panel-head"><h3>All Coupons</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Code</th><th>Title</th><th>Discount</th><th>Min Order</th><th>One-Time</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="coupons-body">
+                                <tr><td colspan="6" class="empty-cell">No custom coupons yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Auto-Assignments -->
+                <div class="panel">
+                    <div class="panel-head"><h3>Recent Auto-Assignments</h3></div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Customer</th><th>Email</th><th>Coupon</th><th>Total Spent</th><th>Assigned</th><th>Seen</th><th>Used</th></tr>
+                            </thead>
+                            <tbody id="assignments-body">
+                                <tr><td colspan="7" class="empty-cell">No coupons have been auto-assigned yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- ── SETTINGS ── -->
             <section class="page" id="page-settings">
-                <div class="page-header"><h2>Settings</h2></div>
+                <div class="page-header">
+                    <h2>Settings</h2>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="primary-btn" type="button" id="sendOfferAlertBtn" onclick="triggerFlashSaleAlert()">Send flash sale alert</button>
+                    </div>
+                </div>
                 <div class="settings-grid">
                     <div class="panel settings-panel">
                         <div class="panel-head"><h3>Store Information</h3></div>
@@ -282,12 +461,56 @@
                                 <label>Standard delivery (৳)</label>
                                 <input type="number" id="feeStandard" value="60">
                             </div>
-                            <div class="field-group">
-                                <label>Pickup</label>
-                                <input type="text" value="Free" disabled>
-                            </div>
+                            
                             <button class="primary-btn" id="saveDelivery">Save fees</button>
                             <p class="settings-msg" id="deliveryMsg"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ── ADMIN SETUP ── -->
+            <section class="page" id="page-adminsetup">
+                <div class="page-header"><h2>Admin Setup</h2></div>
+
+                <div class="info" style="background:#FEF3C7;border-left:4px solid #D97706;padding:14px 16px;border-radius:6px;margin-bottom:20px;font-size:13px;color:#92400E;line-height:1.6;">
+                    <i data-lucide="alert-triangle"></i> <strong>Sensitive area.</strong> Granting Admin gives full access to this panel — products, orders,
+                    customer data, and coupons. Only promote people you trust. The person must sign up first
+                    (as Customer or Deliveryman) before you can find and promote them here.
+                </div>
+
+                <div class="settings-grid">
+                    <!-- Step 1: Find user -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Step 1 — Find User</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>User's Email</label>
+                                <input type="email" id="setupLookupEmail" placeholder="user@example.com">
+                            </div>
+                            <button class="primary-btn" id="setupFindUserBtn"><i data-lucide="search"></i> Find User</button>
+                            <p class="settings-msg" id="setupLookupMsg"></p>
+                            <div class="uid-display" id="setupUidDisplay" style="display:none;background:#F3F4F6;padding:10px;border-radius:6px;font-family:monospace;font-size:12px;word-break:break-all;color:#1F2937;margin-top:8px;border:1px solid #E5E7EB;">
+                                <strong>Firebase UID:</strong><br>
+                                <span id="setupUidValue"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Grant admin -->
+                    <div class="panel settings-panel">
+                        <div class="panel-head"><h3>Step 2 — Grant Admin Role</h3></div>
+                        <div class="settings-body">
+                            <div class="field-group">
+                                <label>Firebase UID</label>
+                                <input type="text" id="setupUserUID" placeholder="Use Find User above, or paste a UID">
+                            </div>
+                            <div class="field-group">
+                                <label>Full Name</label>
+                                <input type="text" id="setupAdminName" placeholder="Admin Name" value="Admin">
+                            </div>
+                            <button class="primary-btn" id="setupGrantAdminBtn"><i data-lucide="check-circle"></i> Grant Admin Role</button>
+                            <p class="settings-msg" id="setupGrantMsg"></p>
                         </div>
                     </div>
                 </div>
@@ -302,7 +525,7 @@
     <div class="modal-box">
         <div class="modal-head">
             <h3 id="modalTitle">Add New Product</h3>
-            <button class="modal-close" id="closeProductModal">✕</button>
+            <button class="modal-close" id="closeProductModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <input type="hidden" id="editProductId">
@@ -322,20 +545,54 @@
                 <div class="field-group">
                     <label>Category</label>
                     <select id="productCategory">
-                        <option value="Nuts">Nuts</option>
-                        <option value="Dry Fruits">Dry Fruits</option>
-                        <option value="Superfoods">Superfoods</option>
+                        <option value="Popular">Popular Products</option>
+                        <option value="Mom">Mom & Baby Pack</option>
+                        <option value="Gym">Gym Pack</option>
+                        <option value="Family">Family Pack</option>
+                        <option value="Gift">Gift Pack</option>
                     </select>
                 </div>
             </div>
             <div class="field-group">
-                <label>Image URL</label>
-                <input type="url" id="productImage" placeholder="https://...">
+                <label>Product Image</label>
+                <input type="file" id="productImageFile" accept="image/*">
+                <div id="productImagePreview" style="margin-top:10px;"></div>
+                <input type="hidden" id="productImage">
             </div>
             <div class="field-group">
                 <label>Description</label>
                 <textarea id="productDesc" rows="2" placeholder="Short product description..."></textarea>
             </div>
+
+            <div class="field-group" style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
+                    <input type="checkbox" id="productOnOffer" style="width:auto;">
+                    <i data-lucide="tag"></i> Show on Offers page
+                </label>
+            </div>
+            <div class="form-row">
+                <div class="field-group">
+                    <label>Original Price ৳ <span style="font-weight:400;color:var(--text-muted);">(before discount)</span></label>
+                    <input type="number" id="productOriginalPrice" placeholder="e.g. 1500" min="0">
+                </div>
+                <div class="field-group">
+                    <label>Discount % <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                    <input type="number" id="productDiscount" placeholder="e.g. 20" min="0" max="100">
+                </div>
+            </div>
+            <p style="font-size:12px;color:var(--text-muted);margin:-8px 0 0;">Fill both and the Price field above will be calculated for you — you can still adjust it by hand afterward.</p>
+
+            <div class="field-group" style="border-top:1px solid var(--border);padding-top:14px;">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;">
+                    <input type="checkbox" id="productFlashSale" style="width:auto;">
+                    <i data-lucide="zap"></i> Show on Flash Sale page
+                </label>
+            </div>
+            <div class="field-group" id="flashSaleEndGroup" style="display:none;">
+                <label>Flash sale ends *</label>
+                <input type="datetime-local" id="productFlashSaleEnd">
+            </div>
+
             <p class="modal-error" id="productError"></p>
         </div>
         <div class="modal-footer">
@@ -350,7 +607,7 @@
     <div class="modal-box modal-sm">
         <div class="modal-head">
             <h3>Update Order Status</h3>
-            <button class="modal-close" id="closeOrderModal">✕</button>
+            <button class="modal-close" id="closeOrderModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <p id="orderModalInfo" class="order-modal-info"></p>
@@ -377,7 +634,7 @@
     <div class="modal-box modal-sm">
         <div class="modal-head">
             <h3>Assign Rider</h3>
-            <button class="modal-close" id="closeAssignRiderModal">✕</button>
+            <button class="modal-close" id="closeAssignRiderModal"><i data-lucide="x"></i></button>
         </div>
         <div class="modal-body">
             <p id="assignRiderInfo" class="order-modal-info"></p>
@@ -403,7 +660,19 @@
 <!-- Chart.js powers the sales & stock charts on the dashboard -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
+<!-- EmailJS for sending emails -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser/dist/email.min.js"></script>
+<script>
+window.addEventListener("load", function () {
+    emailjs.init({
+        publicKey: "StGrNaDDao53u1aoA"
+    });
+});
+</script>
+
 <!-- admin.js must load BEFORE the Firebase module so window.renderAll is defined -->
+<script src="js/newsletterService.js"></script>
+<script src="js/loyaltyService.js"></script>
 <script src="js/admin.js"></script>
 
 <script type="module">
@@ -412,8 +681,10 @@
     import {
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy, serverTimestamp, onSnapshot
+        query, orderBy, where, serverTimestamp, onSnapshot, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+
 
     /* ── The 9 hardcoded products that live in index.html / products.html ──
        We seed them into Firestore the first time (source:"website").
@@ -506,7 +777,7 @@
         db,
         doc, getDoc, setDoc,
         collection, getDocs, addDoc, updateDoc, deleteDoc,
-        query, orderBy,
+        query, orderBy, where, serverTimestamp, runTransaction,
 
         async reloadProducts() {
             const snap = await getDocs(collection(db, 'products'));
@@ -517,7 +788,17 @@
             window.adminData.orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         }
     };
+    
+    // Initialize loyalty service with Firebase db
+    if (window.initLoyaltyService) {
+        window.initLoyaltyService(db);
+    }
 </script>
-
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 </html>

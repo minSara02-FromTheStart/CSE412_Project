@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NurtiNest Website</title>
 
+    <meta name="description" content="NutriNest delivers premium, 100% natural dry fruits, fruit powders, and superfoods straight to your door across Bangladesh. Pay after receiving, delivery within 7 days.">
+    <meta property="og:title" content="NutriNest — Pure & Natural Nutrition">
+    <meta property="og:description" content="Premium dry fruits, fruit powders & superfoods delivered to your door.">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%BF%3C/text%3E%3C/svg%3E">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/cart.css">
     <link rel="stylesheet" href="css/search.css">
@@ -313,6 +320,7 @@
         }
     </style>
 </head>
+
 <body>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -349,29 +357,45 @@
   </aside>
 
 
+  <!-- ===================== -->
+  <!-- COUPONS PANEL -->
+  <!-- ===================== -->
+  <div class="coupon-overlay" id="couponOverlay"></div>
+
+  <aside class="coupon-panel" id="couponPanel">
+      <div class="coupon-panel-header">
+          <h3><i data-lucide="tag"></i> Available Coupons</h3>
+          <button class="close-btn" id="closeCouponBtn"><i data-lucide="x"></i></button>
+      </div>
+
+      <div class="coupon-list" id="couponList">
+          <!-- Coupon cards are injected here by the script below -->
+      </div>
+  </aside>
+
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <span>NutriNest</span>
         </div>
-        <button class="sidebar-close" id="sidebarClose">✕</button>
+        <button class="sidebar-close" id="sidebarClose"><i data-lucide="x"></i></button>
     </div>
 
     <nav class="sidebar-nav">
-        <a href="#home" class="sidebar-link">🏠 Home</a>
-        <a href="#about" class="sidebar-link">🌿 About</a>
+        <a href="#home" class="sidebar-link"><i data-lucide="home"></i> Home</a>
+        <a href="#about" class="sidebar-link"><i data-lucide="leaf"></i> About</a>
 
         <div class="sidebar-dropdown">
             <div class="sidebar-link dropdown-toggle" id="productToggle">
-                🛍️ Products <span class="arrow">▸</span>
+                <i data-lucide="shopping-bag"></i> Products <span class="arrow">▸</span>
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
-                <a href="products.html?category=Popular" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="products.html?category=Mom" class="sidebar-sublink">🤱 Mom & Baby Pack</a>
-                <a href="products.html?category=Gym" class="sidebar-sublink">💪 Gym Pack</a>
-                <a href="products.html?category=Family" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                <a href="products.html?category=Gift" class="sidebar-sublink">🎁 Gift Pack</a>
+                <a href="products.html?category=Popular" class="sidebar-sublink"><i data-lucide="star"></i> Popular Products</a>
+                <a href="products.html?category=Mom" class="sidebar-sublink"><i data-lucide="baby"></i> Mom & Baby Pack</a>
+                <a href="products.html?category=Gym" class="sidebar-sublink"><i data-lucide="dumbbell"></i> Gym Pack</a>
+                <a href="products.html?category=Family" class="sidebar-sublink"><i data-lucide="users"></i> Family Pack</a>
+                <a href="products.html?category=Gift" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
             </div>
         </div>
 
@@ -384,7 +408,7 @@
 </div>
    <header class="navbar">
     <div class="logo">
-      <span class="menu-icon">☰</span>
+      <span class="menu-icon"><i data-lucide="menu"></i></span>
       <div>
         <h1>NutriNest</h1>
         <p class="tagline">PURE & NATURAL</p>
@@ -406,7 +430,7 @@
     <section class="hero" id="home">
     <div class="hero-content">
 <div class="natural-box">
-    🌿 100% Natural & Organic Nutrition
+    <i data-lucide="leaf"></i> 100% Natural & Organic Nutrition
 </div>
 
 <div class="quote-wrapper">
@@ -424,7 +448,27 @@
 
     </div>
 </section>
-<section class="dryfruits-section" id = "about">
+
+<div class="trust-bar">
+    <div class="trust-item">
+        <span class="trust-icon"><i data-lucide="lock"></i></span>
+        <span>Pay After Receiving</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon"><i data-lucide="truck"></i></span>
+        <span>Delivery Within 7 Days</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon"><i data-lucide="leaf"></i></span>
+        <span>100% Natural & Organic</span>
+    </div>
+    <div class="trust-item">
+        <span class="trust-icon"><i data-lucide="star"></i></span>
+        <span>Trusted by 1,000+ Customers</span>
+    </div>
+</div>
+
+<section class="dryfruits-section fade-in-section" id = "about">
     <div class="overlay">
         
         <h2>About Us</h2>
@@ -434,42 +478,17 @@
             and value-added agricultural products including jackfruit powder, banana powder,
             dried fruits, and healthy snacks.
         </p>
-        <button class="explore-btn">Explore More</button>
     </div>
 </section>
-    <section class="why-choose">
-    <div class="why-header">
-        <p class="why-eyebrow">Why Choose Us</p>
-        <h2>The NutriNest Difference</h2>
-        <p class="why-desc">Everything we do is built around making healthy eating simple, affordable, and trustworthy.</p>
+    
+    <section id="products" class="products fade-in-section">
+
+    <div class="products-header">
+        <h1>Our Products</h1>
+        <a href="products.html" class="view-all-link">View All Products <span class="arrow">→</span></a>
     </div>
 
-    <div class="why-grid">
-
-        <div class="why-card">
-            <div class="why-icon">🔒</div>
-            <h3>Pay After Receiving</h3>
-            <p>Order with full confidence. We only ask for payment once your package is safely in your hands.</p>
-        </div>
-
-        <div class="why-card">
-            <div class="why-icon">🚚</div>
-            <h3>Delivery Within 7 Days</h3>
-            <p>Fast, reliable delivery straight to your door — so your nutrition never has to wait.</p>
-        </div>
-
-        <div class="why-card">
-            <div class="why-icon">💰</div>
-            <h3>Deals That Save More</h3>
-            <p>Exclusive member offers, seasonal discounts, and bundle packs designed to make healthy living affordable.</p>
-        </div>
-    </div>
-</section>
-    <section id="products" class="products">
-
-    <h1>Our Products</h1>
-
-    <div id="product-container" class="product-container">
+    <div id="product-container" class="product-container" data-limit="4">
     </div>
 
 </section>
@@ -478,7 +497,7 @@
     <div class="cart-header">
         <h2>Your Cart</h2>
 
-        <button id="close-cart">✖</button>
+        <button id="close-cart"><i data-lucide="x"></i></button>
     </div>
 
     <div id="cart-items"></div>
@@ -500,7 +519,7 @@
 
 
 <button id="open-cart-btn">
-    🛒 Cart
+    <i data-lucide="shopping-cart"></i> Cart
 </button>
 
 <script>
@@ -542,9 +561,10 @@ function displayProducts(products) {
   refreshFavouriteIcons();
 }
 
-document.addEventListener('DOMContentLoaded', fetchProducts);
-</script>
 <script src="js/cart.js"></script>
+<script type="module" src="js/wishlist.js"></script>
+<script src="js/quickview.js"></script>
+<script type="module" src="js/products-feed.js"></script>
 <script src="js/script.js"></script>
 <script type="module" src="js/userStatus.js"></script>
 

@@ -54,15 +54,18 @@ if (heroSection && navbar && navRight) {
     // insert BEFORE nav-right, so order is: logo | search | login
     navbar.insertBefore(navSearch, navRight);
 
-    window.addEventListener('scroll', () => {
+    function syncNavSearch() {
         const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-
         if (window.scrollY > heroBottom - 80) {
             navSearch.style.display = 'flex';
         } else {
             navSearch.style.display = 'none';
         }
-    });
+    }
+
+    window.addEventListener('scroll', syncNavSearch);
+    window.addEventListener('resize', syncNavSearch);
+    syncNavSearch();
 }
 
 // Signup modal and client-side auth using localStorage
@@ -140,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!name || !phone || !email || !password) {
                     alert('Please fill all fields.');
+                    return;
+                }
+
+                if (!/^01\d{9}$/.test(phone)) {
+                    alert('Phone number must start with 01 and be 11 digits.');
                     return;
                 }
 

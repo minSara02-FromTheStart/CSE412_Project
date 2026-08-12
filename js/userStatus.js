@@ -1,19 +1,9 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { dashboardFor, displayNameFrom } from "./userStatus-utils.js";
 
 const loginBtn = document.getElementById("loginNavBtn");
-
-function dashboardFor(role) {
-    if (role === "Admin") return "admin.html";
-    if (role === "Deliveryman") return "rider-dashboard.html";
-    return "customer-dashboard.html";
-}
-
-function displayNameFrom(user, userData) {
-    const name = userData.fullName || user.displayName || user.email || "Customer";
-    return name.split(" ")[0] || "Customer";
-}
 
 onAuthStateChanged(auth, async (user) => {
     if (!loginBtn) return;

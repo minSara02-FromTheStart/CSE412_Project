@@ -5,6 +5,66 @@
    =============================================================  */
 
 'use strict';
+async function uploadToImgBB(file) {
+    const apiKey = "a4b51d4468caa92fa6e3fae1cdc70119";
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=${apiKey}`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const result = await response.json();
+
+    if (!result.success) {
+        throw new Error("Image upload failed.");
+    }
+
+    return result.data.url;
+}
+
+/* Resize + re-compress the chosen image in the browser before it's
+   uploaded, so product photos don't ship at full camera/phone resolution.
+   A 900px-wide JPEG at 82% quality is plenty sharp for a product card and
+   is typically a fraction of the size of the original file -- meaning
+   faster loads on offers.html / flashsale.html / products.html. */
+function compressImage(file, maxDimension = 900, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Could not read the image file.'));
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Could not decode the image file.'));
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width >= height) {
+                        height = Math.round(height * (maxDimension / width));
+                        width = maxDimension;
+                    } else {
+                        width = Math.round(width * (maxDimension / height));
+                        height = maxDimension;
+                    }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob(blob => {
+                    if (!blob) { reject(new Error('Image compression failed.')); return; }
+                    resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+                }, 'image/jpeg', quality);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
 /* =============================================================
    NAVIGATION
@@ -48,6 +108,28 @@ function showToast(msg, duration = 2800) {
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), duration);
+}
+
+async function triggerFlashSaleAlert() {
+    const service = window.newsletterService;
+    if (!service) return;
+
+    const result = await service.sendOfferAlertToSubscribers(
+        'Flash Sale Alert',
+        'A new flash sale or special offer is now live on NutriNest. Shop now before it ends.'
+    );
+
+    const successful = (result.results || []).filter(item => item.success).length;
+    const failed = (result.results || []).filter(item => !item.success);
+
+    if (successful > 0) {
+        showToast(`Sent offer alerts to ${successful} subscriber(s)`);
+    } else if (failed.length) {
+        const detail = failed[0].message || 'Unknown mail error';
+        showToast(`Could not send alerts: ${detail}`);
+    } else {
+        showToast('Could not send alerts. Check the mail server and SMTP settings.');
+    }
 }
 
 /* =============================================================
@@ -99,6 +181,7 @@ window.renderAll = function () {
     renderOrders(orders);
     renderCustomers(users);
     renderRiders(users);
+    if (window.renderTopSpenders) window.renderTopSpenders();
 };
 
 /* =============================================================
@@ -147,14 +230,100 @@ function renderDashboard(orders, users, products) {
             </div>`).join('')
         : `<p class="empty-cell">No products yet.</p>`;
 
-    renderCharts(orders, products);
+    renderInventory(products);
+    renderInventoryPage(products);
+    renderCharts(orders);
+}
+
+function renderInventory(products) {
+    const listEl = document.getElementById('inventory-list');
+    const totalEl = document.getElementById('inventory-total');
+    const lowEl = document.getElementById('inventory-low');
+    const outEl = document.getElementById('inventory-out');
+
+    if (!listEl || !totalEl || !lowEl || !outEl) return;
+
+    const items = [...products].sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+    const lowStock = items.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= 10).length;
+    const outOfStock = items.filter(p => (Number(p.stock) || 0) <= 0).length;
+
+    totalEl.textContent = items.length;
+    lowEl.textContent = lowStock;
+    outEl.textContent = outOfStock;
+
+    listEl.innerHTML = items.length
+        ? items.map(p => {
+            const stock = Number(p.stock) || 0;
+            let badgeClass = 'healthy';
+            let badgeText = 'In stock';
+            if (stock <= 0) {
+                badgeClass = 'danger';
+                badgeText = 'Out of stock';
+            } else if (stock <= 10) {
+                badgeClass = 'warning';
+                badgeText = 'Low stock';
+            }
+            return `
+                <div class="inventory-item">
+                    <div>
+                        <div class="inventory-item-title">${sanitize(p.name)}</div>
+                        <div class="inventory-item-meta">${sanitize(p.category || 'General')} • ${fmtCurrency(p.price)}</div>
+                    </div>
+                    <span class="inventory-qty">${stock} kg</span>
+                    <span class="inventory-badge ${badgeClass}">${badgeText}</span>
+                </div>`;
+          }).join('')
+        : '<p class="empty-cell">No products in inventory yet.</p>';
+}
+
+function renderInventoryPage(products) {
+    const body = document.getElementById('inventoryPageBody');
+    const countEl = document.getElementById('inventoryPageCount');
+    const totalEl = document.getElementById('inventoryPageTotal');
+    const lowEl = document.getElementById('inventoryPageLow');
+    const outEl = document.getElementById('inventoryPageOut');
+
+    if (!body || !countEl || !totalEl || !lowEl || !outEl) return;
+
+    const items = [...products].sort((a, b) => (Number(b.stock) || 0) - (Number(a.stock) || 0));
+    const lowStock = items.filter(p => (Number(p.stock) || 0) > 0 && (Number(p.stock) || 0) <= 10).length;
+    const outOfStock = items.filter(p => (Number(p.stock) || 0) <= 0).length;
+
+    countEl.textContent = `${items.length} product${items.length === 1 ? '' : 's'}`;
+    totalEl.textContent = items.length;
+    lowEl.textContent = lowStock;
+    outEl.textContent = outOfStock;
+
+    body.innerHTML = items.length
+        ? items.map(p => {
+            const stock = Number(p.stock) || 0;
+            let badgeClass = 'healthy';
+            let badgeText = 'In stock';
+            if (stock <= 0) {
+                badgeClass = 'danger';
+                badgeText = 'Out of stock';
+            } else if (stock <= 10) {
+                badgeClass = 'warning';
+                badgeText = 'Low stock';
+            }
+            return `
+                <tr>
+                    <td>
+                        <strong>${sanitize(p.name)}</strong>
+                    </td>
+                    <td>${sanitize(p.category || 'General')}</td>
+                    <td>${fmtCurrency(p.price)}</td>
+                    <td>${stock} kg</td>
+                    <td><span class="inventory-badge ${badgeClass}">${badgeText}</span></td>
+                </tr>`;
+          }).join('')
+        : '<tr><td colspan="5" class="empty-cell">No products in inventory yet.</td></tr>';
 }
 
 /* =============================================================
-   DASHBOARD CHARTS  (sales over time + stock levels)
+   DASHBOARD CHARTS  (sales over time)
    ============================================================= */
 let salesChartInstance = null;
-let stockChartInstance = null;
 
 function orderDateKey(o) {
     const ts = o.createdAt;
@@ -163,7 +332,7 @@ function orderDateKey(o) {
     return d.toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
-function renderCharts(orders, products) {
+function renderCharts(orders) {
     if (typeof Chart === 'undefined') return; // Chart.js failed to load (offline)
 
     /* ── Sales over the last 14 days ── */
@@ -209,34 +378,6 @@ function renderCharts(orders, products) {
         });
     }
 
-    /* ── Stock levels per product ── */
-    const stockCanvas = document.getElementById('stockChart');
-    if (stockCanvas) {
-        const stocked = [...products].sort((a, b) => (Number(a.stock) || 0) - (Number(b.stock) || 0));
-        const labels = stocked.map(p => p.name);
-        const data = stocked.map(p => Number(p.stock) || 0);
-        const colors = data.map(v => v <= 10 ? '#dc2626' : v <= 25 ? '#d97706' : '#006b3c');
-
-        if (stockChartInstance) stockChartInstance.destroy();
-        stockChartInstance = new Chart(stockCanvas, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Stock (KG)',
-                    data,
-                    backgroundColor: colors
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                indexAxis: labels.length > 6 ? 'y' : 'x',
-                scales: { x: { beginAtZero: true } }
-            }
-        });
-    }
 }
 
 /* =============================================================
@@ -271,6 +412,8 @@ function renderProducts(products, search = '', category = '', source = '') {
                     <p class="stock ${(Number(p.stock)||0) <= 10 ? 'stock-low' : ''}">Stock: ${Number(p.stock)||0} kg</p>
                     <span class="cat-tag">${sanitize(p.category||'General')}</span>
                     <span class="src-tag ${srcClass}">${srcLabel}</span>
+                    ${p.onOffer ? `<span class="cat-tag" style="background:#fef3c7;color:#92400e;">🏷️ Offer</span>` : ''}
+                    ${p.flashSale ? `<span class="cat-tag" style="background:#fee2e2;color:#991b1b;">⚡ Flash</span>` : ''}
                 </div>
                 <div class="product-card-actions">
                     <button class="action-btn" onclick="openEditProduct('${p.id}')">✏️ Edit</button>
@@ -317,7 +460,7 @@ function renderOrders(orders, search = '', status = '') {
                 ? `<br><span class="src-tag src-added" style="margin-top:4px;display:inline-block;">🏍️ ${sanitize(o.riderName||'')}</span>`
                 : '';
             return `<tr>
-                <td>#${String(i+1).padStart(4,'0')}</td>
+                <td>#${sanitize(o.id.slice(-6).toUpperCase())}</td>
                 <td>${sanitize(o.fullName || o.customerName || '—')}</td>
                 <td>${sanitize(o.phone || '—')}</td>
                 <td>${itemStr}</td>
@@ -547,11 +690,55 @@ function closeProductModal() {
     document.getElementById('productPrice').value   = '';
     document.getElementById('productStock').value   = '';
     document.getElementById('productImage').value   = '';
+    document.getElementById('productImageFile').value = '';
+    document.getElementById('productImagePreview').innerHTML = '';
     document.getElementById('productDesc').value    = '';
+    document.getElementById('productOnOffer').checked   = false;
+    document.getElementById('productDiscount').value    = '';
+    document.getElementById('productOriginalPrice').value = '';
+    document.getElementById('productFlashSale').checked = false;
+    document.getElementById('productFlashSaleEnd').value = '';
+    document.getElementById('flashSaleEndGroup').style.display = 'none';
     document.getElementById('productError').textContent = '';
     document.getElementById('modalTitle').textContent   = 'Add New Product';
     saveProductBtn.textContent = 'Add Product';
 }
+
+/* Show the "ends at" picker only when Flash Sale is checked */
+document.getElementById('productFlashSale').addEventListener('change', (e) => {
+    document.getElementById('flashSaleEndGroup').style.display = e.target.checked ? 'block' : 'none';
+});
+
+/* Auto-calculate the sale price from Original Price + Discount %, so the
+   admin doesn't have to do the subtraction themselves (and can't forget
+   to update Price after setting a discount). Still editable afterward. */
+function updateComputedPrice() {
+    const originalPrice = Number(document.getElementById('productOriginalPrice').value);
+    const discount = Number(document.getElementById('productDiscount').value);
+    if (originalPrice > 0 && discount > 0 && discount <= 100) {
+        document.getElementById('productPrice').value = Math.round(originalPrice * (1 - discount / 100));
+    }
+}
+document.getElementById('productOriginalPrice').addEventListener('input', updateComputedPrice);
+document.getElementById('productDiscount').addEventListener('input', updateComputedPrice);
+
+/* Convert a Firestore Timestamp / ISO string / Date into the string
+   format <input type="datetime-local"> expects (local time, no seconds). */
+function toDatetimeLocalValue(value) {
+    if (!value) return '';
+    const d = (value && typeof value.toDate === 'function') ? value.toDate() : new Date(value);
+    if (isNaN(d)) return '';
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+document.getElementById('productImageFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const preview = document.getElementById('productImagePreview');
+    if (!file) { preview.innerHTML = ''; return; }
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `<img src="${url}" alt="preview" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`;
+});
 
 document.getElementById('openAddProduct').addEventListener('click', openProductModal);
 document.getElementById('closeProductModal').addEventListener('click', closeProductModal);
@@ -565,8 +752,18 @@ window.openEditProduct = function(id) {
     document.getElementById('productPrice').value       = p.price;
     document.getElementById('productStock').value       = p.stock != null ? p.stock : '';
     document.getElementById('productImage').value       = p.image || '';
+    document.getElementById('productImageFile').value   = '';
+    document.getElementById('productImagePreview').innerHTML = p.image
+        ? `<img src="${p.image}" alt="current" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">`
+        : '';
     document.getElementById('productDesc').value        = p.desc  || '';
-    document.getElementById('productCategory').value   = p.category || 'Nuts';
+    document.getElementById('productCategory').value   = p.category || 'Popular';
+    document.getElementById('productOnOffer').checked   = !!p.onOffer;
+    document.getElementById('productDiscount').value    = p.discount || '';
+    document.getElementById('productOriginalPrice').value = p.originalPrice || '';
+    document.getElementById('productFlashSale').checked = !!p.flashSale;
+    document.getElementById('productFlashSaleEnd').value = toDatetimeLocalValue(p.flashSaleEnd);
+    document.getElementById('flashSaleEndGroup').style.display = p.flashSale ? 'block' : 'none';
     document.getElementById('modalTitle').textContent   = 'Edit Product';
     saveProductBtn.textContent = 'Save Changes';
     openProductModal();
@@ -576,25 +773,59 @@ saveProductBtn.addEventListener('click', async () => {
     const name     = document.getElementById('productName').value.trim();
     const price    = Number(document.getElementById('productPrice').value);
     const stock    = Number(document.getElementById('productStock').value);
-    const image    = document.getElementById('productImage').value.trim();
+    let   image    = document.getElementById('productImage').value.trim();
+    const imageFile = document.getElementById('productImageFile').files[0];
     const desc     = document.getElementById('productDesc').value.trim();
     const category = document.getElementById('productCategory').value;
     const editId   = document.getElementById('editProductId').value;
     const errEl    = document.getElementById('productError');
+
+    const onOffer       = document.getElementById('productOnOffer').checked;
+    const discountRaw   = document.getElementById('productDiscount').value;
+    const discount       = discountRaw !== '' ? Number(discountRaw) : null;
+    const origPriceRaw  = document.getElementById('productOriginalPrice').value;
+    const originalPrice = origPriceRaw !== '' ? Number(origPriceRaw) : null;
+    const flashSale      = document.getElementById('productFlashSale').checked;
+    const flashSaleEndRaw = document.getElementById('productFlashSaleEnd').value;
 
     if (!name)  { errEl.textContent = '⚠️ Product name is required.'; return; }
     if (!price || price <= 0) { errEl.textContent = '⚠️ Enter a valid price.'; return; }
     if (document.getElementById('productStock').value === '' || isNaN(stock) || stock < 0) {
         errEl.textContent = '⚠️ Enter a valid stock quantity.'; return;
     }
+    if (!editId && !imageFile) { errEl.textContent = '⚠️ Please choose an image to upload.'; return; }
+    if (discount !== null && (isNaN(discount) || discount < 0 || discount > 100)) {
+        errEl.textContent = '⚠️ Discount must be between 0 and 100.'; return;
+    }
+    if (flashSale && !flashSaleEndRaw) {
+        errEl.textContent = '⚠️ Set an end date/time for the flash sale.'; return;
+    }
+    const flashSaleEnd = flashSale ? new Date(flashSaleEndRaw) : null;
+    if (flashSale && isNaN(flashSaleEnd)) {
+        errEl.textContent = '⚠️ Flash sale end date/time is invalid.'; return;
+    }
     errEl.textContent = '';
 
-    const data = { name, price, stock, image, desc, category };
     saveProductBtn.disabled = true;
     saveProductBtn.textContent = 'Saving...';
 
     try {
         const { db, doc, collection, addDoc, updateDoc } = window._fb;
+
+        /* Upload the new picture from the admin's device to Firebase Storage,
+           swapping the old Image URL field for a real file upload. */
+        if (imageFile) {
+        saveProductBtn.textContent = "Optimizing image...";
+        const compressed = await compressImage(imageFile);
+        saveProductBtn.textContent = "Uploading image...";
+        image = await uploadToImgBB(compressed);
+}
+
+        const data = {
+            name, price, stock, image, desc, category,
+            onOffer, discount, originalPrice, flashSale, flashSaleEnd
+        };
+        saveProductBtn.textContent = 'Saving...';
 
         if (editId) {
             await updateDoc(doc(db, 'products', editId), data);
@@ -602,16 +833,13 @@ saveProductBtn.addEventListener('click', async () => {
             if (idx > -1) window.adminData.products[idx] = { ...window.adminData.products[idx], ...data };
             showToast('✅ Product updated!');
         } else {
-            /* New products added by admin get source:'added'
-               They will automatically appear in products.html because
-               products.html reads from Firestore (see note at bottom) */
-            const ref = await addDoc(collection(db, 'products'), {
-                ...data,
-                source: 'added',
-                createdAt: new Date().toISOString()
-            });
-            window.adminData.products.unshift({ id: ref.id, ...data, source: 'added' });
-            showToast('✅ Product added! It will now appear on the website.');
+           await addDoc(collection(db, 'products'), {
+    ...data,
+    source: 'added',
+    createdAt: new Date().toISOString()
+});
+
+showToast('✅ Product added! It will now appear on the website.');
         }
 
         renderProducts(window.adminData.products);
@@ -665,20 +893,98 @@ document.getElementById('cancelOrderModal').addEventListener('click', () => orde
 document.getElementById('saveOrderStatus').addEventListener('click', async () => {
     const id     = document.getElementById('editOrderId').value;
     const status = document.getElementById('newOrderStatus').value;
+
+    const idx = window.adminData.orders.findIndex(o => o.id === id);
+    const previousStatus = idx > -1 ? window.adminData.orders[idx].status : null;
+    const becameDelivered = status === 'Delivered' && previousStatus !== 'Delivered';
+
     try {
-        const { db, doc, updateDoc } = window._fb;
-        await updateDoc(doc(db, 'orders', id), { status });
-        const idx = window.adminData.orders.findIndex(o => o.id === id);
+        if (becameDelivered) {
+            // Order is being marked Delivered for the first time -> deduct
+            // stock for every item in the order, inside a transaction.
+            await deductStockForOrder(id, status);
+        } else {
+            const { db, doc, updateDoc } = window._fb;
+            await updateDoc(doc(db, 'orders', id), { status });
+        }
+
         if (idx > -1) window.adminData.orders[idx].status = status;
+        // Stock numbers changed -> refresh products from Firestore so the
+        // Inventory / Products pages reflect the new stock immediately
+        // (the onSnapshot listener will also catch this, this just avoids
+        // a flash of stale numbers).
+        if (becameDelivered && window._fb.reloadProducts) {
+            await window._fb.reloadProducts();
+        }
         renderOrders(window.adminData.orders);
         renderDashboard(window.adminData.orders, window.adminData.users, window.adminData.products);
         orderModal.classList.remove('open');
         showToast('✅ Order status updated.');
     } catch(err) {
         console.error(err);
-        showToast('❌ Update failed.');
+        showToast('❌ Update failed: ' + (err.message || 'Unknown error'));
     }
 });
+
+/* =============================================================
+   STOCK DEDUCTION ON DELIVERY
+   Runs the read+write as a single Firestore transaction so that:
+   - stock is only ever deducted ONCE per order (guarded by the
+     order's own `stockDeducted` flag, checked inside the transaction),
+     even if two admins click "Save" at the same time, or the order
+     was already marked Delivered elsewhere (e.g. rider dashboard).
+   - each product's stock read and write happen atomically, so two
+     orders finishing at the same moment can't overwrite each other's
+     stock update.
+   ============================================================= */
+async function deductStockForOrder(orderId, newStatus) {
+    const { db, doc, runTransaction } = window._fb;
+    const orderRef = doc(db, 'orders', orderId);
+
+    await runTransaction(db, async (tx) => {
+        const orderSnap = await tx.get(orderRef);
+        if (!orderSnap.exists()) throw new Error('Order not found.');
+        const order = orderSnap.data();
+
+        // Already deducted (double click / already delivered elsewhere) -
+        // just update the status, don't touch stock again.
+        if (order.stockDeducted) {
+            tx.update(orderRef, { status: newStatus });
+            return;
+        }
+
+        const items = Array.isArray(order.items) ? order.items : [];
+
+        // Work out which product doc each item refers to. Cart/checkout
+        // items are expected to carry the product's Firestore doc id as
+        // `productId` (or `id`). If neither is present, fall back to
+        // matching by product name against the already-loaded product list.
+        const lines = items.map(item => {
+            const pid = item.productId || item.id || null;
+            let productId = pid;
+            if (!productId) {
+                const match = window.adminData.products.find(
+                    p => (p.name || '').toLowerCase() === (item.name || '').toLowerCase()
+                );
+                productId = match ? match.id : null;
+            }
+            return { productId, qty: Number(item.qty) || 0 };
+        }).filter(line => line.productId && line.qty > 0);
+
+        // All reads must happen before any writes inside a transaction.
+        const productRefs = lines.map(l => doc(db, 'products', l.productId));
+        const productSnaps = await Promise.all(productRefs.map(ref => tx.get(ref)));
+
+        productSnaps.forEach((snap, i) => {
+            if (!snap.exists()) return; // product was deleted since order was placed
+            const currentStock = Number(snap.data().stock) || 0;
+            const newStock = Math.max(0, currentStock - lines[i].qty);
+            tx.update(productRefs[i], { stock: newStock });
+        });
+
+        tx.update(orderRef, { status: newStatus, stockDeducted: true });
+    });
+}
 
 /* =============================================================
    DELETE CUSTOMER
@@ -697,6 +1003,137 @@ window.deleteCustomer = async function(id) {
         showToast('❌ Remove failed.');
     }
 };
+
+/* =============================================================
+   ADMIN SETUP  (find a signed-up user, promote them to Admin)
+   Moved in from the standalone admin-setup.html tool so it lives
+   inside the already-authenticated admin panel instead of a
+   separate unguarded page.
+   ============================================================= */
+document.getElementById('setupFindUserBtn')?.addEventListener('click', async () => {
+    const email = document.getElementById('setupLookupEmail').value.trim().toLowerCase();
+    const msgEl = document.getElementById('setupLookupMsg');
+    const uidDisplay = document.getElementById('setupUidDisplay');
+    const uidValue = document.getElementById('setupUidValue');
+    const btn = document.getElementById('setupFindUserBtn');
+
+    msgEl.textContent = '';
+    msgEl.className = 'settings-msg';
+    uidDisplay.style.display = 'none';
+
+    if (!email) {
+        msgEl.textContent = '❌ Please enter an email.';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+
+    try {
+        const { db, collection, getDocs, query, where } = window._fb;
+        const usersSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+
+        if (usersSnap.empty) {
+            msgEl.textContent = '⚠️ No user found. They must sign up first.';
+            msgEl.className = 'settings-msg error';
+            return;
+        }
+
+        const userId = usersSnap.docs[0].id;
+        const userData = usersSnap.docs[0].data();
+
+        document.getElementById('setupUserUID').value = userId;
+        document.getElementById('setupAdminName').value = userData.fullName || 'Admin';
+
+        uidValue.textContent = userId;
+        uidDisplay.style.display = 'block';
+
+        msgEl.textContent = '✅ User found! Now click "Grant Admin Role" below.';
+        msgEl.className = 'settings-msg success';
+    } catch (err) {
+        console.error('Admin setup lookup error:', err);
+        msgEl.textContent = '❌ Error: ' + (err.message || 'Unknown error');
+        msgEl.className = 'settings-msg error';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🔍 Find User';
+    }
+});
+
+document.getElementById('setupGrantAdminBtn')?.addEventListener('click', async () => {
+    const uid = document.getElementById('setupUserUID').value.trim();
+    const name = document.getElementById('setupAdminName').value.trim();
+    const msgEl = document.getElementById('setupGrantMsg');
+    const btn = document.getElementById('setupGrantAdminBtn');
+
+    msgEl.textContent = '';
+    msgEl.className = 'settings-msg';
+
+    if (!uid) {
+        msgEl.textContent = '❌ Please enter a Firebase UID (or use Find User above).';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+    if (!name) {
+        msgEl.textContent = '❌ Please enter a name.';
+        msgEl.className = 'settings-msg error';
+        return;
+    }
+    if (!confirm(`Grant Admin access to "${name}"? This gives full control of the store.`)) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Granting...';
+
+    try {
+        const { db, doc, getDoc, setDoc, serverTimestamp } = window._fb;
+
+        const adminData = {
+            fullName: name,
+            role: 'Admin',
+            updatedAt: serverTimestamp()
+        };
+
+        const userRef = doc(db, 'users', uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const existingData = userSnap.data();
+            adminData.email = existingData.email;
+            adminData.createdAt = existingData.createdAt || serverTimestamp();
+        } else {
+            adminData.createdAt = serverTimestamp();
+        }
+
+        await setDoc(userRef, adminData, { merge: true });
+
+        // Reflect the promotion immediately in the Customers table without a reload
+        const idx = window.adminData.users.findIndex(u => u.id === uid);
+        if (idx > -1) {
+            window.adminData.users[idx] = { ...window.adminData.users[idx], ...adminData };
+        }
+        renderCustomers(window.adminData.users);
+        renderDashboard(window.adminData.orders, window.adminData.users, window.adminData.products);
+
+        msgEl.innerHTML = `✅ <strong>${name}</strong> is now an Admin! They can log in immediately.`;
+        msgEl.className = 'settings-msg success';
+        showToast(`✅ ${name} promoted to Admin.`);
+
+        setTimeout(() => {
+            document.getElementById('setupUserUID').value = '';
+            document.getElementById('setupAdminName').value = 'Admin';
+            document.getElementById('setupLookupEmail').value = '';
+            document.getElementById('setupUidDisplay').style.display = 'none';
+        }, 1500);
+    } catch (err) {
+        console.error('Admin setup grant error:', err);
+        msgEl.textContent = '❌ Error: ' + (err.message || 'Unknown error');
+        msgEl.className = 'settings-msg error';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ Grant Admin Role';
+    }
+});
 
 /* =============================================================
    SETTINGS
@@ -758,7 +1195,7 @@ if (!window.adminData) {
              <h2>${p.name}</h2>
              <h3>৳${p.price} / KG</h3>
              <p>${p.desc}</p>
-             <button class="cart-btn" onclick="addToCart('${p.name}', ${p.price})">Add to Cart</button>
+             <button class="cart-btn" onclick="addToCart('${p.id}', '${sanitize(p.name)}', ${p.price})">Add to Cart</button>
            </div>`;
        });
      });

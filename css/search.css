@@ -2,7 +2,7 @@
     position: fixed;
     top: 100%;
     left: 0;
-    right: 0;
+    right: auto;
     background: #fff;
     border: 1px solid #e8e3d8;
     border-radius: 10px;
@@ -12,6 +12,9 @@
     overflow-y: auto;
     max-height: 320px;
     padding: 6px;
+    box-sizing: border-box;
+    width: auto;
+    max-width: calc(100% - 20px);
 }
 
 .search-suggestion-item {

@@ -1,0 +1,42 @@
+/* ============================================================
+   new-arrivals.css — New Arrivals page
+   Reuses promo.css for the shared banner/grid/badge structure
+   (same classes as offers.html / flashsale.html) so the layout
+   stays consistent site-wide. This file only overrides the
+   accent color on THIS page, from the shared green to a warm
+   gold/amber, so New Arrivals reads visually distinct from
+   Offers and Flash Sale rather than looking identical.
+   ============================================================ */
+
+.new-arrivals-banner {
+  --promo-accent: #b8860b;
+  --promo-accent-dark: #8f6a08;
+}
+
+.new-arrivals-banner .promo-eyebrow {
+  color: var(--promo-accent);
+}
+
+/* "New" badge on each card -- top-left, same slot flashSale/offer
+   badges use on the other promo pages. Falls back gracefully if
+   style.css already defines .badge-new elsewhere; these rules just
+   make sure it looks right here even if it doesn't. */
+.product-badge.badge-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: #b8860b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 560px) {
+  .new-arrivals-banner {
+    padding: 40px 18px;
+  }
+}

@@ -7,16 +7,39 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/checkout.css">
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 
 <body>
 
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <span><i data-lucide="leaf"></i></span>
+            <span>NutriNest</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">×</button>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-link"><span><i data-lucide="house"></i></span> Home</a>
+        <a href="index.html#about" class="sidebar-link"><span><i data-lucide="info"></i></span> About</a>
+        <a href="products.html" class="sidebar-link"><span><i data-lucide="package"></i></span> Products</a>
+        <a href="offers.html" class="sidebar-link"><span><i data-lucide="tag"></i></span> Offers</a>
+        <a href="checkout.html" class="sidebar-link"><span><i data-lucide="shopping-bag"></i></span> Checkout</a>
+        <a href="login.html" class="sidebar-link"><span><i data-lucide="log-in"></i></span> Login</a>
+    </nav>
+</aside>
+
 <header class="navbar">
     <div class="logo">
-        <span class="menu-icon">☰</span>
+        <span class="menu-icon"><i data-lucide="menu"></i></span>
 
         <div>
-            <h1>NutriNest</h1>
+            <h1><i data-lucide="leaf"></i> NutriNest</h1>
             <p class="tagline">PURE & NATURAL</p>
         </div>
     </div>
@@ -51,7 +74,7 @@
             </div>
 
             <div class="input-group">
-                <label for="email">Email Address</label>
+                <label for="email">Email Address Optional</label>
                 <input id="email" type="email" placeholder="example@gmail.com">
                 <small class="error-message"></small>
             </div>
@@ -88,14 +111,7 @@
                     <b>৳60</b>
                 </label>
 
-                <label class="checkout-option">
-                    <input type="radio" name="delivery" value="0">
-                    <span>
-                        <strong>Pickup </strong>
-                        <small>Collect from pickup point</small>
-                    </span>
-                    <b>Free</b>
-                </label>
+                
             </div>
 
             <h2>Payment Method</h2>
@@ -106,30 +122,6 @@
                     <span>
                         <strong>Cash On Delivery</strong>
                         <small>Pay after receiving your order</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>bKash</strong>
-                        <small>Upcoming</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>Nagad</strong>
-                        <small>Upcoming</small>
-                    </span>
-                </label>
-
-                <label class="payment-option upcoming">
-                    <input type="radio" name="payment" disabled>
-                    <span>
-                        <strong>Rocket</strong>
-                        <small>Upcoming</small>
                     </span>
                 </label>
             </div>
@@ -190,5 +182,44 @@
 
 <script type="module" src="js/checkout.js"></script>
 <script type="module" src="js/userStatus.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const menuIcon = document.querySelector('.menu-icon');
+      const closeBtn = document.getElementById('sidebarClose');
+
+      if (menuIcon && sidebar && overlay) {
+        menuIcon.addEventListener('click', () => {
+          sidebar.classList.add('open');
+          overlay.classList.add('active');
+        });
+      }
+
+      if (closeBtn && sidebar && overlay) {
+        closeBtn.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('active');
+        });
+      }
+
+      if (overlay && sidebar) {
+        overlay.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('active');
+        });
+      }
+
+      document.querySelectorAll('.sidebar-link[href]').forEach(link => {
+        link.addEventListener('click', () => {
+          if (sidebar) sidebar.classList.remove('open');
+          if (overlay) overlay.classList.remove('active');
+        });
+      });
+    });
+  </script>
 </body>
 </html>

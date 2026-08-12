@@ -8,7 +8,32 @@ const cartWarning = document.getElementById("cart-warning");
 
 
 // LOAD CART FROM STORAGE
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const initialCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function persistCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+const cart = new Proxy(initialCart, {
+    get(target, prop, receiver) {
+        const value = Reflect.get(target, prop, receiver);
+        if (typeof value === 'function' && ['push', 'splice', 'pop', 'shift', 'unshift', 'reverse', 'sort', 'fill', 'copyWithin'].includes(prop)) {
+            return function(...args) {
+                const result = Array.prototype[prop].apply(target, args);
+                persistCart();
+                return result;
+            };
+        }
+        return value;
+    },
+    set(target, prop, value, receiver) {
+        const result = Reflect.set(target, prop, value, receiver);
+        if (!isNaN(prop) || prop === 'length') {
+            persistCart();
+        }
+        return result;
+    }
+});
 
 
 // =====================
@@ -100,11 +125,27 @@ function updateCheckoutButton() {
 // ADD TO CART
 // =====================
 
-function addToCart(product, price) {
+function addToCart(id, product, price) {
+
+
+    const hasExplicitId =
+    arguments.length >= 3;
+
+
+    const itemId =
+    id;
+
+
+    const productName =
+    hasExplicitId ? product : id;
+
+
+    const productPrice =
+    hasExplicitId ? price : product;
 
 
     const existing =
-    cart.find(item => item.product === product);
+    cart.find(item => (item.id || item.product) === itemId);
 
 
 
@@ -115,14 +156,23 @@ function addToCart(product, price) {
     } else {
 
 
-        cart.push({
+        const cartItem = {
 
-            product: product,
+            product: productName,
 
-            price: Number(price),
+            price: Number(productPrice),
 
             quantity: 1
-        });
+        };
+
+
+        if (hasExplicitId) {
+
+            cartItem.id = itemId;
+        }
+
+
+        cart.push(cartItem);
     }
 
 

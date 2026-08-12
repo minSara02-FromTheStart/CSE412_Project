@@ -371,24 +371,24 @@
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-logo">
-            <span>🌿</span>
+            <span><i data-lucide="leaf"></i></span>
             <span>NutriNest</span>
         </div>
-        <button class="sidebar-close" id="sidebarClose">✕</button>
+        <button class="sidebar-close" id="sidebarClose"><i data-lucide="x"></i></button>
     </div>
     <nav class="sidebar-nav">
-        <a href="index.html" class="sidebar-link">🏠 Home</a>
-        <a href="index.html#about" class="sidebar-link">🌿 About</a>
+        <a href="index.html" class="sidebar-link"><i data-lucide="home"></i> Home</a>
+        <a href="index.html#about" class="sidebar-link"><i data-lucide="leaf"></i> About</a>
         <div class="sidebar-dropdown">
             <div class="sidebar-link dropdown-toggle" id="productToggle">
-                🛍️ Products <span class="arrow">▸</span>
+                <i data-lucide="shopping-bag"></i> Products <span class="arrow">▸</span>
             </div>
             <div class="sidebar-submenu" id="productSubmenu">
-                <a href="#" class="sidebar-sublink">⭐ Popular Products</a>
-                <a href="#" class="sidebar-sublink">🎓 Student Pack</a>
-                <a href="#" class="sidebar-sublink">💪 Gym Pack</a>
-                <a href="#" class="sidebar-sublink">👨‍👩‍👧 Family Pack</a>
-                <a href="#" class="sidebar-sublink">🎁 Gift Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="star"></i> Popular Products</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="graduation-cap"></i> Student Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="dumbbell"></i> Gym Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="users"></i> Family Pack</a>
+                <a href="#" class="sidebar-sublink"><i data-lucide="gift"></i> Gift Pack</a>
             </div>
         </div>
         <a href="#" class="sidebar-link" id="couponsLink">🏷️ Coupons</a>
@@ -401,9 +401,9 @@
 
 <header class="navbar">
     <div class="logo">
-        <span class="menu-icon">☰</span>
+        <span class="menu-icon"><i data-lucide="menu"></i></span>
         <div>
-            <h1>NutriNest</h1>
+            <h1><i data-lucide="leaf"></i> NutriNest</h1>
             <p class="tagline">PURE & NATURAL</p>
         </div>
     </div>
@@ -416,15 +416,15 @@
 
     <div class="login-left">
         <div class="login-brand">
-            <div class="login-brand-icon">🌿</div>
+            <div class="login-brand-icon"><i data-lucide="leaf"></i></div>
             <h2>Welcome back to NutriNest</h2>
             <p>Your trusted source for premium dry fruits, superfoods & healthy snacks.</p>
         </div>
         <ul class="login-perks">
-            <li>✦ 100% organic & naturally sourced</li>
-            <li>✦ Exclusive member discounts & coupons</li>
-            <li>✦ Track orders & save favourites</li>
-            <li>✦ Flash sale early access</li>
+            <li><i data-lucide="sparkle"></i> 100% organic & naturally sourced</li>
+            <li><i data-lucide="sparkle"></i> Exclusive member discounts & coupons</li>
+            <li><i data-lucide="sparkle"></i> Track orders & save favourites</li>
+            <li><i data-lucide="sparkle"></i> Flash sale early access</li>
         </ul>
     </div>
 
@@ -464,7 +464,7 @@
 <!-- Signup Modal -->
 <div class="modal-overlay" id="signupOverlay" hidden>
     <div class="signup-modal" role="dialog" aria-modal="true" id="signupModal">
-        <button class="modal-close" id="signupClose">✕</button>
+        <button class="modal-close" id="signupClose"><i data-lucide="x"></i></button>
 
         <div class="signup-options" id="signupOptions">
             <h3>Sign up as</h3>
@@ -560,11 +560,13 @@
     switch(code) {
       case 'auth/user-not-found': return '❌ No account found with this email.';
       case 'auth/wrong-password': return '❌ Wrong password. Please try again.';
+      case 'auth/invalid-credential': return '❌ Wrong email or password. Please try again.';
       case 'auth/email-already-in-use': return '❌ This email is already registered. Please login.';
       case 'auth/weak-password': return '❌ Password must be at least 6 characters.';
       case 'auth/invalid-email': return '❌ Please enter a valid email address.';
       case 'auth/too-many-requests': return '❌ Too many attempts. Try again later.';
-      default: return '❌ Something went wrong. Please try again.';
+      case 'permission-denied': return '❌ Your account exists but Firestore is blocking access to it. This is a security-rules issue, not a login issue.';
+      default: return `❌ Something went wrong (${code || 'unknown error'}). Please try again.`;
     }
   }
 
@@ -583,10 +585,19 @@
     btn.disabled = true;
     btn.textContent = 'Logging in...';
 
+    let user;
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      user = userCredential.user;
+    } catch (error) {
+      console.error('Sign-in failed:', error.code, error.message);
+      showError('loginError', friendlyError(error.code));
+      btn.disabled = false;
+      btn.textContent = 'Login';
+      return;
+    }
 
+    try {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       const userData = userDoc.exists() ? userDoc.data() : {};
       const role = userData.role || 'Customer';
@@ -604,13 +615,20 @@
   if (role === 'Admin') {
     window.location.href = 'admin.html';
   } else if (role === 'Deliveryman') {
-    window.location.href = 'rider-dashboard.html';
+    if (userData.riderStatus === 'approved') {
+      window.location.href = 'rider-dashboard.html';
+    } else {
+      showError('loginError', '⏳ Your rider application is still under review. Please wait for admin approval.');
+      btn.disabled = false;
+      btn.textContent = 'Login';
+    }
   } else {
     window.location.href = 'customer-dashboard.html';
   }
 }, 1200);
 
     } catch (error) {
+      console.error('Post-login role lookup failed:', error.code, error.message);
       showError('loginError', friendlyError(error.code));
       btn.disabled = false;
       btn.textContent = 'Login';

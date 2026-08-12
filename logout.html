@@ -59,6 +59,10 @@ transform:rotate(360deg);
 
 </style>
 
+    <style>
+        /* Lucide icon sizing - matches surrounding text */
+        .lucide { width: 1em; height: 1em; vertical-align: -0.15em; stroke-width: 2; }
+    </style>
 </head>
 
 
@@ -68,12 +72,17 @@ transform:rotate(360deg);
   <script type="module">
     import { auth } from "./js/firebase-config.js";
     import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
-    // Automatically logs out and sends to login page
-    signOut(auth).then(() => {
-      window.location.href = 'login.html';
+    // Automatically logs out and sends back to the home page.
+    signOut(auth).finally(() => {
+      window.location.href = 'index.html';
     });
   </script>
-
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
 </body>
 
 </html>

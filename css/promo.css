@@ -1,0 +1,198 @@
+/* ============================================================
+   promo.css — Offers & Flash Sale pages
+   Palette: the site's own brand green + warm neutrals. No neon,
+   no rainbow badges — one accent color, used sparingly.
+   Intentionally does NOT define .product-container or .card
+   layout rules, so the grid matches products.html / index.html
+   exactly (those live in style.css).
+   ============================================================ */
+
+:root {
+  --promo-accent: #006b3c;      /* same green used elsewhere on the site */
+  --promo-accent-dark: #00532e;
+  --promo-ink: #1f2a24;
+  --promo-muted: #6b7a72;
+  --promo-line: #e4e8e2;
+  --promo-surface: #f7f8f5;
+}
+
+/* ── Banner ── */
+.promo-banner {
+  background: var(--promo-surface);
+  border-bottom: 1px solid var(--promo-line);
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.promo-banner-content {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.promo-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--promo-accent);
+  background: #fff;
+  border: 1px solid var(--promo-line);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.promo-banner h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--promo-ink);
+  margin: 0 0 10px;
+}
+
+.promo-banner p {
+  color: var(--promo-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Countdown (flash sale only) ── */
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.countdown-unit {
+  background: #fff;
+  border: 1px solid var(--promo-line);
+  border-radius: 10px;
+  min-width: 72px;
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.countdown-unit .value {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--promo-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.countdown-unit .label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--promo-muted);
+  margin-top: 2px;
+}
+
+.countdown.ended .value {
+  color: var(--promo-muted);
+}
+
+/* ── Section header above the grid ── */
+.promo-products {
+  padding: 40px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.promo-products h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--promo-ink);
+  margin: 0 0 20px;
+}
+
+/* ── Discount / flash badge on the card image ──
+   Card layout itself (.card, .card-media) comes from style.css;
+   this only styles the small overlay tag so it matches this
+   toned-down palette instead of a bright/loud default. */
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: var(--promo-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* If a product ALSO carries a New/Bestseller badge (.product-badge,
+   styled in style.css) in the same top-left corner, push this one
+   down below it instead of overlapping. Order in the HTML matters:
+   .product-badge must come first, .discount-badge second, for this
+   sibling selector to catch it. */
+.product-badge + .discount-badge {
+  top: 42px;
+}
+
+/* ── Empty state ── */
+.promo-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--promo-muted);
+}
+
+.promo-empty-icon {
+  font-size: 34px;
+  display: block;
+  margin-bottom: 14px;
+  opacity: 0.7;
+}
+
+.promo-empty h3 {
+  color: var(--promo-ink);
+  font-size: 17px;
+  margin: 0 0 8px;
+}
+
+.promo-empty p {
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0 auto 20px;
+}
+
+.promo-empty .explore-btn {
+  display: inline-block;
+  background: var(--promo-accent);
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.promo-empty .explore-btn:hover {
+  background: var(--promo-accent-dark);
+}
+
+/* ── Loading state (before products:loaded fires) ── */
+.loading-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--promo-muted);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 560px) {
+  .promo-banner { padding: 40px 18px; }
+  .promo-banner h1 { font-size: 24px; }
+  .countdown-unit { min-width: 60px; padding: 10px 6px; }
+  .countdown-unit .value { font-size: 20px; }
+}

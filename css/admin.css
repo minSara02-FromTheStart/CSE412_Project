@@ -324,6 +324,43 @@ body {
 .pill-website     { background: #F3F4F6; color: #374151; }
 .pill-added       { background: #EAF3DE; color: #27500A; }
 
+/* ── Top spender rank badges ── */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    background: #F3F4F6;
+    color: #374151;
+}
+.rank-badge.rank-1 { background: #FEF3C7; color: #92400E; }
+.rank-badge.rank-2 { background: #E5E7EB; color: #374151; }
+.rank-badge.rank-3 { background: #FDE7D3; color: #9A3412; }
+
+.pill-rewarded { background: #EAF3DE; color: #27500A; }
+.pill-eligible { background: #E6F1FB; color: #0C447C; }
+.pill-none     { background: #F3F4F6; color: #6B7280; }
+
+.inline-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #374151;
+}
+.inline-checkbox input { width: auto; }
+
+.panel-subtext {
+    font-size: 12px;
+    color: #6B7280;
+    margin: -6px 0 14px;
+    line-height: 1.5;
+}
+
 /* ── Action buttons ── */
 .action-btn {
     background: none;
@@ -453,6 +490,89 @@ body {
 .top-prod-name { font-size: 13px; font-weight: 600; flex: 1; }
 .top-prod-price { font-size: 12px; color: #6B7280; font-weight: 600; }
 
+/* ── Inventory overview in dashboard ── */
+.inventory-summary-page {
+    padding: 18px 18px 0;
+}
+.inventory-pill {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #1B3A2D;
+    background: #EAF3DE;
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+.inventory-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    padding: 14px 18px 0;
+}
+.inventory-kpi {
+    background: #F8FAF8;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 12px;
+}
+.inventory-kpi.warning { background: #FFF8E8; border-color: #F7D58D; }
+.inventory-kpi.danger { background: #FEF2F2; border-color: #FECACA; }
+.inventory-kpi span {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6B7280;
+    margin-bottom: 6px;
+}
+.inventory-kpi strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+}
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 18px 18px;
+}
+.inventory-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    background: #FAFAFA;
+    border: 1px solid #EDEDED;
+    border-radius: 10px;
+}
+.inventory-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+.inventory-item-meta {
+    font-size: 11px;
+    color: #6B7280;
+    margin-top: 2px;
+}
+.inventory-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.inventory-badge.healthy { background: #EAF3DE; color: #3B6D11; }
+.inventory-badge.warning { background: #FEF3C7; color: #92400E; }
+.inventory-badge.danger { background: #FEE2E2; color: #991B1B; }
+.inventory-qty {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1B3A2D;
+}
+
 /* =============================================================
    SETTINGS
    ============================================================= */
@@ -470,6 +590,16 @@ body {
     color: #3B6D11;
     min-height: 16px;
 }
+
+.settings-msg.error {
+    color: #DC2626;
+}
+
+.settings-msg.success {
+    color: #16A34A;
+}
+
+.settings-panel { background: #fff; }
 
 /* =============================================================
    FORM ELEMENTS (shared by settings + modals)
@@ -648,6 +778,8 @@ body {
     .admin-content { padding: 16px; }
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .product-grid { grid-template-columns: repeat(2,1fr); }
+    .inventory-summary { grid-template-columns: 1fr; }
+    .inventory-item { grid-template-columns: 1fr auto; }
 }
 
 @media (max-width: 480px) {

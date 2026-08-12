@@ -1,22 +1,10 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  getFirestore, doc, getDoc, updateDoc,
+  doc, getDoc, updateDoc,
   collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAJOWu8ZYEyUms8nF1uVBw2m9v4ApNaT4s",
-  authDomain: "nutrinest-408d4.firebaseapp.com",
-  projectId: "nutrinest-408d4",
-  storageBucket: "nutrinest-408d4.firebasestorage.app",
-  messagingSenderId: "44196278510",
-  appId: "1:44196278510:web:11acb64840e2d536c843ff"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 const riderNameEl = document.getElementById('riderName');
 const riderAvatarEl = document.getElementById('riderAvatar');
@@ -41,6 +29,7 @@ let riderUid = null;
 let activeOrders = [];   // all non-delivered orders assigned to this rider, oldest first
 let deliveredCount = 0;
 let earningsTotal = 0;
+let avgRating = null;    // average of customer-submitted riderRating values, null if none yet
 
 function getInitials(name) {
   return (name || 'Rider')
@@ -122,7 +111,7 @@ function renderUpNext() {
 function updateStats() {
   runsCountEl.textContent = deliveredCount;
   earningsAmountEl.textContent = fmtCurrency(earningsTotal);
-  ratingValueEl.textContent = '5.0';
+  ratingValueEl.textContent = avgRating !== null ? avgRating.toFixed(1) : 'New';
 }
 
 function renderRiderStatus() {
@@ -149,6 +138,11 @@ async function loadAssignedOrders() {
   const delivered = orders.filter(o => o.status === 'Delivered');
   deliveredCount = delivered.length;
   earningsTotal = delivered.reduce((sum, o) => sum + (Number(o.deliveryFee) || 0), 0);
+
+  const rated = delivered.filter(o => Number.isFinite(Number(o.riderRating)));
+  avgRating = rated.length
+    ? rated.reduce((sum, o) => sum + Number(o.riderRating), 0) / rated.length
+    : null;
 }
 
 async function refreshDashboard() {
@@ -202,7 +196,12 @@ onAuthStateChanged(auth, async user => {
   const userDoc = await getDoc(doc(db, 'users', user.uid));
   const userData = userDoc.exists() ? userDoc.data() : {};
 
-  if (userData.role !== 'Deliveryman' || userData.riderStatus !== 'approved') {
+  if (userData.role !== 'Deliveryman') {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  if (userData.riderStatus !== 'approved') {
     window.location.href = 'login.html';
     return;
   }
