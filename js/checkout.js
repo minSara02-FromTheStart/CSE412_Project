@@ -521,9 +521,7 @@ if (checkoutForm) {
           : ""
       });
 
-      setCheckoutMessage(currentUser
-        ? `Your order is confirmed. You earned ${result.pointsEarned} points!`
-        : "Your order is confirmed. Thank you for shopping with NutriNest!");
+      setCheckoutMessage(`Your order is confirmed. You earned ${result.pointsEarned} points!`);
 
       localStorage.removeItem("cart");
       localStorage.removeItem("cartTotal");
@@ -544,8 +542,16 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) {
     currentUser = null;
     currentUserData = {};
-    updateSubmitState();
-    setCheckoutMessage("Checking out as a guest. Fill in your delivery details to place the order.");
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Redirecting to login...";
+    }
+    setCheckoutMessage("Please log in or sign up to check out. Redirecting...");
+
+    setTimeout(() => {
+      window.location.href = "login.html?redirect=checkout.html";
+    }, 1500);
     return;
   }
 
