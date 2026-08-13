@@ -152,23 +152,21 @@ describe('products.js', () => {
         .map(product => product.id)
     ).toEqual(['p1']);
 
-
     expect(
-      searchProducts(products, 'powder')
-        .map(product => product.id)
-    ).toEqual(['p3']);
-
-
-    expect(
-      searchProducts(products, 'dried')
+      searchProducts(products, 'papaya')
         .map(product => product.id)
     ).toEqual(['p2']);
+
+    expect(
+      searchProducts(products, 'jackfruit')
+        .map(product => product.id)
+    ).toEqual(['p3']);
   });
 
 
   // =========================================================
   // UNIT TEST 2
-  // Caching/memoization
+  // Caching / memoization
   // =========================================================
 
   test('Caching returns cached results and invalidates on updates', () => {
@@ -189,7 +187,6 @@ describe('products.js', () => {
     ).toBe(firstResult);
 
 
-    // Update the cached result
     const updatedResult = [
       {
         id: 'p1',
@@ -204,7 +201,6 @@ describe('products.js', () => {
     ).toBe(updatedResult);
 
 
-    // Invalidate
     cache.invalidate('banana');
 
     expect(
@@ -294,8 +290,7 @@ describe('products.js', () => {
       }
     ];
 
-    const result =
-      safeSearch(products);
+    const result = safeSearch(products);
 
     expect(result).toEqual(products);
 
@@ -314,23 +309,19 @@ describe('products.js', () => {
       safeFiltersToQueryParams(null);
     }).not.toThrow();
 
-
     expect(
       safeFiltersToQueryParams(null)
     ).toBe('');
-
 
     expect(
       safeFiltersToQueryParams('invalid')
     ).toBe('');
 
-
-    const result =
-      safeFiltersToQueryParams({
-        category: 'Chips',
-        minPrice: 'not-a-number',
-        maxPrice: 500
-      });
+    const result = safeFiltersToQueryParams({
+      category: 'Chips',
+      minPrice: 'not-a-number',
+      maxPrice: 500
+    });
 
     const params = new URLSearchParams(result);
 
