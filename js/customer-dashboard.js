@@ -1408,6 +1408,15 @@ onAuthStateChanged(
         userDoc.exists()
           ? userDoc.data()
           : {};
+          console.log("===== NAME DEBUG =====");
+console.log("UID:", user.uid);
+console.log("Firestore document exists:", userDoc.exists());
+console.log("Firestore data:", userData);
+console.log("FULL NAME:", userData.fullName);
+console.log("NAME:", userData.name);
+console.log("Firebase displayName:", user.displayName);
+console.log("Firebase email:", user.email);
+console.log("======================");
 
 
       const role =
