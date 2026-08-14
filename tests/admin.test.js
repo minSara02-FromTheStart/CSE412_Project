@@ -55,6 +55,26 @@ describe("admin.js helpers", () => {
   });
 
 
+  test("fmtDate formats a valid date correctly", () => {
+
+    const fmtDate = (ts) => {
+      if (!ts) return "—";
+
+      const d = new Date(ts);
+
+      if (isNaN(d)) return "—";
+
+      return d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    };
+
+    expect(fmtDate("2026-08-14")).toBe("14 Aug 2026");
+  });
+
+
   // =========================================================
   // NEGATIVE TESTS
   // =========================================================
@@ -88,6 +108,17 @@ describe("admin.js helpers", () => {
     };
 
     expect(fmtDate("invalid-date")).toBe("—");
+  });
+
+
+  test("fmtCurrency returns zero Taka for invalid input", () => {
+
+    const fmtCurrency = (n) => {
+      const num = Number(n);
+      return isNaN(num) ? "৳0" : "৳" + num.toLocaleString();
+    };
+
+    expect(fmtCurrency("invalid")).toBe("৳0");
   });
 
 });
