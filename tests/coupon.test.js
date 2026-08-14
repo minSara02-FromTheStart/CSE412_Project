@@ -1,0 +1,112 @@
+/**
+ * @jest-environment jsdom
+ */
+
+const {
+  couponSummary,
+  mapLiveCoupon,
+  getCouponList,
+  builtInCoupons
+} = require("../js/coupon");
+
+describe("coupon.js", () => {
+
+  // =========================================================
+  // UNIT TESTS
+  // =========================================================
+
+  test("couponSummary returns free shipping message for freeShip coupon", () => {
+
+    const coupon = {
+      type: "freeShip"
+    };
+
+    expect(couponSummary(coupon))
+      .toBe("Free shipping on this order.");
+  });
+
+
+  test("couponSummary returns percentage discount message", () => {
+
+    const coupon = {
+      type: "percentage",
+      value: 15
+    };
+
+    expect(couponSummary(coupon))
+      .toBe("Get 15% off.");
+  });
+
+
+  test("mapLiveCoupon creates the correct coupon display data", () => {
+
+    const coupon = {
+      code: "SAVE20",
+      title: "20% Off",
+      description: "Save on your order.",
+      value: 20,
+      minOrder: 1000,
+      oneTimeOnly: false
+    };
+
+    expect(mapLiveCoupon(coupon)).toEqual({
+      code: "SAVE20",
+      badge: "Min Order ৳1000",
+      title: "20% Off",
+      desc: "Save on your order. Get 20% off."
+    });
+  });
+
+
+  test("getCouponList includes the built-in coupons", () => {
+
+    const result = getCouponList();
+
+    expect(result).toEqual(builtInCoupons);
+    expect(result.length).toBe(builtInCoupons.length);
+  });
+
+
+  // =========================================================
+  // NEGATIVE TESTS
+  // =========================================================
+
+  test("couponSummary returns empty string when coupon has no discount value", () => {
+
+    const coupon = {
+      type: "percentage"
+    };
+
+    expect(couponSummary(coupon)).toBe("");
+  });
+
+
+  test("mapLiveCoupon handles missing title and description", () => {
+
+    const coupon = {
+      code: "TEST10",
+      value: 10,
+      minOrder: 0,
+      oneTimeOnly: false
+    };
+
+    expect(mapLiveCoupon(coupon)).toEqual({
+      code: "TEST10",
+      badge: "Limited Time",
+      title: "TEST10",
+      desc: "Get 10% off."
+    });
+  });
+
+
+  test("couponSummary returns empty string for an unknown coupon type", () => {
+
+    const coupon = {
+      type: "unknown",
+      value: 0
+    };
+
+    expect(couponSummary(coupon)).toBe("");
+  });
+
+});
