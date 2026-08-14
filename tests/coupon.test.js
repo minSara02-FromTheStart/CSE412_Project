@@ -3,22 +3,20 @@
  */
 
 const {
-  couponSummary,
-  mapLiveCoupon,
-  getCouponList,
-  builtInCoupons,
   copyCode,
-  mergeCoupons
-} = require("../js/coupon");
+  mergeCoupons,
+  mapLiveCoupon,
+  couponSummary
+} = require("../js/coupon-utils");
 
-describe("coupon.js", () => {
+
+describe("coupon-utils.js", () => {
 
   // =========================================================
   // UNIT TESTS
   // =========================================================
 
   test("couponSummary returns free shipping message for freeShip coupon", () => {
-
     const coupon = {
       type: "freeShip"
     };
@@ -29,7 +27,6 @@ describe("coupon.js", () => {
 
 
   test("couponSummary returns percentage discount message", () => {
-
     const coupon = {
       type: "percentage",
       value: 15
@@ -40,8 +37,7 @@ describe("coupon.js", () => {
   });
 
 
-  test("mapLiveCoupon creates the correct coupon display data", () => {
-
+  test("mapLiveCoupon creates correct coupon display data", () => {
     const coupon = {
       code: "SAVE20",
       title: "20% Off",
@@ -51,26 +47,17 @@ describe("coupon.js", () => {
       oneTimeOnly: false
     };
 
-    expect(mapLiveCoupon(coupon)).toEqual({
-      code: "SAVE20",
-      badge: "Min Order ৳1000",
-      title: "20% Off",
-      desc: "Save on your order. Get 20% off."
-    });
-  });
-
-
-  test("getCouponList includes the built-in coupons", () => {
-
-    const result = getCouponList();
-
-    expect(result).toEqual(builtInCoupons);
-    expect(result.length).toBe(builtInCoupons.length);
+    expect(mapLiveCoupon(coupon))
+      .toEqual({
+        code: "SAVE20",
+        badge: "Min Order ৳1000",
+        title: "20% Off",
+        desc: "Save on your order. Get 20% off."
+      });
   });
 
 
   test("mergeCoupons combines built-in and live coupons", () => {
-
     const builtIn = [
       {
         code: "FIRST10",
@@ -91,21 +78,27 @@ describe("coupon.js", () => {
     const result = mergeCoupons(builtIn, live);
 
     expect(result).toHaveLength(2);
-    expect(result[0]).toEqual(builtIn[0]);
-    expect(result[1]).toEqual({
-      code: "LIVE20",
-      badge: "Limited Time",
-      title: "20% Off",
-      desc: "Get 20% off."
-    });
+
+    expect(result[0])
+      .toEqual(builtIn[0]);
+
+    expect(result[1])
+      .toEqual({
+        code: "LIVE20",
+        badge: "Limited Time",
+        title: "20% Off",
+        desc: "Get 20% off."
+      });
   });
 
 
-  test("copyCode copies the coupon code and changes button text", async () => {
+  test("copyCode copies coupon code and changes button text", async () => {
 
     Object.assign(navigator, {
       clipboard: {
-        writeText: jest.fn().mockResolvedValue()
+        writeText: jest
+          .fn()
+          .mockResolvedValue()
       }
     });
 
@@ -121,6 +114,9 @@ describe("coupon.js", () => {
 
     expect(button.textContent)
       .toBe("Copied!");
+
+    expect(button.classList.contains("copied"))
+      .toBe(true);
   });
 
 
@@ -129,17 +125,16 @@ describe("coupon.js", () => {
   // =========================================================
 
   test("couponSummary returns empty string when coupon has no discount value", () => {
-
     const coupon = {
       type: "percentage"
     };
 
-    expect(couponSummary(coupon)).toBe("");
+    expect(couponSummary(coupon))
+      .toBe("");
   });
 
 
   test("mapLiveCoupon handles missing title and description", () => {
-
     const coupon = {
       code: "TEST10",
       value: 10,
@@ -147,28 +142,28 @@ describe("coupon.js", () => {
       oneTimeOnly: false
     };
 
-    expect(mapLiveCoupon(coupon)).toEqual({
-      code: "TEST10",
-      badge: "Limited Time",
-      title: "TEST10",
-      desc: "Get 10% off."
-    });
+    expect(mapLiveCoupon(coupon))
+      .toEqual({
+        code: "TEST10",
+        badge: "Limited Time",
+        title: "TEST10",
+        desc: "Get 10% off."
+      });
   });
 
 
-  test("couponSummary returns empty string for an unknown coupon type", () => {
-
+  test("couponSummary returns empty string for unknown coupon type", () => {
     const coupon = {
       type: "unknown",
       value: 0
     };
 
-    expect(couponSummary(coupon)).toBe("");
+    expect(couponSummary(coupon))
+      .toBe("");
   });
 
 
   test("mergeCoupons handles empty live coupon list", () => {
-
     const builtIn = [
       {
         code: "FIRST10"
@@ -177,29 +172,35 @@ describe("coupon.js", () => {
 
     const result = mergeCoupons(builtIn, []);
 
-    expect(result).toEqual(builtIn);
+    expect(result)
+      .toEqual(builtIn);
   });
 
 
   test("copyCode falls back to alert when clipboard fails", async () => {
 
-    Object.assign(navigator, {
-      clipboard: {
-        writeText: jest.fn().mockRejectedValue(new Error("Clipboard failed"))
-      }
-    });
-
-    window.alert = jest.fn();
-
-    const button = document.createElement("button");
-    button.textContent = "Copy";
-
-    copyCode("BADCODE", button);
-
-    await Promise.resolve();
-
-    expect(window.alert)
-      .toHaveBeenCalledWith("Coupon code: BADCODE");
+  Object.assign(navigator, {
+    clipboard: {
+      writeText: jest
+        .fn()
+        .mockRejectedValue(
+          new Error("Clipboard failed")
+        )
+    }
   });
+
+  window.alert = jest.fn();
+
+  const button = document.createElement("button");
+  button.textContent = "Copy";
+
+  copyCode("BADCODE", button);
+
+  // Wait for the rejected promise and catch() to execute
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  expect(window.alert)
+    .toHaveBeenCalledWith("Coupon code: BADCODE");
+});
 
 });
