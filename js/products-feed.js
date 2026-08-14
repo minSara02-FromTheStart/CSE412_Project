@@ -17,9 +17,9 @@
 import { db } from "./firebase-config.js";
 import {
   collection,
-  getDocs
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { renderCard } from "./promoCard.js";
+import { renderCard } from "./promoCard.js?v=2";
 
 // New/Bestseller/Sale label set from the admin panel's `badge` field.
 // Sits top-left on the card.
@@ -73,20 +73,28 @@ function renderProducts(products) {
   document.dispatchEvent(new CustomEvent('products:loaded', { detail: { products } }));
 }
 
-async function loadProducts() {
+function loadProducts() {
   const container = document.getElementById('product-container');
-  try {
-    const snap = await getDocs(collection(db, 'products'));
-    const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderProducts(products);
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    if (container) {
-      container.innerHTML = '<p class="error">Failed to load products. Please try again shortly.</p>';
+
+  // onSnapshot instead of a one-time getDocs: if a product's stock hits 0
+  // (someone else buys the last one, or you zero it out in admin) while a
+  // customer already has this page open, this pushes the update to them
+  // live -- so Quick View/Add to Cart can't act on stale "still available"
+  // data. Matches the same pattern admin.js uses for its own product list.
+  onSnapshot(
+    collection(db, 'products'),
+    (snap) => {
+      const products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderProducts(products);
+    },
+    (error) => {
+      console.error('Error fetching products:', error);
+      if (container) {
+        container.innerHTML = '<p class="error">Failed to load products. Please try again shortly.</p>';
+      }
+      document.dispatchEvent(new CustomEvent('products:loaded', { detail: { products: [] } }));
     }
-    // Still fire the event (with no products) so listeners don't hang forever
-    document.dispatchEvent(new CustomEvent('products:loaded', { detail: { products: [] } }));
-  }
+  );
 }
 
 document.addEventListener('DOMContentLoaded', loadProducts);

@@ -13,7 +13,8 @@ export function registerProduct(product) {
     price: product.price,
     unit: product.unit || 'KG',
     image: imgSrc,
-    desc
+    desc,
+    stock: Number(product.stock) || 0
   };
   return imgSrc;
 }

@@ -1248,13 +1248,13 @@ nav ul li a{
     background: var(--card);
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
-    max-width: 720px;
+    max-width: 780px;
     width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
+    height: min(560px, 85vh);
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.15fr;
     gap: 0;
+    overflow: hidden;
 }
 
 .quickview-close {
@@ -1279,39 +1279,45 @@ nav ul li a{
 
 .quickview-media {
     background: var(--background);
+    height: 100%;
+    overflow: hidden;
 }
 
 .quickview-media img {
     width: 100%;
     height: 100%;
-    min-height: 260px;
     object-fit: cover;
+    display: block;
 }
 
 .quickview-details {
-    padding: 32px 28px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 28px 26px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .quickview-details h2 {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
     color: var(--text);
+    margin: 0;
 }
 
 .quickview-details h3 {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
     color: var(--accent);
+    margin: 0;
 }
 
 .quickview-details p {
     font-size: 14px;
     color: var(--text-light);
-    line-height: 1.7;
-    flex-grow: 1;
+    line-height: 1.6;
+    margin: 0;
 }
 
 .quickview-add-btn {
@@ -1323,9 +1329,14 @@ nav ul li a{
 @media (max-width: 640px) {
     .quickview-modal {
         grid-template-columns: 1fr;
+        grid-template-rows: 200px 1fr;
+        height: min(85vh, 620px);
     }
-    .quickview-media img {
-        min-height: 200px;
+    .quickview-media {
+        height: 200px;
+    }
+    .quickview-details {
+        padding: 20px;
     }
 }
 

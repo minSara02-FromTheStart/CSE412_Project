@@ -18,7 +18,7 @@ import {
   where,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { renderCard, renderEmptyState } from "./promoCard.js";
+import { renderCard, renderEmptyState } from "./promoCard.js?v=2";
 
 
 function toDate(value) {

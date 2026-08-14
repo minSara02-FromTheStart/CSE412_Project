@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import {
   collection,
   addDoc,
+  setDoc,
   serverTimestamp,
   doc,
   getDoc,
@@ -448,7 +449,31 @@ async function saveOrderToFirestore(formValues) {
 
   const docRef = await addDoc(collection(db, "orders"), orderData);
   await decrementStock(orderItems);
+  await recordPurchases(orderItems, docRef.id);
   return { id: docRef.id, pointsEarned };
+}
+
+// One doc per (customer, product), keyed so a repeat purchase just
+// refreshes the timestamp instead of creating duplicates. This is what
+// review submission checks against to confirm "this customer actually
+// bought this product" before letting them post a review.
+async function recordPurchases(orderItems, orderId) {
+  if (!currentUser) return;
+
+  for (const item of orderItems) {
+    if (!item.id) continue; // no Firestore product id to key off of
+
+    try {
+      await setDoc(doc(db, "purchases", `${currentUser.uid}_${item.id}`), {
+        uid: currentUser.uid,
+        productId: item.id,
+        lastOrderId: orderId,
+        purchasedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (err) {
+      console.error(`Failed to record purchase for "${item.name}":`, err);
+    }
+  }
 }
 
 if (checkoutForm) {
