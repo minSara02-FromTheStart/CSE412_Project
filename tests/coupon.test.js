@@ -6,7 +6,9 @@ const {
   couponSummary,
   mapLiveCoupon,
   getCouponList,
-  builtInCoupons
+  builtInCoupons,
+  copyCode,
+  mergeCoupons
 } = require("../js/coupon");
 
 describe("coupon.js", () => {
@@ -67,6 +69,61 @@ describe("coupon.js", () => {
   });
 
 
+  test("mergeCoupons combines built-in and live coupons", () => {
+
+    const builtIn = [
+      {
+        code: "FIRST10",
+        title: "10% Off"
+      }
+    ];
+
+    const live = [
+      {
+        code: "LIVE20",
+        title: "20% Off",
+        value: 20,
+        minOrder: 0,
+        oneTimeOnly: false
+      }
+    ];
+
+    const result = mergeCoupons(builtIn, live);
+
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual(builtIn[0]);
+    expect(result[1]).toEqual({
+      code: "LIVE20",
+      badge: "Limited Time",
+      title: "20% Off",
+      desc: "Get 20% off."
+    });
+  });
+
+
+  test("copyCode copies the coupon code and changes button text", async () => {
+
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockResolvedValue()
+      }
+    });
+
+    const button = document.createElement("button");
+    button.textContent = "Copy";
+
+    copyCode("SAVE20", button);
+
+    await Promise.resolve();
+
+    expect(navigator.clipboard.writeText)
+      .toHaveBeenCalledWith("SAVE20");
+
+    expect(button.textContent)
+      .toBe("Copied!");
+  });
+
+
   // =========================================================
   // NEGATIVE TESTS
   // =========================================================
@@ -107,6 +164,42 @@ describe("coupon.js", () => {
     };
 
     expect(couponSummary(coupon)).toBe("");
+  });
+
+
+  test("mergeCoupons handles empty live coupon list", () => {
+
+    const builtIn = [
+      {
+        code: "FIRST10"
+      }
+    ];
+
+    const result = mergeCoupons(builtIn, []);
+
+    expect(result).toEqual(builtIn);
+  });
+
+
+  test("copyCode falls back to alert when clipboard fails", async () => {
+
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockRejectedValue(new Error("Clipboard failed"))
+      }
+    });
+
+    window.alert = jest.fn();
+
+    const button = document.createElement("button");
+    button.textContent = "Copy";
+
+    copyCode("BADCODE", button);
+
+    await Promise.resolve();
+
+    expect(window.alert)
+      .toHaveBeenCalledWith("Coupon code: BADCODE");
   });
 
 });
