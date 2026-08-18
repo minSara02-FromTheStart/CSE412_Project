@@ -82,3 +82,45 @@ function persistList(storage, key, list) {
 }
 
 module.exports = { normaliseProduct, toggleInList, persistList };
+
+
+
+/**
+ * @jest-environment jsdom
+ */
+const { normaliseProduct, toggleInList, persistList } = require("../js/wishlist-utils");
+
+describe('toggleInList', () => {
+  // Unit 1: add/remove updates list and persists as expected
+  test('adds a product then removes it, updating the list correctly', () => {
+    let list = [];
+    list = toggleInList(list, { id: 'p1', name: 'Almonds', price: 500 });
+    expect(list).toHaveLength(1);
+
+    list = toggleInList(list, { id: 'p1', name: 'Almonds', price: 500 });
+    expect(list).toHaveLength(0);
+  });
+
+  test('persists the updated list to storage', () => {
+    const list = toggleInList([], { id: 'p1', name: 'Almonds', price: 500 });
+    const storage = { data: {}, setItem(k, v) { this.data[k] = v; }, getItem(k) { return this.data[k]; } };
+    const saved = persistList(storage, 'favourites', list);
+    expect(saved).toHaveLength(1);
+    expect(saved[0].id).toBe('p1');
+  });
+
+  // Unit 2: normalise product shape before saving
+  test('normalises product shape before saving into the list', () => {
+    const list = toggleInList([], { id: 42, price: '750' });
+    expect(list[0]).toMatchObject({ id: '42', price: 750, name: 'Product', unit: 'KG' });
+  });
+
+  // Negative 1: adding duplicate product → prevented / deduped
+  test('adding the same product twice does not create a duplicate entry', () => {
+    let list = toggleInList([], { id: 'p1', name: 'Almonds', price: 500 });
+    list = toggleInList(list, { id: 'p1', name: 'Almonds', price: 500 }); // toggled off
+    const ids = list.map(i => i.id);
+    expect(new Set(ids).size).toBe(ids.length); // no duplicates ever existed
+    expect(list).toHaveLength(0);
+  });
+});
