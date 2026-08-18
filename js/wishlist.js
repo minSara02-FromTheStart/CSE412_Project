@@ -245,3 +245,25 @@ document.addEventListener("DOMContentLoaded", () => {
   getWishlist().catch(error => console.warn("Could not initialise favourites:", error));
 });
 document.addEventListener("products:loaded", syncWishlistButtons);
+
+
+
+function toggleInList(list, product) {
+  const normalised = normaliseProduct(product);
+  if (!normalised) return list;
+
+  const exists = list.some(item => item.id === normalised.id || item.productId === normalised.id);
+
+  if (exists) {
+    return list.filter(item => item.id !== normalised.id && item.productId !== normalised.id);
+  }
+
+  return [...list, { ...normalised, savedAt: new Date().toISOString() }];
+}
+
+function persistList(storage, key, list) {
+  storage.setItem(key, JSON.stringify(list));
+  return JSON.parse(storage.getItem(key));
+}
+
+module.exports = { normaliseProduct, toggleInList, persistList };
