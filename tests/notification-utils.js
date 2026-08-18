@@ -85,3 +85,61 @@ module.exports = {
   injectBellUI, renderBadge, showToast,
   buildToastPayload, markAllSeenInList, safeSaveSeenSet
 };
+
+
+
+const {
+  NotificationSubject, buildToastPayload, markAllSeenInList, safeSaveSeenSet
+} = require('../js/notifications-utils');
+
+describe('subscribe/unsubscribe flags', () => {
+  // Unit 1: subscribe/unsubscribe toggles subscription flags correctly
+  test('subscribing adds observer, unsubscribing removes it', () => {
+    const subject = new NotificationSubject();
+    const fn = jest.fn();
+
+    expect(subject.observers).toHaveLength(0);
+    subject.subscribe(fn);
+    expect(subject.observers).toHaveLength(1);
+    subject.unsubscribe(fn);
+    expect(subject.observers).toHaveLength(0);
+  });
+});
+
+describe('buildToastPayload', () => {
+  // Unit 2: notify builds payload and enqueues toast/notification
+  test('builds a coupon toast payload with code and title', () => {
+    const payload = buildToastPayload('coupon', 'SAVE15', 'Big Savings');
+    expect(payload.icon).toBe('🏷️');
+    expect(payload.headline).toBe('New coupon available!');
+    expect(payload.body).toContain('SAVE15');
+    expect(payload.body).toContain('Big Savings');
+  });
+
+  // Negative 1: notify called with missing message → no-op / safe fallback
+  test('builds a safe payload even when code/title are missing', () => {
+    expect(() => buildToastPayload('reward', undefined, undefined)).not.toThrow();
+    const payload = buildToastPayload('reward');
+    expect(payload.body).not.toContain('undefined');
+  });
+});
+
+describe('markAllSeenInList', () => {
+  // Unit 3: markAllSeen sets seen flags on all notifications
+  test('sets seen: true on every item in the list', () => {
+    const list = [{ id: 1, seen: false }, { id: 2, seen: false }];
+    const result = markAllSeenInList(list);
+    expect(result.every(item => item.seen === true)).toBe(true);
+  });
+});
+
+describe('safeSaveSeenSet', () => {
+  // Negative 2: subscription/storage persistence failure handled gracefully
+  test('returns false instead of throwing when storage.setItem fails', () => {
+    const brokenStorage = {
+      setItem() { throw new Error('QuotaExceededError'); }
+    };
+    const result = safeSaveSeenSet(brokenStorage, 'nn_seen', new Set(['a']));
+    expect(result).toBe(false);
+  });
+});
