@@ -53,3 +53,35 @@ if (typeof module !== 'undefined' && module.exports) {
     getSeenSet, saveSeenSet, unreadCount
   };
 }
+
+
+
+function buildToastPayload(kind, code, title) {
+  const icon = kind === 'reward' ? '🎁' : '🏷️';
+  const headline = kind === 'reward' ? "You've earned a reward!" : 'New coupon available!';
+  return {
+    icon,
+    headline,
+    body: `${sanitize(title || '')}${title ? ' — ' : ''}code ${sanitize(code || '')}`
+  };
+}
+
+function markAllSeenInList(list) {
+  return list.map(item => ({ ...item, seen: true }));
+}
+
+function safeSaveSeenSet(storage, key, set) {
+  try {
+    storage.setItem(key, JSON.stringify([...set]));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+module.exports = {
+  NotificationSubject, sanitize, fmtDate, couponSummary,
+  getSeenSet, saveSeenSet, unreadCount,
+  injectBellUI, renderBadge, showToast,
+  buildToastPayload, markAllSeenInList, safeSaveSeenSet
+};
